@@ -15,14 +15,7 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
             this, &DockControls::onDeckSelected);
 
     loadAvailableDecks();
-    /*
-    int defaultIndex = deckSelector->findText("OriginalRiderWaite");
-    if (defaultIndex >= 0) {
-        deckSelector->setCurrentIndex(defaultIndex);
-    } else if (deckSelector->count() > 0) {
-        deckSelector->setCurrentIndex(0);
-    }
-    */
+
     if (deckSelector->count() >= 0) {
         onDeckSelected(deckSelector->currentText());
     }

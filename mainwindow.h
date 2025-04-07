@@ -6,20 +6,17 @@
 #include <QDockWidget>
 #include "tarotscene.h"
 #include<QProgressBar>
-#include "meaningdisplay.h"
-#include "tarotscene.h"
-#include "dockcontrols.h"
-#include"mistralapi.h"
 #include<QInputDialog>
 #include<QLineEdit>
 #include<QFileDialog>
 #include<QMessageBox>
+#include<QMenu>
+#include<QMenuBar>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
+#include "meaningdisplay.h"
+#include "tarotscene.h"
+#include "dockcontrols.h"
+#include"mistralapi.h"
 
 class MainWindow : public QMainWindow
 {
@@ -43,7 +40,6 @@ public slots:
    void onGetReadingClicked();
 
 private:
-    Ui::MainWindow *ui;
     QGraphicsView *centralView;
     QDockWidget *leftDock;   // For spread selection
     QDockWidget *rightDock;  // For card meanings
