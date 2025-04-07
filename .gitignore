@@ -13,6 +13,19 @@ Makefile*
 .qmake.stash
 *.autosave
 
+# Build directories
+build/
+debug/
+release/
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+_deps/
+
 # Executables and binaries
 *.exe
 *.dll
@@ -23,5 +36,9 @@ Makefile*
 
 # Debug files
 *.debug
-debug/
-release/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*~
