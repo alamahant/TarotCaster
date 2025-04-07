@@ -45,3 +45,4 @@ _deps/
 
 # Specific files
 mainwindow.ui
+CMakeLists.txt
