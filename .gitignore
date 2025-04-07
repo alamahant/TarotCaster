@@ -1,0 +1,27 @@
+# Qt-specific ignores
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+*.qm
+.qmake.stash
+*.autosave
+
+# Executables and binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+
+# Debug files
+*.debug
+debug/
+release/

@@ -1,0 +1,2 @@
+set(__QT_DEPLOY_TARGET_TarotCaster_FILE /home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/TarotCaster)
+set(__QT_DEPLOY_TARGET_TarotCaster_TYPE EXECUTABLE)

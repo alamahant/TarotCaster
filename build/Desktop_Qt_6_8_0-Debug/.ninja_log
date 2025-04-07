@@ -1,0 +1,16 @@
+# ninja log v6
+3	2121	1744060307029045048	TarotCaster_autogen/timestamp	c5ca9726cd85b4b2
+3	2121	1744060307029045048	TarotCaster_autogen/mocs_compilation.cpp	c5ca9726cd85b4b2
+3	2121	1744060307029045048	/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/TarotCaster_autogen/timestamp	c5ca9726cd85b4b2
+3	2121	1744060307029045048	/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/TarotCaster_autogen/mocs_compilation.cpp	c5ca9726cd85b4b2
+2154	9772	1744060307085711880	CMakeFiles/TarotCaster.dir/mistralapi.cpp.o	5799df13c47339c3
+2144	9857	1744060307072378508	CMakeFiles/TarotCaster.dir/tarotcarditem.cpp.o	45a675f6cfc7ad9e
+2145	11374	1744060307075711851	CMakeFiles/TarotCaster.dir/cardmeaning.cpp.o	3666f4fc33948d44
+2145	11928	1744060307075711851	CMakeFiles/TarotCaster.dir/meaningdisplay.cpp.o	25a40a27adb25658
+2140	13384	1744060307069045165	CMakeFiles/TarotCaster.dir/cardloader.cpp.o	67355a1e9055820d
+2152	13434	1744060307082378538	CMakeFiles/TarotCaster.dir/dockcontrols.cpp.o	3b846a849a6acc7
+2128	14181	1744060307059045136	CMakeFiles/TarotCaster.dir/main.cpp.o	a35d5d255e20ba27
+2125	14561	1744060307055711793	CMakeFiles/TarotCaster.dir/TarotCaster_autogen/mocs_compilation.cpp.o	812bfcba987e3a3e
+2142	14778	1744060307072378508	CMakeFiles/TarotCaster.dir/tarotscene.cpp.o	7e83ac1b907c175c
+2131	16155	1744060307062378479	CMakeFiles/TarotCaster.dir/mainwindow.cpp.o	167f3e66bec984ba
+16156	16929	1744060321085752938	TarotCaster	11d0db5ecffb2bb9
