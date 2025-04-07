@@ -1,9 +1,0 @@
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/TarotCaster.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/edit_cache.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/rebuild_cache.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/list_install_components.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/install.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/install/local.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/install/strip.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/TarotCaster_autogen_timestamp_deps.dir
-/home/dharma/GithubRepositories/TarotCaster/build/Desktop_Qt_6_8_0-Debug/CMakeFiles/TarotCaster_autogen.dir
