@@ -42,4 +42,6 @@ _deps/
 .vscode/
 *.swp
 *~
+
+# Specific files
 mainwindow.ui
