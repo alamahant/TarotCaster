@@ -1,0 +1,1 @@
+Screenshots of TarotCaster App
