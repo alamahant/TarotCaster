@@ -1,0 +1,23 @@
+app-id: io.github.alamahant.TarotCaster
+runtime: org.kde.Platform
+runtime-version: "6.8"
+sdk: org.kde.Sdk
+command: TarotCaster
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=host:ro
+
+modules:
+  - name: tarotcaster
+    buildsystem: cmake
+    sources:
+      - type: dir
+        path: .
+    build-commands:
+      - mkdir -p /app/bin/decks/OriginalRiderWaite/
+      - cp -rv decks/OriginalRiderWaite/* /app/bin/decks/OriginalRiderWaite/
+      - install -Dm644 card_meanings.json -t /app/bin/

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/favicon-32x32.png</file>
+    </qresource>
+</RCC>

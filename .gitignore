@@ -43,6 +43,11 @@ _deps/
 *.swp
 *~
 
+# Flatpak specific
+.flatpak-builder/
+build-dir/
+repo/
+*.flatpak
+
 # Specific files
 mainwindow.ui
-CMakeLists.txt

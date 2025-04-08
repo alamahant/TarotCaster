@@ -5,9 +5,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
 {
-
+    this->setMinimumSize(1200, 800);
     this->showMaximized();
-
 
     setWindowTitle("TarotCaster");
 
