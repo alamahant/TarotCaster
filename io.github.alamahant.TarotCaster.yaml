@@ -10,7 +10,6 @@ finish-args:
   - --socket=wayland
   - --device=dri
   - --filesystem=host:ro
-
 modules:
   - name: tarotcaster
     buildsystem: cmake
@@ -18,6 +17,16 @@ modules:
       - type: dir
         path: .
     build-commands:
+      # Install application data
       - mkdir -p /app/bin/decks/OriginalRiderWaite/
       - cp -rv decks/OriginalRiderWaite/* /app/bin/decks/OriginalRiderWaite/
       - install -Dm644 card_meanings.json -t /app/bin/
+      
+      # Install desktop integration files
+      - install -Dm644 io.github.alamahant.TarotCaster.desktop -t /app/share/applications/
+      - install -Dm644 io.github.alamahant.TarotCaster.metainfo.xml -t /app/share/metainfo/
+      
+      # Install icon
+      - install -Dm644 io.github.alamahant.TarotCaster.png -t /app/share/icons/hicolor/512x512/apps/
+      
+     
