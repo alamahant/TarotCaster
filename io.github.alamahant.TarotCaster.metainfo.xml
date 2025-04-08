@@ -21,9 +21,8 @@
   <url type="homepage">https://github.com/alamahant/TarotCaster</url>
   <screenshots>
     <screenshot type="default">
-      <!-- For screenshots: Take a screenshot of your app, create a 'screenshots' folder in your GitHub repo,
-           upload the image there, and then use the URL below (replacing 'screenshot.png' with your filename) -->
-      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/main/screenshots/screenshot.png</image>
+      
+      <image>https://github.com/alamahant/TarotCaster/blob/master/screenshots/Screenshot8.png</image>
       <caption>TarotCaster main interface with card spread</caption>
     </screenshot>
   </screenshots>
@@ -31,9 +30,9 @@
     <release version="1.0" date="2023-06-01"/>
   </releases>
   <content_rating type="oars-1.1"/>
-  <!-- Replace with your actual name or use "Alamahant" if that's your preferred developer name -->
-  <developer_name>Alamahant</developer_name>
-  <!-- Replace with your actual license (GPL-3.0, MIT, etc.) -->
+
+  <developer_name>Andreas Lamprinos</developer_name>
+
   <project_license>GPL-3.0</project_license>
   <categories>
     <category>Utility</category>
