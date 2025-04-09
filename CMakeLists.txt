@@ -81,3 +81,21 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(TarotCaster)
 endif()
 
+# Install desktop file
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.TarotCaster.desktop
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+
+# Install metainfo file
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.TarotCaster.metainfo.xml
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+
+# Install icon
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.TarotCaster.png
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/512x512/apps)
+
+# Install data files
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/OriginalRiderWaite
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/card_meanings.json
+        DESTINATION ${CMAKE_INSTALL_BINDIR})
