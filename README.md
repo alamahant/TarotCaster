@@ -55,33 +55,53 @@ You can add your own tarot decks to TarotCaster:
 -->Detailed instructions for custom deck creation will be provided in the wiki.
 3. Restart the application to see your new deck
 
-
 ## Dependencies
 
 ### For Flatpak Users
 No additional dependencies required - everything is included in the Flatpak package.
 
 ### For Users Building from Source
-- Qt 6.8 or higher
+- Qt 6.2 or higher
 - CMake 3.16 or higher
-- OpenGL libraries
-- X11 development libraries
-- Standard build tools (gcc/g++, make)
+- Standard build tools (gcc/g++, make, ninja, etc)
 
-On Ubuntu/Debian-based systems:
+#### On Ubuntu/Debian-based systems:
 ```bash
-sudo apt install build-essential cmake libgl1-mesa-dev libx11-dev libxkbcommon-dev libfontconfig1-dev
-# Qt 6.8 may need to be installed separately
+# Install build tools and dependencies
+sudo apt install build-essential cmake ninja-build pkg-config
+
+# Install Qt6 (Ubuntu 22.04+)
+sudo apt install qt6-base-dev
 ```
 
-On Fedora/RHEL-based systems:
+For older Ubuntu versions that don't have Qt6 in their repositories:
 ```bash
-sudo dnf install cmake gcc-c++ mesa-libGL-devel libX11-devel libxkbcommon-devel fontconfig-devel
-# Qt 6.8 may need to be installed separately
+# Add Qt repository
+sudo add-apt-repository ppa:okirby/qt6-backports
+sudo apt update
+sudo apt install qt6-base-dev
+```
+
+#### On Fedora/RHEL-based systems:
+```bash
+# Install build tools
+sudo dnf install cmake gcc-c++ ninja-build pkg-config
+
+# Install Qt6
+sudo dnf install qt6-qtbase-devel
+```
+
+#### On Arch Linux and derivatives:
+```bash
+# Install build tools
+sudo pacman -S base-devel cmake ninja pkg-config
+
+# Install Qt6
+sudo pacman -S qt6-base
 ```
 
 ### For Users Running the Binary Directly
-The application requires Qt 6.8 libraries to be installed on your system. Most modern Linux distributions will have the other required dependencies already installed.
+The application requires Qt 6.2 libraries or higher to be installed on your system. Most modern Linux distributions will have the other required dependencies already installed.
 
 ## Using AI-Powered Readings
 
@@ -153,6 +173,86 @@ This shuffling method creates a more meaningful connection between you and your 
 - Establishing a ritual similar to physical card shuffling
 
 Even if you don't display the full deck, simply moving your cursor around in shuffle mode will generate the entropy needed for a personalized reading.
+
+## Adding Your Own Tarot Decks
+
+TarotCaster allows you to add your own custom tarot decks. Follow these instructions to prepare and install your deck images.
+
+### Preparing Your Deck Files
+
+1. **Obtain digital images** of your preferred tarot deck
+   - Ensure you have rights to use these images
+   - PNG, JPG, and JPEG formats are supported
+   - Consistent image dimensions are recommended
+
+2. **Rename the files** according to TarotCaster's required format:
+   
+   **Major Arcana (22 cards):**
+   - Name files from `00.png` to `21.png` (or .jpg/.jpeg)
+   - Follow the standard order: Fool (00), Magician (01), High Priestess (02), etc.
+
+   **Minor Arcana (56 cards):**
+   - Organize by suit in this order: Wands, Cups, Swords, Pentacles
+   - Within each suit, use this naming convention:
+     - Wands: `22.png` to `35.png`
+     - Cups: `36.png` to `49.png`
+     - Swords: `50.png` to `63.png`
+     - Pentacles: `64.png` to `77.png`
+   
+   **Card sequence within each suit:**
+   - Ace (1), 2, 3, 4, 5, 6, 7, 8, 9, 10, Page, Knight, Queen, King
+   - Example: Ace of Wands = `22.png`, King of Pentacles = `77.png`
+
+   **Card Back:**
+   - Include a card back image named `back.png` (or .jpg/.jpeg)
+
+3. **Create a folder** for your deck with a descriptive name
+   - Example: `MyCustomDeck` or `ArtisticTarot`
+   - Place all renamed card images in this folder
+
+### Installing Your Custom Deck
+
+#### For Standard Installations:
+
+The location of the `decks` directory depends on how you installed TarotCaster:
+
+1. **Linux:**
+   - If installed from source: Look for a `decks` folder in the same directory as the TarotCaster executable
+
+   2. **Windows:**
+   - The `decks` folder is located in the TarotCaster installation directory
+
+3. **macOS:**
+   - The `decks` folder is inside the application package
+   - Right-click on TarotCaster.app and select "Show Package Contents"
+   - Navigate to `Contents/Resources/decks/`
+   
+  4. Copy your prepared deck folder into the appropriate `decks` directory
+5. Restart TarotCaster - your deck will appear in the deck selection menu
+
+#### For Flatpak Installations:
+
+Flatpak apps run in a sandbox with limited access to the system. To add custom decks:
+
+1. Create a `decks` directory in the Flatpak data folder:
+   ```bash
+   mkdir -p ~/.var/app/io.github.alamahant.TarotCaster/data/decks
+   ```
+
+2. Copy your prepared deck folder into this location:
+   ```bash
+   cp -r /path/to/MyCustomDeck ~/.var/app/io.github.alamahant.TarotCaster/data/decks/
+   ```
+
+3. Restart TarotCaster - your deck will be automatically detected and available in the deck selection menu
+
+### Troubleshooting Custom Decks
+
+- If your deck doesn't appear, check that all files are named correctly
+- Ensure you have all 78 cards plus the back image
+- Verify that the deck folder is in the correct location
+- Check file permissions if using Linux or macOS
+- For Flatpak, ensure the data directory path is correct
 
 ## Credits and Licensing
 
