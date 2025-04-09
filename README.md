@@ -2,7 +2,7 @@
 
 An AI-powered tarot reading application built with Qt that combines traditional tarot wisdom with modern artificial intelligence.
 
-![TarotCaster Screenshot](screenshots/your-screenshot-filename.png)
+![TarotCaster Screenshot](screenshots/Screenshot8.png)
 
 ## Features
 
@@ -42,7 +42,7 @@ TarotCaster uses Mistral AI to generate personalized card interpretations. To us
 
 1. Register for a free Mistral AI API key at [https://mistral.ai/](https://mistral.ai/)
 2. Enter your API key in the application settings
-3. Select "AI Interpretation" when viewing a card or spread
+3. Select "Get Reading" when viewing spread
 
 The free tier of Mistral AI provides sufficient requests for personal tarot reading use.
 
@@ -52,11 +52,9 @@ You can add your own tarot decks to TarotCaster:
 
 1. Create a folder with your deck name in the `decks` directory
 2. Name your card images according to the following convention:
-   - Major Arcana: `major_XX_cardname.png` (e.g., `major_00_fool.png`)
-   - Minor Arcana: `minor_suit_cardname.png` (e.g., `minor_cups_ace.png`)
+-->Detailed instructions for custom deck creation will be provided in the wiki.
 3. Restart the application to see your new deck
 
-Detailed instructions for custom deck creation will be provided in the wiki.
 
 ## Dependencies
 
