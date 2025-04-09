@@ -88,7 +88,7 @@ The application requires Qt 6.8 libraries to be installed on your system. Most m
 ### Tarot Deck Artwork
 - Original Rider-Waite Tarot deck artwork by Pamela Colman Smith under the direction of Arthur Edward Waite
 - Images sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:Rider-Waite_tarot_deck)
-- These images are in the public domain in the United States because their copyright has expired
+- These images are in the public domain in the United States, the EU and globally because their copyright has expired
 
 ### Tarot Interpretations
 - Traditional card meanings adapted from [Corpora Project](https://github.com/dariusk/corpora/blob/master/data/divination/tarot_interpretations.json)
