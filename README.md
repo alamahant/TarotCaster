@@ -83,6 +83,77 @@ sudo dnf install cmake gcc-c++ mesa-libGL-devel libX11-devel libxkbcommon-devel 
 ### For Users Running the Binary Directly
 The application requires Qt 6.8 libraries to be installed on your system. Most modern Linux distributions will have the other required dependencies already installed.
 
+## Using AI-Powered Readings
+
+TarotCaster integrates with Mistral AI to provide personalized interpretations of your tarot spreads. Follow these steps to enable and use this feature:
+
+### Setting Up Your Mistral API Key
+
+1. **Obtain a Mistral API Key**:
+   - Create an account at [Mistral AI](https://mistral.ai/)
+   - Navigate to your account dashboard
+   - Generate a new API key
+
+2. **Add Your API Key to TarotCaster**:
+   - Open TarotCaster
+   - Go to the **Edit** menu
+   - Select **Mistral API Key**
+   - Paste your API key in the dialog box
+   - Click "OK" to save
+
+### Getting AI Interpretations
+
+Once your API key is set up:
+
+1. Cast the Tarot cards using any of the available spreads
+2. After the cards are displayed, click the **Get Reading** button
+3. TarotCaster will connect to Mistral AI and generate a personalized interpretation
+4. The AI reading will appear, offering insights based on the specific cards in your spread
+
+### Tips for AI Readings
+
+- Readings are generated based on traditional card meanings and their relationships
+- Each reading is unique and tailored to your specific card combination
+
+Note: Using the AI feature requires an internet connection and consumes Mistral API credits. The free tier of Mistral AI typically provides sufficient credits for personal use.
+
+## The Shuffle Feature: Creating a Personal Connection
+
+TarotCaster offers a unique way to "shuffle" the cards that creates a personal energetic connection between you and your reading through digital entropy generation.
+
+### How to Use the Shuffle Feature
+
+1. **Activate Shuffle Mode**:
+   - Click the **Shuffle** button in the interface
+   - Your cursor will change to a crosshair (+) symbol
+   - This indicates that entropy collection is active
+
+2. **Generate Entropy**:
+   - Move your mouse cursor around the screen in any pattern
+   - Your mouse movements create unique entropy that feeds into TarotCaster's quantum random number generator
+   - This process creates a personalized randomization for your reading
+
+3. **Recommended Shuffling Technique**:
+   - For a deeper connection, click the **Display Full Deck** button
+   - Move your cursor over the displayed cards, following your intuition
+   - Take your time with this process - the longer you move, the more unique your shuffle
+   - When you feel ready, click the **Display Full Deck** button again to return to the main interface
+
+4. **Complete the Process**:
+   - After shuffling, click the **Deal** button to lay out your spread
+   - The cards will be selected based on the entropy you generated during shuffling
+
+### Why This Matters
+
+This shuffling method creates a more meaningful connection between you and your reading by:
+
+- Incorporating your physical movements into the card selection process
+- Creating truly random card selections based on quantum principles
+- Allowing your intuition to guide the shuffling process
+- Establishing a ritual similar to physical card shuffling
+
+Even if you don't display the full deck, simply moving your cursor around in shuffle mode will generate the entropy needed for a personalized reading.
+
 ## Credits and Licensing
 
 ### Tarot Deck Artwork
