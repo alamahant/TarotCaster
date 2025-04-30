@@ -212,23 +212,19 @@ void DockControls::loadAvailableDecks() {
 
     QString userDecksPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/decks";
 
-    qDebug() << "Looking for user decks in:" << userDecksPath;
 
     // Create user decks directory if it doesn't exist
     QDir userDecksDir(userDecksPath);
     if (!userDecksDir.exists()) {
         bool created = userDecksDir.mkpath(".");
-        qDebug() << "Created user decks directory:" << created;
     }
 
     // Load system decks
     QDir systemDecksDir(systemDecksPath);
     QStringList systemDeckDirs = systemDecksDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    qDebug() << "Found system decks:" << systemDeckDirs;
 
     // Load user decks
     QStringList userDeckDirs = userDecksDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    qDebug() << "Found user decks:" << userDeckDirs;
 
     // Add system decks to selector
     foreach (const QString &deckName, systemDeckDirs) {
@@ -264,7 +260,6 @@ void DockControls::onDeckSelected(const QString& deckName) {
         deckPath = QApplication::applicationDirPath() + "/decks/" + deckName;
     }
 
-    qDebug() << "Loading deck from path:" << deckPath;
 
     cardLoader = new CardLoader(deckPath);
     emit deckLoaded(cardLoader);
