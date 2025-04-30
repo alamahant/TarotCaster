@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1] - 2025-06-15
+## [1.1] - 2025-04-29
 
 ### New Content
 - Added the classic Tarot of Marseilles deck, sourced from Wikimedia Commons [View on Wikimedia](https://commons.wikimedia.org/wiki/Category:Tarot_de_Marseille_(Single_Cards))
