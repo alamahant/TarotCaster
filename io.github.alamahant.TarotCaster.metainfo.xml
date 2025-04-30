@@ -60,7 +60,7 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.1" date="2025-04-29">
+    <release version="1.1.0" date="2025-04-29">
       <description>
         <p>New Content:</p>
         <ul>
@@ -75,30 +75,16 @@
         </ul>
         <p>New Features:</p>
         <ul>
-          <li>Enhanced Help menu with comprehensive sections:
-            <ul>
-              <li>About: Application information and credits</li>
-              <li>Instructions: Detailed guide for beginners and experienced users</li>
-              <li>Spreads: Explanations of available card layouts and their meanings</li>
-              <li>Custom Decks: Step-by-step instructions for adding personal decks</li>
-            </ul>
-          </li>
-          <li>Implemented user-friendly deck management system:
-            <ul>
-              <li>Created standardized user "decks" directory that follows Flatpak sandbox guidelines</li>
-              <li>Automatic detection of custom decks placed in ~/.var/app/io.github.alamahant.TarotCaster/data/TarotCaster/decks/</li>
-              <li>No restart required for the application to recognize newly added decks</li>
-            </ul>
-          </li>
+          <li>Enhanced Help menu with comprehensive sections (About, Instructions, Spreads, Custom Decks)</li>
+          <li>Implemented user-friendly deck management system with standardized directories</li>
+          <li>Automatic detection of custom decks placed in ~/.var/app/io.github.alamahant.TarotCaster/data/TarotCaster/decks/</li>
+          <li>No restart required for the application to recognize newly added decks</li>
         </ul>
         <p>Technical Improvements:</p>
         <ul>
-          <li>Improved random number generation for more authentic shuffling:
-            <ul>
-              <li>Enhanced seed generation at application startup</li>
-              <li>Additional entropy collection during the shuffle process</li>
-            </ul>
-          </li>
+          <li>Improved random number generation for more authentic shuffling</li>
+          <li>Enhanced seed generation at application startup</li>
+          <li>Additional entropy collection during the shuffle process</li>
           <li>Optimized save/load functionality for better compatibility with Flatpak sandbox environment</li>
           <li>Updated application summary to conform with Flathub quality guidelines</li>
         </ul>
@@ -109,7 +95,7 @@
         </ul>
       </description>
     </release>
-    <release version="1.0" date="2025-04-09">
+    <release version="1.0.1" date="2025-04-09">
       <description>
         <p>Initial release</p>
       </description>
@@ -123,6 +109,8 @@
   </categories>
   <launchable type="desktop-id">io.github.alamahant.TarotCaster.desktop</launchable>
 </component>
+
+
 
 
 
