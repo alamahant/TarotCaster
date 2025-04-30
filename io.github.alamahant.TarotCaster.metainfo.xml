@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.alamahant.TarotCaster</id>
   <name>TarotCaster</name>
-  <summary>Tarot card reading application with AI interpretations</summary>
+  <summary>Cast in Style</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <description>
@@ -26,9 +26,90 @@
       <caption>TarotCaster main interface with card spread</caption>
       <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/Screenshot8.png</image>
     </screenshot>
+    <screenshot>
+      <caption>Celtic Cross Flipped</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/celticcross-flipped.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Celtic Cross Unflipped</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/celticcross-unflipped.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Full Marseille</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/full-marseille.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Full RWS</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/full-rws.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Help Dialogs</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/helpdialogs.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Zodiac Spread</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/zodiac.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Horseshoe Spread</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/horseshoe.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Three Card Spread</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/3card.png</image>
+    </screenshot>
   </screenshots>
   <releases>
-    <release version="1.0" date="2023-06-01">
+    <release version="1.1" date="2025-04-29">
+      <description>
+        <p>New Content:</p>
+        <ul>
+          <li>Added the classic Tarot of Marseilles deck, sourced from Wikimedia Commons</li>
+          <li>Introduced the Zodiac spread, offering astrological insights with a 12-card layout representing each zodiac sign</li>
+        </ul>
+        <p>User Interface Improvements:</p>
+        <ul>
+          <li>Redesigned application icon with an elegant blue background and golden yellow text</li>
+          <li>Consolidated all styling into a central CSS file for consistent appearance throughout the application</li>
+          <li>Added more screenshots to better showcase the application's features</li>
+        </ul>
+        <p>New Features:</p>
+        <ul>
+          <li>Enhanced Help menu with comprehensive sections:
+            <ul>
+              <li>About: Application information and credits</li>
+              <li>Instructions: Detailed guide for beginners and experienced users</li>
+              <li>Spreads: Explanations of available card layouts and their meanings</li>
+              <li>Custom Decks: Step-by-step instructions for adding personal decks</li>
+            </ul>
+          </li>
+          <li>Implemented user-friendly deck management system:
+            <ul>
+              <li>Created standardized user "decks" directory that follows Flatpak sandbox guidelines</li>
+              <li>Automatic detection of custom decks placed in ~/.var/app/io.github.alamahant.TarotCaster/data/TarotCaster/decks/</li>
+              <li>No restart required for the application to recognize newly added decks</li>
+            </ul>
+          </li>
+        </ul>
+        <p>Technical Improvements:</p>
+        <ul>
+          <li>Improved random number generation for more authentic shuffling:
+            <ul>
+              <li>Enhanced seed generation at application startup</li>
+              <li>Additional entropy collection during the shuffle process</li>
+            </ul>
+          </li>
+          <li>Optimized save/load functionality for better compatibility with Flatpak sandbox environment</li>
+          <li>Updated application summary to conform with Flathub quality guidelines</li>
+        </ul>
+        <p>Bug Fixes:</p>
+        <ul>
+          <li>Resolved issue where saved readings would display cards face-down upon loading</li>
+          <li>Fixed various minor UI inconsistencies and layout issues</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0" date="2025-04-09">
       <description>
         <p>Initial release</p>
       </description>
@@ -42,4 +123,6 @@
   </categories>
   <launchable type="desktop-id">io.github.alamahant.TarotCaster.desktop</launchable>
 </component>
+
+
 

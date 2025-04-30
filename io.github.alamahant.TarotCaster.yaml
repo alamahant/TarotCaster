@@ -13,8 +13,6 @@ modules:
   - name: tarotcaster
     buildsystem: cmake-ninja
     sources:
-      #- type: git
-      #  url: https://github.com/alamahant/TarotCaster.git
-      #  tag: v1.0.1
-      - type: dir
-        path: .
+      - type: git
+        url: https://github.com/alamahant/TarotCaster.git
+        tag: v1.1.0

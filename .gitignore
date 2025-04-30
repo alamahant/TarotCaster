@@ -1,9 +1,9 @@
-# Qt-specific ignores
+# Qt specific
 *.pro.user
 *.pro.user.*
 *.qbs.user
 *.qbs.user.*
-*.moc
+.moc
 moc_*.cpp
 qrc_*.cpp
 ui_*.h
@@ -49,5 +49,17 @@ build-dir/
 repo/
 *.flatpak
 
-# Specific files
-mainwindow.ui
+# Python cache files only (keep all Python scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Don't ignore UI files
+!*.ui
+
+# Custom additions
+*.bak
+/venv/
+/wheels/
+.flatpak
