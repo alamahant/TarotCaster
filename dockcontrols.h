@@ -12,6 +12,8 @@
 #include<QRandomGenerator>
 #include<QTextEdit>
 #include<QLabel>
+#include<QStandardPaths>
+
 class DockControls : public QWidget
 {
     Q_OBJECT

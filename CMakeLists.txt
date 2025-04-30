@@ -11,7 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
-configure_file(card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
+#configure_file(card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
+configure_file(resources/card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
+
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/decks DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 set(PROJECT_SOURCES
@@ -35,6 +38,7 @@ qt_add_executable(TarotCaster
         dockcontrols.h dockcontrols.cpp
         mistralapi.h mistralapi.cpp
         resources.qrc
+        helpdialog.h helpdialog.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET TarotCaster APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -97,5 +101,8 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.TarotCaster.png
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/OriginalRiderWaite
         DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/card_meanings.json
+      install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/TarotdeMarseille
+              DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/card_meanings.json
         DESTINATION ${CMAKE_INSTALL_BINDIR})

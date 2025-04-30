@@ -16,7 +16,10 @@ TarotScene::TarotScene(QObject *parent) : QGraphicsScene(parent),
 {
     setBackgroundBrush(Qt::black);
     cardLoader.loadCards();  // Load initial deck
-    loadCardNames(QApplication::applicationDirPath() + "/card_meanings.json");
+    //loadCardNames(QApplication::applicationDirPath() + ":resources/card_meanings.json");
+    loadCardNames(":/resources/card_meanings.json");
+
+
 }
 
 TarotScene::~TarotScene() {
@@ -25,7 +28,7 @@ TarotScene::~TarotScene() {
 }
 
 
-void TarotScene::displayCard(int number, bool reversed, const QPointF& pos) {
+void TarotScene::displayCard(int number, bool reversed, const QPointF& pos, bool beRevealed = false) {
     TarotCardItem* card = new TarotCardItem(cardLoader.getCardImage(number),
                                             cardLoader.getCardBack(), number);
     card->setTransformOriginPoint(card->boundingRect().center());
@@ -35,6 +38,8 @@ void TarotScene::displayCard(int number, bool reversed, const QPointF& pos) {
     card->setPos(pos);
     addItem(card);
     connect(card, &TarotCardItem::cardRevealed, this, &TarotScene::onCardRevealed);
+    if(beRevealed)
+        card->flip();
 }
 
 void TarotScene::onCardRevealed(int cardNumber) {
@@ -45,9 +50,11 @@ void TarotScene::onCardRevealed(int cardNumber) {
 
 
 void TarotScene::displayCelticCross() {
+
     clearScene();
     currentSpreadType = CelticCross;
     readingRequested = false;
+
     currentCards = cardLoader.getRandomCards(10, allowReversedCards);
 
     // Display the cards (existing code)
@@ -119,11 +126,13 @@ void TarotScene::displayThreeCardSpread() {
 }
 
 void TarotScene::setSpreadType(const QString& type) {
+    /*
     if (type == "Three Card Spread") {
         displayThreeCardSpread();
     } else if (type == "Celtic Cross") {
         displayCelticCross();
     }
+*/
 }
 
 void TarotScene::displaySingleCard() {
@@ -151,7 +160,7 @@ void TarotScene::displayHorseshoeSpread() {
     const qreal CARD_WIDTH = 150;
     const qreal CARD_HEIGHT = 225;
     const qreal HORIZONTAL_SPACING = 200;
-    const qreal VERTICAL_SPACING = 350;    // Increased to 350 for ultimate clarity
+    const qreal VERTICAL_SPACING = 310;    // Increased to 350 for ultimate clarity
 
     QPointF center = sceneRect().center();
 
@@ -331,6 +340,35 @@ QString TarotScene::generateReadingPrompt() const {
         prompt += "\nPlease interpret these cards in the context of a Celtic Cross spread, explaining the significance of each position and how the cards interact with each other.";
         break;
 
+    case ZodiacSpread:
+        prompt = "Please provide a tarot reading for a Zodiac spread with the following cards:\n\n";
+        positions = {
+            "Aries (1st House): Self, identity, appearance, beginnings",
+            "Taurus (2nd House): Possessions, values, resources, self-worth",
+            "Gemini (3rd House): Communication, siblings, local travel, learning",
+            "Cancer (4th House): Home, family, roots, emotional foundation",
+            "Leo (5th House): Creativity, romance, children, pleasure",
+            "Virgo (6th House): Health, daily routine, service, work",
+            "Libra (7th House): Partnerships, marriage, open enemies, contracts",
+            "Scorpio (8th House): Transformation, shared resources, intimacy, death/rebirth",
+            "Sagittarius (9th House): Higher education, philosophy, travel, expansion",
+            "Capricorn (10th House): Career, public image, authority, achievement",
+            "Aquarius (11th House): Friends, groups, hopes, humanitarian pursuits",
+            "Pisces (12th House): Unconscious, secrets, spirituality, self-undoing"
+        };
+
+        for (int i = 0; i < currentCards.size() && i < 12; i++) {
+            QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
+            prompt += QString("%1: %2 (%3)\n")
+                          .arg(positions[i])
+                          .arg(cardName)
+                          .arg(orientation);
+        }
+
+        prompt += "\nPlease interpret these cards in the context of a Zodiac spread, explaining how each card influences the corresponding house in the querent's life. Consider both the zodiac sign's energy and the house's domain when interpreting each position.";
+        break;
+
     default:
         return "Error: Unknown spread type.";
     }
@@ -369,6 +407,9 @@ void TarotScene::displaySavedSpread(SpreadType type, const QVector<CardLoader::C
     case CelticCross:
         displaySavedCelticCross(savedCards);
         break;
+    case ZodiacSpread:
+        displaySavedZodiacSpread(savedCards);
+        break;
     default:
         // Handle error
         break;
@@ -377,31 +418,31 @@ void TarotScene::displaySavedSpread(SpreadType type, const QVector<CardLoader::C
 
 void TarotScene::displaySavedSingleCard(const QVector<CardLoader::CardData>& savedCards) {
     if (savedCards.isEmpty()) return;
-
+    beRevealed = true;
     QPointF center = sceneRect().center();
-    displayCard(savedCards[0].number, savedCards[0].reversed, center);
+    displayCard(savedCards[0].number, savedCards[0].reversed, center, beRevealed);
 }
 
 void TarotScene::displaySavedThreeCardSpread(const QVector<CardLoader::CardData>& savedCards) {
     if (savedCards.size() < 3) return;
-
+    beRevealed = true;
     const qreal CARD_WIDTH = 150;
     const qreal HORIZONTAL_SPACING = 40;
     QPointF center = sceneRect().center();
 
     // Past
     displayCard(savedCards[0].number, savedCards[0].reversed,
-                QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()), beRevealed);
     // Present
-    displayCard(savedCards[1].number, savedCards[1].reversed, center);
+    displayCard(savedCards[1].number, savedCards[1].reversed, center, beRevealed);
     // Future
     displayCard(savedCards[2].number, savedCards[2].reversed,
-                QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()), beRevealed);
 }
 
 void TarotScene::displaySavedHorseshoeSpread(const QVector<CardLoader::CardData>& savedCards) {
     if (savedCards.size() < 7) return;
-
+    beRevealed = true;
     const qreal CARD_WIDTH = 150;
     const qreal HORIZONTAL_SPACING = 200;
     const qreal VERTICAL_SPACING = 350;
@@ -409,28 +450,28 @@ void TarotScene::displaySavedHorseshoeSpread(const QVector<CardLoader::CardData>
 
     // Left column (1-2-3)
     displayCard(savedCards[0].number, savedCards[0].reversed,
-                QPointF(center.x() - HORIZONTAL_SPACING, center.y() + VERTICAL_SPACING));
+                QPointF(center.x() - HORIZONTAL_SPACING, center.y() + VERTICAL_SPACING), beRevealed);
     displayCard(savedCards[1].number, savedCards[1].reversed,
-                QPointF(center.x() - HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() - HORIZONTAL_SPACING, center.y()), beRevealed);
     displayCard(savedCards[2].number, savedCards[2].reversed,
-                QPointF(center.x() - HORIZONTAL_SPACING, center.y() - VERTICAL_SPACING));
+                QPointF(center.x() - HORIZONTAL_SPACING, center.y() - VERTICAL_SPACING), beRevealed);
 
     // Top center (4)
     displayCard(savedCards[3].number, savedCards[3].reversed,
-                QPointF(center.x(), center.y() - VERTICAL_SPACING * 2));
+                QPointF(center.x(), center.y() - VERTICAL_SPACING * 2), beRevealed);
 
     // Right column (5-6-7)
     displayCard(savedCards[4].number, savedCards[4].reversed,
-                QPointF(center.x() + HORIZONTAL_SPACING, center.y() - VERTICAL_SPACING));
+                QPointF(center.x() + HORIZONTAL_SPACING, center.y() - VERTICAL_SPACING), beRevealed);
     displayCard(savedCards[5].number, savedCards[5].reversed,
-                QPointF(center.x() + HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() + HORIZONTAL_SPACING, center.y()), beRevealed);
     displayCard(savedCards[6].number, savedCards[6].reversed,
-                QPointF(center.x() + HORIZONTAL_SPACING, center.y() + VERTICAL_SPACING));
+                QPointF(center.x() + HORIZONTAL_SPACING, center.y() + VERTICAL_SPACING), beRevealed);
 }
 
 void TarotScene::displaySavedCelticCross(const QVector<CardLoader::CardData>& savedCards) {
     if (savedCards.size() < 10) return;
-
+    beRevealed = true;
     const qreal CARD_WIDTH = 150;
     const qreal CARD_HEIGHT = 225;
     const qreal HORIZONTAL_SPACING = 40;
@@ -438,22 +479,22 @@ void TarotScene::displaySavedCelticCross(const QVector<CardLoader::CardData>& sa
     QPointF center = sceneRect().center();
 
     // 1. Center card (Present)
-    displayCard(savedCards[0].number, savedCards[0].reversed, center);
+    displayCard(savedCards[0].number, savedCards[0].reversed, center, beRevealed);
     // 2. Crossing card (Challenge)
     displayCard(savedCards[1].number, savedCards[1].reversed,
-                QPointF(center.x() - (CARD_WIDTH * 3) - (HORIZONTAL_SPACING * 3), center.y()));
+                QPointF(center.x() - (CARD_WIDTH * 3) - (HORIZONTAL_SPACING * 3), center.y()), beRevealed);
     // 3. Below (Foundation)
     displayCard(savedCards[2].number, savedCards[2].reversed,
-                QPointF(center.x(), center.y() + VERTICAL_SPACING));
+                QPointF(center.x(), center.y() + VERTICAL_SPACING), beRevealed);
     // 4. Left (Past)
     displayCard(savedCards[3].number, savedCards[3].reversed,
-                QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()), beRevealed);
     // 5. Above (Crown)
     displayCard(savedCards[4].number, savedCards[4].reversed,
-                QPointF(center.x(), center.y() - VERTICAL_SPACING));
+                QPointF(center.x(), center.y() - VERTICAL_SPACING), beRevealed);
     // 6. Right (Future)
     displayCard(savedCards[5].number, savedCards[5].reversed,
-                QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()), beRevealed);
 
     // Staff positions (right column)
     qreal staffX = center.x() + (CARD_WIDTH * 2) + (HORIZONTAL_SPACING * 2);
@@ -462,6 +503,91 @@ void TarotScene::displaySavedCelticCross(const QVector<CardLoader::CardData>& sa
     // 7-10. Staff cards (bottom to top)
     for(int i = 0; i < 4; i++) {
         displayCard(savedCards[i+6].number, savedCards[i+6].reversed,
-                    QPointF(staffX, bottomY - (i * VERTICAL_SPACING)));
+                    QPointF(staffX, bottomY - (i * VERTICAL_SPACING)), beRevealed);
     }
 }
+
+
+void TarotScene::displayZodiacSpread() {
+    clearScene();
+    currentSpreadType = ZodiacSpread;
+    readingRequested = false;
+
+    // Zodiac spread uses 12 cards
+    currentCards = cardLoader.getRandomCards(12, allowReversedCards);
+
+    // Display constants
+    const qreal CARD_WIDTH = 150;
+    const qreal CARD_HEIGHT = 225;
+
+    QPointF center = sceneRect().center();
+
+    // Base radius for most positions
+    const qreal BASE_RADIUS = 365;
+
+    // Place cards in a circle, starting from 9 o'clock position (Aries)
+    // and moving COUNTERCLOCKWISE through the zodiac signs
+    for (int i = 0; i < 12; i++) {
+        // Calculate angle in radians (starting from 9 o'clock, moving COUNTERCLOCKWISE)
+        qreal angle = M_PI + (i * 2 * M_PI / 12); // Changed from - to +
+
+        // Use larger radius for certain positions
+        qreal currentRadius = BASE_RADIUS;
+        if (i == 0 || i == 6) {
+            currentRadius = BASE_RADIUS + 190; // Larger radius for Aries and Libra
+        }
+        if (i == 5 || i == 7 || i == 11 || i == 1) {
+            currentRadius = BASE_RADIUS + 60; // Slightly larger radius for Virgo, Scorpio, Taurus, Pisces
+        }
+
+        // Calculate position on the circle
+        qreal x = center.x() + currentRadius * cos(angle) - (CARD_WIDTH / 2);
+        qreal y = center.y() + currentRadius * sin(angle) - (CARD_HEIGHT / 2);
+
+        // Display the card
+        displayCard(currentCards[i].number, currentCards[i].reversed, QPointF(x, y));
+    }
+}
+
+
+void TarotScene::displaySavedZodiacSpread(const QVector<CardLoader::CardData>& savedCards) {
+    if (savedCards.size() < 12) return;
+    beRevealed = true;
+    clearScene();
+    currentSpreadType = ZodiacSpread;
+    readingRequested = false;
+
+    // Display constants
+    const qreal CARD_WIDTH = 150;
+    const qreal CARD_HEIGHT = 225;
+
+    QPointF center = sceneRect().center();
+
+    // Base radius for most positions
+    const qreal BASE_RADIUS = 365;
+
+    // Place cards in a circle, starting from 9 o'clock position (Aries)
+    // and moving COUNTERCLOCKWISE through the zodiac signs
+    for (int i = 0; i < 12; i++) {
+        // Calculate angle in radians (starting from 9 o'clock, moving COUNTERCLOCKWISE)
+        qreal angle = M_PI + (i * 2 * M_PI / 12);
+
+        // Use larger radius for certain positions
+        qreal currentRadius = BASE_RADIUS;
+        if (i == 0 || i == 6) {
+            currentRadius = BASE_RADIUS + 190; // Larger radius for Aries and Libra
+        }
+        if (i == 5 || i == 7 || i == 11 || i == 1) {
+            currentRadius = BASE_RADIUS + 60; // Slightly larger radius for Virgo, Scorpio, Taurus, Pisces
+        }
+
+        // Calculate position on the circle
+        qreal x = center.x() + currentRadius * cos(angle) - (CARD_WIDTH / 2);
+        qreal y = center.y() + currentRadius * sin(angle) - (CARD_HEIGHT / 2);
+
+        // Display the saved card
+        displayCard(savedCards[i].number, savedCards[i].reversed, QPointF(x, y), beRevealed);
+    }
+}
+
+

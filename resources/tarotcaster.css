@@ -1,0 +1,194 @@
+/* Base application style */
+QWidget {
+    background-color: black;
+    color: gold;
+}
+
+/* Menu bar */
+QMenuBar {
+    background-color: #2a2a2a;
+}
+
+/* Standard buttons */
+QPushButton {
+    background-color: #2a2a2a;
+    color: gold;
+    border: 1px solid #3a3a3a;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-height: 20px;
+}
+
+QPushButton:hover {
+    background-color: #3a3a3a;
+    border: 1px solid gold;
+}
+
+/* Specific button styling */
+QPushButton#shuffleButton,
+QPushButton#dealButton,
+QPushButton#clearButton,
+QPushButton#displayFullDeckButton {
+    background-color: #2a2a2a;
+    color: gold;
+    border: 1px solid #3a3a3a;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-height: 20px;
+}
+
+QPushButton#shuffleButton:hover,
+QPushButton#dealButton:hover,
+QPushButton#clearButton:hover,
+QPushButton#displayFullDeckButton:hover {
+    background-color: #3a3a3a;
+    border: 1px solid gold;
+}
+
+/* Reading action button */
+QPushButton#readingButton {
+    background-color: darkgoldenrod;
+    color: black;
+    font-weight: bold;
+    border: 1px solid #3a3a3a;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-height: 25px;
+}
+
+QPushButton#readingButton:hover {
+    background-color: #d4af37;
+    border: 1px solid black;
+}
+
+/* Text edits */
+QTextEdit {
+    background-color: black;
+    color: gold;
+}
+
+/* Reading display (specific styling) */
+QTextEdit#readingDisplay {
+    background-color: #1a1a1a;
+    color: gold;
+    border: none;
+}
+
+/* Group boxes */
+QGroupBox {
+    color: gold;
+    border: 1px solid gold;
+    margin-top: 6px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 7px;
+    padding: 0px 5px 0px 5px;
+}
+
+/* Combo boxes */
+QComboBox {
+    background-color: #2a2a2a;
+    color: gold;
+}
+
+/* Dropdown menu in combo boxes */
+QComboBox QAbstractItemView {
+    background-color: #2a2a2a;
+    color: gold;
+    selection-background-color: darkgoldenrod;
+    selection-color: black;
+}
+
+/* Checkboxes */
+/*
+QCheckBox {
+    color: gold;
+}
+
+QCheckBox::indicator {
+    width: 13px;
+    height: 13px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 1px solid gold;
+    background-color: #2a2a2a;
+}
+
+QCheckBox::indicator:checked {
+    border: 1px solid gold;
+    background-color: darkgoldenrod;
+}
+*/
+/* Dialog styling */
+QDialog {
+    background-color: #1a1a1a;
+}
+
+QDialog QLabel {
+    color: gold;
+}
+
+QDialog QTextBrowser {
+    background-color: #222222;
+    color: gold;
+    border: 1px solid #3a3a3a;
+}
+
+QDialog QPushButton {
+    background-color: #2a2a2a;
+    color: gold;
+    border: 1px solid #3a3a3a;
+    padding: 5px 15px;
+}
+
+QDialog QPushButton:hover {
+    background-color: #3a3a3a;
+    border: 1px solid gold;
+}
+
+/* Links in text browser */
+QTextBrowser {
+    background-color: #222222;
+    color: gold;
+}
+
+
+/* Labels */
+QLabel {
+    color: gold;
+}
+
+/* Scrollbars */
+QScrollBar:vertical {
+    background-color: #1a1a1a;
+    width: 12px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: darkgoldenrod;
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background-color: #1a1a1a;
+    height: 12px;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: darkgoldenrod;
+    min-width: 20px;
+}
+
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+

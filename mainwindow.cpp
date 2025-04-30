@@ -18,7 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     createDocks();
 
-    QString jsonPath = QDir(QCoreApplication::applicationDirPath()).filePath("card_meanings.json");
+   // QString jsonPath = QDir(QCoreApplication::applicationDirPath()).filePath("card_meanings.json");
+    QString jsonPath = ":/resources/card_meanings.json";
+
+
     cardMeanings = CardMeaning::loadFromJson(jsonPath);
 
     connect(tarotScene, SIGNAL(cardMeaningRequested(int)),
@@ -36,7 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(dockControls->allowReversed, &QCheckBox::toggled,
            tarotScene, &TarotScene::setAllowReversedCards);
-    setStyleSheet("background-color: black; color: gold;");
 
     connect(dockControls, &DockControls::displayFullDeckRequested,
             tarotScene, &TarotScene::displayFullDeck);
@@ -51,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dockControls->getReadingButton, &QPushButton::clicked,
             this, &MainWindow::onGetReadingClicked);
 
+
     QMenu* fileMenu = menuBar()->addMenu("&File");
     QAction* saveAction = fileMenu->addAction("&Save Reading", this, &MainWindow::onSaveReading);
     saveAction->setShortcut(QKeySequence::Save);
@@ -59,8 +62,23 @@ MainWindow::MainWindow(QWidget *parent)
     fileMenu->addSeparator();
     fileMenu->addAction("&Exit", this, &QWidget::close, QKeySequence::Quit);
 
+    // Edit Menu
     QMenu *editMenu = menuBar()->addMenu("&Edit");
     editMenu->addAction("&Mistral API Key", this, &MainWindow::onEditApiKey);
+
+    // Settings Menu
+    QMenu *settingsMenu = menuBar()->addMenu("&Settings");
+    // We'll populate this later
+    settingsMenu->addAction("&Preferences", this, &MainWindow::onOpenPreferences);
+
+    // Help Menu
+    QMenu *helpMenu = menuBar()->addMenu("&Help");
+    helpMenu->addAction("&About", this, &MainWindow::onShowAbout);
+    helpMenu->addAction("&Instructions", this, &MainWindow::onShowInstructions);
+    helpMenu->addAction("&Spreads", this, &MainWindow::onShowSpreads);
+    helpMenu->addAction("&How to Add Additional Decks", this, &MainWindow::onShowAddDecks);
+
+
 }
 
 MainWindow::~MainWindow()
@@ -75,13 +93,22 @@ void MainWindow::setupUI() {
 }
 
 void MainWindow::createDocks() {
-    leftDock = new QDockWidget("Deck Controls", this);
+    //leftDock = new QDockWidget("Deck Controls and Readings",this);
+    leftDock = new QDockWidget("Decks and Spreads", this);
+    //leftDock = new QDockWidget("Decks and Readings", this);
+
+    //leftDock->setStyleSheet("QDockWidget::title { text-align: center; }");
+
+    leftDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
     dockControls = new DockControls(this);
     leftDock->setWidget(dockControls);
     leftDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     addDockWidget(Qt::LeftDockWidgetArea, leftDock);
 
-    rightDock = new QDockWidget("Card Meaning", this);
+    rightDock = new QDockWidget("Card Meaning",this);
+    //rightDock->setStyleSheet("QDockWidget::title { text-align: center; }");
+
+    rightDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
     meaningDisplay = new MeaningDisplay(this);
     rightDock->setWidget(meaningDisplay);
     rightDock->setAllowedAreas(Qt::RightDockWidgetArea);
@@ -129,6 +156,8 @@ void MainWindow::onDealClicked() {
         tarotScene->displayThreeCardSpread();
     } else if (currentSpread == "Horseshoe") {
         tarotScene->displayHorseshoeSpread();
+    } else if (currentSpread == "ZodiacSpread") {
+        tarotScene->displayZodiacSpread();
     } else {
         tarotScene->displayCelticCross();
     }
@@ -179,7 +208,6 @@ void MainWindow::onApiError(const QString& errorMessage) {
     dockControls->readingDisplay->setText("Error: " + errorMessage);
 }
 
-//save load
 
 void MainWindow::onSaveReading() {
     if (tarotScene->getCurrentCards().isEmpty()) {
@@ -187,13 +215,18 @@ void MainWindow::onSaveReading() {
         return;
     }
 
-    // Create TaroCaster directory in home directory if it doesn't exist
-    QString saveDir = QDir::homePath() + "/TaroCaster";
+    // Get the proper data location for the application
+    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dataLocation.isEmpty()) {
+        dataLocation = QDir::homePath() + "/.local/share/TaroCaster";
+    }
+
+    // Create the directory if it doesn't exist
     QDir dir;
-    if (!dir.exists(saveDir)) {
-        if (!dir.mkpath(saveDir)) {
+    if (!dir.exists(dataLocation)) {
+        if (!dir.mkpath(dataLocation)) {
             QMessageBox::warning(this, "Save Error",
-                                 "Could not create save directory: " + saveDir);
+                                 "Could not create save directory: " + dataLocation);
             return;
         }
     }
@@ -204,7 +237,7 @@ void MainWindow::onSaveReading() {
                               ".tarot";
 
     QString fileName = QFileDialog::getSaveFileName(this, "Save Reading",
-                                                    saveDir + "/" + defaultFilename,
+                                                    dataLocation + "/" + defaultFilename,
                                                     "Tarot Readings (*.tarot)");
     if (fileName.isEmpty())
         return;
@@ -242,12 +275,15 @@ void MainWindow::onSaveReading() {
 }
 
 void MainWindow::onLoadReading() {
-    // Open file dialog in TaroCaster directory if it exists
-    QString loadDir = QDir::homePath() + "/TaroCaster";
-    QDir dir(loadDir);
-    if (!dir.exists()) {
-        loadDir = QDir::homePath();
+    // Get the proper data location for the application
+    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dataLocation.isEmpty()) {
+        dataLocation = QDir::homePath() + "/.local/share/TaroCaster";
     }
+
+    // Use the data location if it exists, otherwise fall back to home directory
+    QDir dir(dataLocation);
+    QString loadDir = dir.exists() ? dataLocation : QDir::homePath();
 
     QString fileName = QFileDialog::getOpenFileName(this, "Load Reading",
                                                     loadDir,
@@ -291,7 +327,6 @@ void MainWindow::onLoadReading() {
     // Load spread type and display cards
     TarotScene::SpreadType spreadType = static_cast<TarotScene::SpreadType>(
         json["spreadType"].toInt(TarotScene::NoSpread));
-
     tarotScene->displaySavedSpread(spreadType, loadedCards);
 
     // Load reading
@@ -302,7 +337,6 @@ void MainWindow::onLoadReading() {
     QMessageBox::information(this, "Load Successful",
                              "Reading loaded successfully from " + fileName);
 }
-
 
 void MainWindow::onEditApiKey()
 {
@@ -317,7 +351,9 @@ void MainWindow::onEditApiKey()
     layout->addWidget(infoLabel);
 
     // Add clickable link
-    QLabel *linkLabel = new QLabel("<a href='https://mistral.ai'>https://mistral.ai</a>");
+    //QLabel *linkLabel = new QLabel("<a href='https://mistral.ai'>https://mistral.ai</a>");
+    QLabel *linkLabel = new QLabel("<a href='https://mistral.ai' style='color: gold;'>https://mistral.ai</a>");
+
     linkLabel->setOpenExternalLinks(true); // Makes the link clickable
     layout->addWidget(linkLabel);
 
@@ -338,4 +374,41 @@ void MainWindow::onEditApiKey()
         QString newKey = keyEdit->text().trimmed();
         mistralApi->setApiKey(newKey);
     }
+}
+
+
+void MainWindow::onOpenPreferences()
+{
+    // We'll implement this later
+    QMessageBox::information(this, "Settings", "Preferences dialog will be implemented soon.");
+}
+
+void MainWindow::onShowAbout()
+{
+    HelpDialog *dialog = new HelpDialog(HelpDialog::About, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->exec();
+}
+
+void MainWindow::onShowInstructions()
+{
+    HelpDialog *dialog = new HelpDialog(HelpDialog::Instructions, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);  // Make the dialog non-modal
+    dialog->show();  // Use show() instead of exec() for non-modal behavior
+}
+
+void MainWindow::onShowSpreads()
+{
+    HelpDialog *dialog = new HelpDialog(HelpDialog::Spreads, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);  // Make the dialog non-modal
+    dialog->show();  // Use show() instead of exec() for non-modal behavior
+}
+
+void MainWindow::onShowAddDecks() {
+    HelpDialog *dialog = new HelpDialog(HelpDialog::AddDecks, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);  // Make the dialog non-modal
+    dialog->show();  // Use show() instead of exec() for non-modal behavior
 }

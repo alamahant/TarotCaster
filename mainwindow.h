@@ -12,11 +12,12 @@
 #include<QMessageBox>
 #include<QMenu>
 #include<QMenuBar>
-
+#include<QStandardPaths>
 #include "meaningdisplay.h"
 #include "tarotscene.h"
 #include "dockcontrols.h"
 #include"mistralapi.h"
+#include"helpdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -63,5 +64,10 @@ private slots:
 
 private slots:
     void onEditApiKey();
+    void onOpenPreferences();
+    void onShowAbout();
+    void onShowInstructions();
+    void onShowSpreads();
+    void onShowAddDecks();
 };
 #endif // MAINWINDOW_H

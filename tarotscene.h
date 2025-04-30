@@ -17,15 +17,15 @@ private:
 public:
     TarotScene(QObject *parent = nullptr);
     ~TarotScene();
-    void displayCard(int number, bool reversed, const QPointF& pos);
-
+    void displayCard(int number, bool reversed, const QPointF& pos, bool beRevealed);
+    bool beRevealed;
     void setCardLoader(CardLoader* newCardLoader);
     void setReversedCardsAllowed(bool allowed);
     void displayCelticCross();
     void displayThreeCardSpread();
     void displaySingleCard();
     void displayHorseshoeSpread();
-
+    void displayZodiacSpread();
 
 public slots:
     void onCardRevealed(int cardNumber);
@@ -59,7 +59,8 @@ public:
         SingleCard,
         ThreeCard,
         Horseshoe,
-        CelticCross
+        CelticCross,
+        ZodiacSpread
     };
 
 private:
@@ -74,6 +75,7 @@ private:
     void displaySavedThreeCardSpread(const QVector<CardLoader::CardData>& savedCards);
     void displaySavedHorseshoeSpread(const QVector<CardLoader::CardData>& savedCards);
     void displaySavedCelticCross(const QVector<CardLoader::CardData>& savedCards);
+    void displaySavedZodiacSpread(const QVector<CardLoader::CardData>& savedCards);
 
 public:
     SpreadType getCurrentSpreadType() const { return currentSpreadType; }

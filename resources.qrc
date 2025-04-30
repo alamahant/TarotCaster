@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/favicon-32x32.png</file>
+        <file>resources/app.png</file>
+        <file>resources/app-blue.png</file>
+        <file>resources/app-gold.png</file>
+        <file>resources/card_meanings.json</file>
+        <file>resources/tarotcaster.css</file>
     </qresource>
 </RCC>

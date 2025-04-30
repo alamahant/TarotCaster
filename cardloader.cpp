@@ -5,6 +5,7 @@
 CardLoader::CardLoader(const QString& path) : cardPath(path) {
 }
 
+
 void CardLoader::loadCards()
 {
     QDir dir(cardPath);
@@ -28,6 +29,8 @@ void CardLoader::loadCards()
 
     cardBack = QPixmap(backPath);
 }
+
+
 
 
 QString CardLoader::formatName(const QString &rawName)

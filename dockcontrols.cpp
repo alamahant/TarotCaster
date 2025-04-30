@@ -1,9 +1,13 @@
 #include "dockcontrols.h"
-
+#include<QThread>
 QRandomGenerator DockControls::randomGen;
+
 
 DockControls::DockControls(QWidget *parent) : QWidget{parent}
 {
+
+    generateSeed();
+
     QVBoxLayout* layout = new QVBoxLayout(this);
     // Create deck selector group
     QGroupBox* deckGroup = new QGroupBox("Deck Selection", this);
@@ -30,6 +34,8 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
     spreadSelector->addItem("Three Card");
     spreadSelector->addItem("Celtic Cross");
     spreadSelector->addItem("Horseshoe");
+    spreadSelector->addItem("ZodiacSpread");
+
     spreadLayout->addWidget(spreadSelector);
     layout->addWidget(spreadGroup);
 
@@ -42,40 +48,40 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
 
     // Create action buttons
     shuffleButton = new QPushButton("Shuffle Deck", this);
-    shuffleButton->setStyleSheet("QPushButton { background-color: #2a2a2a; color: gold; }");
+
     dealButton = new QPushButton("Deal Cards", this);
-    dealButton->setStyleSheet("QPushButton { background-color: #2a2a2a; color: gold; }");
+
     clearButton = new QPushButton("Clear Cards", this);
-    clearButton->setStyleSheet("QPushButton { background-color: #2a2a2a; color: gold; }");
+
 
     //display full deck
     displayFullDeckButton = new QPushButton("Display Full Deck", this);
-    displayFullDeckButton->setStyleSheet("QPushButton { background-color: #2a2a2a; color: gold; }");
-    layout->addWidget(displayFullDeckButton);
 
+    layout->addWidget(displayFullDeckButton);
     layout->addWidget(clearButton);
     layout->addWidget(shuffleButton);
     layout->addWidget(dealButton);
 
     // Add Get Reading button
     getReadingButton = new QPushButton("Get Reading", this);
-    getReadingButton->setStyleSheet("QPushButton { background-color: darkgoldenrod; color: black; font-weight: bold; }");
     layout->addWidget(getReadingButton);
-
-    // Add a label for the reading section
-    QLabel* readingLabel = new QLabel("Reading Interpretation:", this);
-    readingLabel->setStyleSheet("color: gold; font-weight: bold;");
-    layout->addWidget(readingLabel);
 
     // Create the reading display area directly in the main layout
     readingDisplay = new QTextEdit(this);
     readingDisplay->setReadOnly(true);
-    readingDisplay->setStyleSheet("background-color: #1a1a1a; color: gold; border: none;");
+    //readingDisplay->setStyleSheet("background-color: #1a1a1a; color: gold; border: none;");
     readingDisplay->setMinimumHeight(200);
     readingDisplay->setPlaceholderText("Your tarot reading will appear here...");
 
     // Set the text edit to take all available space
     layout->addWidget(readingDisplay, 1); // The stretch factor of 1 makes it take all available space
+
+    shuffleButton->setObjectName("shuffleButton");
+    dealButton->setObjectName("dealButton");
+    clearButton->setObjectName("clearButton");
+    displayFullDeckButton->setObjectName("displayFullDeckButton");
+    getReadingButton->setObjectName("readingButton");
+    readingDisplay->setObjectName("readingDisplay");
 
     // Connect all signals
 
@@ -88,11 +94,6 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
     // Connect the Get Reading button
     connect(getReadingButton, &QPushButton::clicked, this, &DockControls::getReadingRequested);
 
-    // Set overall styling
-    setStyleSheet("QGroupBox { color: gold; border: 1px solid gold; margin-top: 6px; } "
-                  "QGroupBox::title { subcontrol-origin: margin; left: 7px; padding: 0px 5px 0px 5px; }"
-                  "QComboBox { background-color: #2a2a2a; color: gold; }");
-
     //shuffle
     mouseTimer = new QTimer(this);
     mouseTimer->setInterval(50);
@@ -102,23 +103,6 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
     //full deck
     connect(displayFullDeckButton, &QPushButton::clicked, this, &DockControls::onDisplayFullDeckClicked);
 }
-
-void DockControls::onDeckSelected(const QString& deckName) {
-    QString deckPath = QApplication::applicationDirPath() + "/decks/" + deckName;
-
-    cardLoader = new CardLoader(deckPath);  // We'll modify this to handle different decks
-    emit deckLoaded(cardLoader);
-}
-
-void DockControls::onReversedToggled(bool allowed) {
-    emit reversedCardsToggled(allowed);
-}
-
-void DockControls::onDealClicked() {
-    emit dealRequested();
-}
-
-
 
 void DockControls::toggleShuffle() {
     if (!isShuffling) {
@@ -150,19 +134,32 @@ void DockControls::collectMouseData() {
 }
 
 void DockControls::generateSeed() {
-    qint64 seed = 0;
+    // Start with current time in milliseconds for basic randomness
+    qint64 seed = QDateTime::currentMSecsSinceEpoch();
+
+    // Add process ID and thread ID for additional uniqueness
+    seed ^= (qint64)QCoreApplication::applicationPid();
+    seed ^= (qint64)QThread::currentThreadId();
+
+    // Add a truly random value from Qt's secure random generator
+    QRandomGenerator secureRandom = QRandomGenerator::securelySeeded();
+    seed ^= secureRandom.generate64();
+
+    // Add mouse entropy data if available (from shuffling)
     for (const qint64& value : entropyData) {
         seed ^= value;
     }
-    randomGen.seed(seed);
 
+    // Seed our main random generator
+    randomGen.seed(seed);
 }
+
 
 void DockControls::onDisplayFullDeckClicked() {
     emit displayFullDeckRequested();
 }
 
-
+/*
 void DockControls::loadAvailableDecks()
 {
     deckSelector->clear();
@@ -182,3 +179,94 @@ void DockControls::loadAvailableDecks()
         deckSelector->setCurrentIndex(0);
     }
 }
+*/
+/*
+void DockControls::onDeckSelected(const QString& deckName) {
+    QString deckPath = QApplication::applicationDirPath() + "/decks/" + deckName;
+
+    cardLoader = new CardLoader(deckPath);  // We'll modify this to handle different decks
+    emit deckLoaded(cardLoader);
+}
+*/
+
+
+void DockControls::onReversedToggled(bool allowed) {
+    emit reversedCardsToggled(allowed);
+}
+
+void DockControls::onDealClicked() {
+    emit dealRequested();
+}
+
+void DockControls::loadAvailableDecks() {
+    deckSelector->clear();
+
+    // System decks location (application directory)
+    QString systemDecksPath = QCoreApplication::applicationDirPath() + "/decks";
+
+    // User decks location - use the application name from QCoreApplication
+    QString appName = QCoreApplication::applicationName();
+    if (appName.isEmpty()) {
+        appName = "TarotCaster"; // Fallback if app name isn't set
+    }
+
+    QString userDecksPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/decks";
+
+    qDebug() << "Looking for user decks in:" << userDecksPath;
+
+    // Create user decks directory if it doesn't exist
+    QDir userDecksDir(userDecksPath);
+    if (!userDecksDir.exists()) {
+        bool created = userDecksDir.mkpath(".");
+        qDebug() << "Created user decks directory:" << created;
+    }
+
+    // Load system decks
+    QDir systemDecksDir(systemDecksPath);
+    QStringList systemDeckDirs = systemDecksDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    qDebug() << "Found system decks:" << systemDeckDirs;
+
+    // Load user decks
+    QStringList userDeckDirs = userDecksDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    qDebug() << "Found user decks:" << userDeckDirs;
+
+    // Add system decks to selector
+    foreach (const QString &deckName, systemDeckDirs) {
+        deckSelector->addItem(deckName, systemDecksPath + "/" + deckName);
+    }
+
+    // Add user decks to selector
+    foreach (const QString &deckName, userDeckDirs) {
+        // Check if this deck name already exists in system decks
+        if (systemDeckDirs.contains(deckName)) {
+            // Add with a "(User)" suffix to distinguish
+            deckSelector->addItem(deckName + " (User)", userDecksPath + "/" + deckName);
+        } else {
+            deckSelector->addItem(deckName, userDecksPath + "/" + deckName);
+        }
+    }
+
+    if (deckSelector->count() > 0) {
+        deckSelector->setCurrentIndex(0);
+    }
+}
+
+
+
+
+void DockControls::onDeckSelected(const QString& deckName) {
+    // Get the full path from the item data
+    int index = deckSelector->currentIndex();
+    QString deckPath = deckSelector->itemData(index).toString();
+
+    // If the path is empty (for backward compatibility), use the old method
+    if (deckPath.isEmpty()) {
+        deckPath = QApplication::applicationDirPath() + "/decks/" + deckName;
+    }
+
+    qDebug() << "Loading deck from path:" << deckPath;
+
+    cardLoader = new CardLoader(deckPath);
+    emit deckLoaded(cardLoader);
+}
+

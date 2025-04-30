@@ -10,3 +10,4 @@ Terminal=false
 Categories=Utility;Game;
 Keywords=tarot;cards;reading;divination;ai;
 StartupNotify=true
+X-Flatpak=io.github.alamahant.TarotCaster
