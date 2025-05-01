@@ -13,6 +13,7 @@
 #include<QMenu>
 #include<QMenuBar>
 #include<QStandardPaths>
+#include <QDialogButtonBox>
 #include "meaningdisplay.h"
 #include "tarotscene.h"
 #include "dockcontrols.h"
