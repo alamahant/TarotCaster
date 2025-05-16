@@ -5,7 +5,8 @@
 #include <QScreen>
 
 HelpDialog::HelpDialog(DialogType type, QWidget *parent)
-    : QDialog(parent)
+    : QDialog(parent),
+    currentType(type)
 {
     // Set up the dialog
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -61,6 +62,15 @@ HelpDialog::HelpDialog(DialogType type, QWidget *parent)
         break;
     case AddDecks:
         setupDecks();
+        break;
+    case CustomSpreads :
+        setupCustomSpreads();
+        break;
+    case CustomSpreadHelp:
+        setupCustomSpreadHelp();
+        break;
+    case ChangeLogHelp:
+        setupChangelogHelp();
         break;
     }
 }
@@ -309,7 +319,260 @@ void HelpDialog::setupDecks() {
     contentBrowser->setHtml(decksText);
 }
 
+void HelpDialog::setupCustomSpreads() {
+    setWindowTitle("Custom Spreads");
+    titleLabel->setText("Description of your Custom Tarot Spreads");
 
+    QString content = "<h2 align='center'>Custom Tarot Spreads</h2><hr>";
+
+    if (!tarotScene) {
+        content += "<p align='center'><i>Error: No tarot scene available.</i></p>";
+        contentBrowser->setHtml(content);
+        return;
+    }
+
+    // Get custom spreads directly from the tarotScene
+    QVector<TarotScene::CustomSpread> customSpreads = tarotScene->getCustomSpreads();
+
+    if (customSpreads.isEmpty()) {
+        content += "<p align='center'><i>No custom spreads found.</i></p>";
+        content += "<p align='center'>You can create custom spreads by using the 'Create Custom Spread' option.</p>";
+    } else {
+        for (const TarotScene::CustomSpread& spread : customSpreads) {
+            // Create a section for each custom spread
+            content += QString("<div style='margin-bottom: 30px;'>");
+
+            // Spread name as header
+            content += QString("<h3 style='margin-top:0; color:#8C6D46; border-bottom: 1px solid #8C6D46;'>%1</h3>")
+                           .arg(spread.name);
+
+            // Description
+            if (!spread.description.isEmpty()) {
+                content += QString("<p style='margin-bottom:15px;'>%1</p>")
+                .arg(spread.description);
+            }
+
+            // Card positions
+            content += "<h4 style='margin-bottom:5px; color:#8C6D46;'>Card Positions:</h4>";
+            content += "<table style='border-collapse:collapse; width:100%;'>";
+
+            for (const TarotScene::CustomSpreadPosition& pos : spread.positions) {
+                content += QString("<tr><td style='padding:2px 5px; font-weight:bold; width:30px;'>%1.</td>"
+                                   "<td style='padding:2px 5px; font-weight:bold;'>%2</td></tr>")
+                               .arg(pos.number)
+                               .arg(pos.name);
+
+                content += QString("<tr><td></td><td style='padding:2px 5px; padding-bottom:8px;'>%1</td></tr>")
+                               .arg(pos.significance);
+            }
+
+            content += "</table></div>";
+        }
+    }
+
+    contentBrowser->setHtml(content);
+}
+
+
+
+void HelpDialog::setupCustomSpreadHelp() {
+    setWindowTitle("Creating Custom Spreads");
+    titleLabel->setText("How to Create Custom Tarot Spreads");
+
+    QString content = R"(
+        <h2 align='center'>Creating Your Own Tarot Spreads</h2>
+        <hr>
+
+        <p>The Custom Spread Designer allows you to create your own unique tarot spreads with personalized card positions and meanings.</p>
+
+        <h3 style='color:#8C6D46;'>Getting Started</h3>
+        <p>To create a custom spread, select "Create Custom Spread" from the Spreads menu. This will open the Custom Spread Designer dialog.</p>
+
+        <h3 style='color:#8C6D46;'>Step 1: Define Your Spread</h3>
+        <p>Start by entering basic information about your spread:</p>
+        <ul>
+            <li><strong>Spread Name:</strong> Give your spread a descriptive name.</li>
+            <li><strong>Spread Description:</strong> Explain the purpose and meaning of your spread.</li>
+        </ul>
+
+        <h3 style='color:#8C6D46;'>Step 2: Add Card Positions</h3>
+        <p>Click the "Add Card" button to add each position to your spread. For each position:</p>
+        <ul>
+            <li>A card will appear in the reading area</li>
+            <li>Drag the card to position it where you want it in the spread</li>
+            <li>The position will be added to the "Defined Positions" list</li>
+        </ul>
+
+        <h3 style='color:#8C6D46;'>Step 3: Define Each Position</h3>
+        <p>Select each position in the "Defined Positions" list to edit its details:</p>
+        <ul>
+            <li><strong>Position Name:</strong> Give each position a meaningful name (e.g., "Past Influences", "Current Situation")</li>
+            <li><strong>Position Significance:</strong> Explain what this position represents in your spread</li>
+        </ul>
+        <p>The selected card will be highlighted in the reading area, making it easy to identify which position you're editing.</p>
+
+        <h3 style='color:#8C6D46;'>Step 4: Save Your Spread</h3>
+        <p>Once you've added all positions and defined their meanings:</p>
+        <ul>
+            <li>Review your spread layout in the reading area</li>
+            <li>Make sure all positions have names and significance descriptions</li>
+            <li>Click "Save Spread" to store your custom spread</li>
+        </ul>
+
+        <h3 style='color:#8C6D46;'>Managing Custom Spreads</h3>
+        <p>You can manage your saved custom spreads by clicking the "Manage Spreads" button in the Custom Spread Designer. This allows you to:</p>
+        <ul>
+            <li>View a list of all your custom spreads</li>
+            <li>Delete spreads you no longer need</li>
+        </ul>
+
+        <h3 style='color:#8C6D46;'>Using Your Custom Spreads</h3>
+        <p>Your custom spreads will appear in the Spreads menu alongside the built-in spreads. Select your custom spread to perform a reading with your personalized layout.</p>
+
+        <p style='margin-top:20px;'><i>Note: Custom spreads are saved automatically and will be available the next time you open the application.</i></p>
+    )";
+
+    contentBrowser->setHtml(content);
+}
+
+void HelpDialog::setupChangelogHelp()
+{
+    setWindowTitle("Changelog");
+    titleLabel->setText("TarotCaster Version History");
+    QString content = R"(
+        <h2 align='center'>Changelog</h2>
+        <hr>
+
+        <h3 style='color:#8C6D46;'>Version 1.2.0 - May 16, 2025</h3>
+
+        <h4>New Features</h4>
+        <ul>
+            <li><strong>Custom Spread Designer:</strong>
+                <ul>
+                    <li>Users can now create and save their own custom card layouts</li>
+                    <li>Intuitive drag-and-drop interface for positioning cards</li>
+                    <li>Option to name and describe the spiritual significance of each position</li>
+                    <li>Save and load custom spreads for future readings</li>
+                    <li>Share custom spreads with other users</li>
+                </ul>
+            </li>
+            <li><strong>Card-specific Zoom Functionality:</strong>
+                <ul>
+                    <li>Users can now Ctrl+mouse wheel while hovering over a card to examine details</li>
+                    <li>Zoom starts at the hover magnification (1.5x) and can increase up to 3x</li>
+                    <li>Cards automatically return to normal size when no longer hovered</li>
+                    <li>Zoom affects only the specific card being examined, not the entire spread</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Visual Enhancements</h4>
+        <ul>
+            <li>Optimized card rendering with pre-scaling for improved performance and image quality</li>
+            <li>Maintained high-quality card hover effect with golden shadow highlighting</li>
+            <li>Ensured smooth transitions between normal and highlighted card states</li>
+            <li>Implemented OpenGL rendering for hardware-accelerated graphics performance</li>
+        </ul>
+
+        <h4>Technical Improvements</h4>
+        <ul>
+            <li>Implemented proper event handling for wheel events in card items</li>
+            <li>Ensured compatibility between hover effects and zoom functionality</li>
+            <li>Maintained visual consistency of shadow effects during zoom operations</li>
+            <li>Optimized rendering with Qt::SmoothTransformation for high-quality card display</li>
+            <li>Enabled OpenGL acceleration for smoother animations and effects</li>
+            <li>Utilized GPU-accelerated compositing for shadow effects and transparency</li>
+            <li>Added fallback rendering path for systems without OpenGL support</li>
+            <li>Implemented pre-scaling system that scales all card images once during loading</li>
+            <li>Added storage for pre-scaled images to eliminate redundant scaling operations</li>
+        </ul>
+
+        <h4>User Experience</h4>
+        <ul>
+            <li>Enhanced card examination capabilities while preserving the context of spreads</li>
+            <li>Improved accessibility by allowing users to see card details more clearly</li>
+            <li>Maintained intuitive interaction model with consistent visual feedback</li>
+            <li>Significantly improved animation smoothness and overall responsiveness</li>
+            <li>Reduced CPU usage during card animations and transitions</li>
+        </ul>
+
+        <h4>System Requirements</h4>
+        <ul>
+            <li>Added support for hardware acceleration on compatible systems</li>
+            <li>Maintained compatibility with systems lacking dedicated graphics hardware</li>
+        </ul>
+
+        <hr>
+        <h3 style='color:#8C6D46;'>Version 1.1.0 - April 29, 2025</h3>
+
+        <h4>New Content</h4>
+        <ul>
+            <li>Added the classic Tarot of Marseilles deck, sourced from Wikimedia Commons</li>
+            <li>Introduced the Zodiac spread, offering astrological insights with a 12-card layout representing each zodiac sign</li>
+        </ul>
+
+        <h4>User Interface Improvements</h4>
+        <ul>
+            <li>Redesigned application icon with an elegant blue background and golden yellow text</li>
+            <li>Consolidated all styling into a central CSS file for consistent appearance throughout the application</li>
+            <li>Added more screenshots to better showcase the application's features</li>
+        </ul>
+
+        <h4>New Features</h4>
+        <ul>
+            <li>Enhanced Help menu with comprehensive sections:
+                <ul>
+                    <li>About: Application information and credits</li>
+                    <li>Instructions: Detailed guide for beginners and experienced users</li>
+                    <li>Spreads: Explanations of available card layouts and their meanings</li>
+                    <li>Custom Decks: Step-by-step instructions for adding personal decks</li>
+                </ul>
+            </li>
+            <li>Implemented user-friendly deck management system:
+                <ul>
+                    <li>Created standardized user "decks" directory that follows Flatpak sandbox guidelines</li>
+                    <li>Automatic detection of custom decks placed in <code>~/.var/app/io.github.alamahant.TarotCaster/data/TarotCaster/decks/</code></li>
+                    <li>No restart required for the application to recognize newly added decks</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Technical Improvements</h4>
+        <ul>
+            <li>Improved random number generation for more authentic shuffling:
+                <ul>
+                    <li>Enhanced seed generation at application startup</li>
+                    <li>Additional entropy collection during the shuffle process</li>
+                </ul>
+            </li>
+            <li>Optimized save/load functionality for better compatibility with Flatpak sandbox environment</li>
+            <li>Updated application summary to conform with Flathub quality guidelines</li>
+        </ul>
+
+        <h4>Bug Fixes</h4>
+        <ul>
+            <li>Resolved issue where saved readings would display cards face-down upon loading</li>
+            <li>Fixed various minor UI inconsistencies and layout issues</li>
+        </ul>
+
+        <hr>
+        <h3 style='color:#8C6D46;'>Version 1.0.0 - April 9, 2025</h3>
+
+        <h4>Initial Release</h4>
+        <ul>
+            <li>Core tarot reading functionality with interactive card spreads</li>
+            <li>Support for Rider-Waite-Smith deck</li>
+            <li>Multiple spread layouts: Celtic Cross, Three Card, and Horseshoe</li>
+            <li>Traditional card meanings and interpretations</li>
+            <li>Save and load readings</li>
+            <li>Basic help documentation</li>
+        </ul>
+
+        <p style='margin-top:20px;'><i>Note: This changelog documents all significant changes made to TarotCaster since its initial release.</i></p>
+    )";
+    contentBrowser->setHtml(content);
+
+}
 
 
 

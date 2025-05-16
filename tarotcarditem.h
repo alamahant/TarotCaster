@@ -8,6 +8,8 @@
 #include<QAbstractAnimation>
 #include<QTransform>
 #include<QGraphicsRotation>
+#include <QGraphicsSceneWheelEvent>
+
 
 class TarotCardItem :  public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
@@ -18,11 +20,14 @@ public:
     TarotCardItem(const QPixmap &front, const QPixmap &back, int number);
     void flip();
 
+    int getCardNumber() const { return cardNumber; }
+
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
 
+    void wheelEvent(QGraphicsSceneWheelEvent *event) override;
 signals:
     void cardRevealed(int cardNumber);
 

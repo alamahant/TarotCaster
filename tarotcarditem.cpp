@@ -5,6 +5,11 @@ TarotCardItem::TarotCardItem(const QPixmap &front, const QPixmap &back, int numb
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem::ItemIsMovable);
     //setFlag(QGraphicsItem::ItemIsSelectable);
+    setTransformationMode(Qt::SmoothTransformation);
+    // Enable wheel events
+    setFlag(QGraphicsItem::ItemIsFocusable);
+    setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
+
 }
 
 void TarotCardItem::flip()
@@ -56,4 +61,36 @@ void TarotCardItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     setZValue(0);    // Reset Z-value
     setGraphicsEffect(nullptr);
 }
+
+void TarotCardItem::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+    // Only handle wheel events when Ctrl is pressed and the card is being hovered
+    if (event->modifiers() & Qt::ControlModifier) {
+        // Get current scale
+        qreal currentScale = scale();
+
+        // Determine zoom factor
+        const qreal zoomFactor = 0.15; // 15% change per wheel step
+
+        // Calculate new scale based on wheel direction
+        qreal newScale = currentScale;
+        if (event->delta() > 0) {
+            // Zoom in (up to maximum of 3.0)
+            newScale = qMin(currentScale + zoomFactor, 3.0);
+        } else {
+            // Zoom out (but not below 1.5 while hovering)
+            newScale = qMax(currentScale - zoomFactor, 1.5);
+        }
+
+        // Apply the new scale
+        setScale(newScale);
+
+        // Consume the event
+        event->accept();
+    } else {
+        // Pass the event to the base class if Ctrl is not pressed
+        QGraphicsPixmapItem::wheelEvent(event);
+    }
+}
+
 

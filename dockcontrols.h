@@ -13,13 +13,13 @@
 #include<QTextEdit>
 #include<QLabel>
 #include<QStandardPaths>
-
+#include"tarotscene.h"
 class DockControls : public QWidget
 {
     Q_OBJECT
 public:
     explicit DockControls(QWidget *parent = nullptr);
-
+    ~DockControls();
     // Getters for the controls
     QComboBox* getDeckSelector() const { return deckSelector; }
     QComboBox* getSpreadSelector() const { return spreadSelector; }
@@ -40,7 +40,6 @@ signals:
     void getReadingRequested();
 private slots:
     void onDeckSelected(const QString& deckName);
-    void onReversedToggled(bool allowed);
     void onDisplayFullDeckClicked();
 
 public slots:
@@ -48,7 +47,7 @@ public slots:
     void collectMouseData();
     void toggleShuffle();
 private:
-    CardLoader* cardLoader;
+    CardLoader cardLoader;
     QComboBox* deckSelector;
     QPushButton* shuffleButton;
     bool isShuffling = false;
@@ -62,7 +61,7 @@ public:
     QTextEdit* readingDisplay;
 private:
     void loadAvailableDecks();
-
+    TarotScene* tarotScene;
 };
 
 #endif // DOCKCONTROLS_H

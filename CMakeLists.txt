@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Network Qt6OpenGLWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network OpenGLWidgets)
 #configure_file(card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
 configure_file(resources/card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
 
@@ -39,6 +39,7 @@ qt_add_executable(TarotCaster
         mistralapi.h mistralapi.cpp
         resources.qrc
         helpdialog.h helpdialog.cpp
+        customspreaddesigner.h customspreaddesigner.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET TarotCaster APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -58,7 +59,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(TarotCaster PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::Network)
+target_link_libraries(TarotCaster PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::Network Qt6::OpenGLWidgets)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

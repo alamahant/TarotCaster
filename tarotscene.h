@@ -1,10 +1,14 @@
 #ifndef TAROTSCENE_H
 #define TAROTSCENE_H
-
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QStandardPaths>
+#include <QDir>
 #include <QGraphicsScene>
 #include "cardloader.h"
 #include "tarotcarditem.h"
-#include "cardloader.h"
+#include "customspreaddesigner.h"
 
 class TarotScene : public QGraphicsScene {
     Q_OBJECT
@@ -26,6 +30,8 @@ public:
     void displaySingleCard();
     void displayHorseshoeSpread();
     void displayZodiacSpread();
+    const CardLoader& getCardLoader() const { return cardLoader; }
+
 
 public slots:
     void onCardRevealed(int cardNumber);
@@ -60,7 +66,23 @@ public:
         ThreeCard,
         Horseshoe,
         CelticCross,
-        ZodiacSpread
+        ZodiacSpread,
+        Custom  // Add this
+
+    };
+
+    struct CustomSpreadPosition {
+        int number;
+        QString name;
+        QString significance;
+        qreal x;
+        qreal y;
+    };
+
+    struct CustomSpread {
+        QString name;
+        QString description;
+        QVector<CustomSpreadPosition> positions;
     };
 
 private:
@@ -68,7 +90,9 @@ private:
 
 //save/load
 public:
-    void displaySavedSpread(SpreadType type, const QVector<CardLoader::CardData>& savedCards);
+    //void displaySavedSpread(SpreadType type, const QVector<CardLoader::CardData>& savedCards);
+    void displaySavedSpread(SpreadType type, const QVector<CardLoader::CardData>& savedCards, const QString& customSpreadName = QString());
+
 
 private:
     void displaySavedSingleCard(const QVector<CardLoader::CardData>& savedCards);
@@ -80,6 +104,21 @@ private:
 public:
     SpreadType getCurrentSpreadType() const { return currentSpreadType; }
     QVector<CardLoader::CardData> getCurrentCards() const { return currentCards; }
+
+    //custom spread methods
+    bool saveCustomSpread(const CustomSpread& spread);
+    QVector<CustomSpread> getCustomSpreads() const;
+    bool deleteCustomSpread(const QString& spreadName);
+
+    bool displayCustomSpread(const QString& spreadName);
+private:
+    void displaySavedCustomSpread(const QVector<CardLoader::CardData>& savedCards, const QString& spreadName);
+
+    QString currentCustomSpreadName;
+
+signals:
+    void viewRefreshRequested();
+
 };
 
 #endif

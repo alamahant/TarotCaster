@@ -3,7 +3,10 @@
 QRandomGenerator DockControls::randomGen;
 
 
-DockControls::DockControls(QWidget *parent) : QWidget{parent}
+DockControls::DockControls(QWidget *parent)
+    : QWidget{parent},
+      cardLoader(QApplication::applicationDirPath() + "/decks/OriginalRiderWaite") // Initialize here
+
 {
 
     generateSeed();
@@ -19,7 +22,12 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
             this, &DockControls::onDeckSelected);
 
     loadAvailableDecks();
-
+    //
+    int index = deckSelector->findText("OriginalRiderWaite");
+    if (index >= 0) {
+        deckSelector->setCurrentIndex(index);
+    }
+    //
     if (deckSelector->count() >= 0) {
         onDeckSelected(deckSelector->currentText());
     }
@@ -35,7 +43,17 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
     spreadSelector->addItem("Celtic Cross");
     spreadSelector->addItem("Horseshoe");
     spreadSelector->addItem("ZodiacSpread");
+    //add custom spreads
+    if (tarotScene) {
+        QVector<TarotScene::CustomSpread> customSpreads = tarotScene->getCustomSpreads();
+        for (const auto& spread : customSpreads) {
+            spreadSelector->addItem(spread.name, "custom");
+        }
+    } else {
+    }
 
+
+    //
     spreadLayout->addWidget(spreadSelector);
     layout->addWidget(spreadGroup);
 
@@ -104,6 +122,22 @@ DockControls::DockControls(QWidget *parent) : QWidget{parent}
     connect(displayFullDeckButton, &QPushButton::clicked, this, &DockControls::onDisplayFullDeckClicked);
 }
 
+DockControls::~DockControls()
+{
+    // Stop the timer if it's running
+    if (mouseTimer && mouseTimer->isActive()) {
+        mouseTimer->stop();
+    }
+
+    // Restore cursor if we're in shuffling mode
+    if (isShuffling) {
+        QApplication::restoreOverrideCursor();
+    }
+
+    // Qt will handle deleting all child widgets automatically
+}
+
+
 void DockControls::toggleShuffle() {
     if (!isShuffling) {
         // Start shuffling
@@ -159,40 +193,8 @@ void DockControls::onDisplayFullDeckClicked() {
     emit displayFullDeckRequested();
 }
 
-/*
-void DockControls::loadAvailableDecks()
-{
-    deckSelector->clear();
-
-    QString cardsPath = QCoreApplication::applicationDirPath() + "/decks";
-    QDir cardsDir(cardsPath);
 
 
-    QStringList deckDirs = cardsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-
-    foreach (const QString &deckName, deckDirs) {
-        deckSelector->addItem(deckName);
-    }
-
-
-    if (deckSelector->count() > 0) {
-        deckSelector->setCurrentIndex(0);
-    }
-}
-*/
-/*
-void DockControls::onDeckSelected(const QString& deckName) {
-    QString deckPath = QApplication::applicationDirPath() + "/decks/" + deckName;
-
-    cardLoader = new CardLoader(deckPath);  // We'll modify this to handle different decks
-    emit deckLoaded(cardLoader);
-}
-*/
-
-
-void DockControls::onReversedToggled(bool allowed) {
-    emit reversedCardsToggled(allowed);
-}
 
 void DockControls::onDealClicked() {
     emit dealRequested();
@@ -261,7 +263,9 @@ void DockControls::onDeckSelected(const QString& deckName) {
     }
 
 
-    cardLoader = new CardLoader(deckPath);
-    emit deckLoaded(cardLoader);
+    //cardLoader = new CardLoader(deckPath);
+    cardLoader = CardLoader(deckPath);
+
+    emit deckLoaded(&cardLoader);
 }
 

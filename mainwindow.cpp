@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include<QMetaMethod>
-
+#include <QtOpenGLWidgets/QtOpenGLWidgets>
+#include <QSurfaceFormat>
+#include <QStyleFactory>
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
@@ -14,6 +16,24 @@ MainWindow::MainWindow(QWidget *parent)
     centralView = new QGraphicsView(tarotScene);  // Set scene immediately
     centralView->setBackgroundBrush(Qt::black);
     centralView->setRenderHint(QPainter::Antialiasing);
+    centralView->setRenderHint(QPainter::SmoothPixmapTransform);
+
+#ifndef QT_NO_OPENGL
+    QOpenGLWidget *glWidget = new QOpenGLWidget();
+    QSurfaceFormat format = glWidget->format();
+    format.setSamples(4);  // 4x MSAA
+    format.setSwapInterval(1);  // Enable VSync
+    glWidget->setFormat(format);
+    centralView->setViewport(glWidget);
+#endif
+
+    // Set viewport update mode for smoother rendering
+    centralView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
+    // Optimize for quality over speed
+    centralView->setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
+
+    //
     setCentralWidget(centralView);
 
     createDocks();
@@ -37,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dockControls->clearButton, &QPushButton::clicked,
             this, &MainWindow::clearMeaningDisplay);
 
-    connect(dockControls->allowReversed, &QCheckBox::toggled,
+   connect(dockControls->allowReversed, &QCheckBox::toggled,
            tarotScene, &TarotScene::setAllowReversedCards);
 
     connect(dockControls, &DockControls::displayFullDeckRequested,
@@ -53,6 +73,21 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dockControls->getReadingButton, &QPushButton::clicked,
             this, &MainWindow::onGetReadingClicked);
 
+    /*
+    connect(tarotScene, &TarotScene::viewRefreshRequested, this, [this](){
+        tarotScene->clear();
+        centralView->resetTransform();
+        centralView->centerOn(0, 0);
+        //tarotScene->setSceneRect(-500, -500, 1000, 1000);
+
+        // Ensure scrollbars are in the right state
+        centralView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        centralView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+        // Update the view
+        centralView->update();
+    });
+    */
 
     QMenu* fileMenu = menuBar()->addMenu("&File");
     QAction* saveAction = fileMenu->addAction("&Save Reading", this, &MainWindow::onSaveReading);
@@ -71,26 +106,36 @@ MainWindow::MainWindow(QWidget *parent)
     // We'll populate this later
     settingsMenu->addAction("&Preferences", this, &MainWindow::onOpenPreferences);
 
+    // Tools Menu (create if it doesn't exist)
+    QMenu* toolsMenu = menuBar()->addMenu("&Tools");
+
+    // Add custom spread designer action
+    QAction* createSpreadAction = toolsMenu->addAction("&Custom Spread Designer");
+    connect(createSpreadAction, &QAction::triggered, this, &MainWindow::onCreateCustomSpreadClicked);
+
     // Help Menu
     QMenu *helpMenu = menuBar()->addMenu("&Help");
     helpMenu->addAction("&About", this, &MainWindow::onShowAbout);
     helpMenu->addAction("&Instructions", this, &MainWindow::onShowInstructions);
     helpMenu->addAction("&Spreads", this, &MainWindow::onShowSpreads);
     helpMenu->addAction("&How to Add Additional Decks", this, &MainWindow::onShowAddDecks);
+    helpMenu->addAction("&How to Add Custom Spreads", this, &MainWindow::onShowAddCustomSpreads);
+    helpMenu->addAction("&Custom Spreads", this, &MainWindow::onShowCustomSpreads);
+    helpMenu->addAction("&ChangeLog", this, &MainWindow::onShowChangelog);
 
 
 }
 
 MainWindow::~MainWindow()
 {
+    // The OpenGL widget might not have a proper parent
+    QOpenGLWidget* glWidget = qobject_cast<QOpenGLWidget*>(centralView->viewport());
+    if (glWidget && glWidget->parent() == nullptr) {
+        delete glWidget;
+    }
 }
 
-void MainWindow::setupUI() {
-    centralView = new QGraphicsView(this);
-    centralView->setBackgroundBrush(Qt::black);
-    centralView->setRenderHint(QPainter::Antialiasing);
-    setCentralWidget(centralView);
-}
+
 
 void MainWindow::createDocks() {
     //leftDock = new QDockWidget("Deck Controls and Readings",this);
@@ -121,14 +166,13 @@ void MainWindow::createDocks() {
             this, &MainWindow::onReversedCardsToggled);
 }
 
-void MainWindow::testCards() {
 
-}
 
 void MainWindow::clearMeaningDisplay()
 {
     meaningDisplay->clear();
     dockControls->readingDisplay->clear();
+
 }
 
 void MainWindow::showCardMeaning(int cardNumber) {
@@ -148,8 +192,11 @@ void MainWindow::onReversedCardsToggled(bool allowed) {
     tarotScene->setReversedCardsAllowed(allowed);
 }
 
+
 void MainWindow::onDealClicked() {
     QString currentSpread = dockControls->spreadSelector->currentText();
+
+    // Check for built-in spreads first
     if (currentSpread == "Single Card") {
         tarotScene->displaySingleCard();
     } else if (currentSpread == "Three Card") {
@@ -158,10 +205,19 @@ void MainWindow::onDealClicked() {
         tarotScene->displayHorseshoeSpread();
     } else if (currentSpread == "ZodiacSpread") {
         tarotScene->displayZodiacSpread();
-    } else {
+    } else if (currentSpread == "Celtic Cross") {
         tarotScene->displayCelticCross();
+    } else {
+        // Check if it's a custom spread by trying to display it through our method
+        if (!onDisplayCustomSpread(currentSpread)) {
+            // If display fails, fall back to Celtic Cross
+            tarotScene->displayCelticCross();
+        }
     }
 }
+
+
+
 
 
 void MainWindow::onGetReadingClicked() {
@@ -253,6 +309,14 @@ void MainWindow::onSaveReading() {
     json["version"] = "1.0";
     json["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
     json["spreadType"] = static_cast<int>(tarotScene->getCurrentSpreadType());
+
+    //
+    // Add this section to save the custom spread name
+    if (tarotScene->getCurrentSpreadType() == TarotScene::Custom) {
+        json["customSpreadName"] = currentCustomSpreadName; // You need to track this
+    }
+    //
+
     json["reading"] = dockControls->readingDisplay->toPlainText();
 
     QJsonArray cardsArray;
@@ -327,7 +391,18 @@ void MainWindow::onLoadReading() {
     // Load spread type and display cards
     TarotScene::SpreadType spreadType = static_cast<TarotScene::SpreadType>(
         json["spreadType"].toInt(TarotScene::NoSpread));
-    tarotScene->displaySavedSpread(spreadType, loadedCards);
+
+    //
+    // Add this section to handle custom spreads
+    if (spreadType == TarotScene::Custom) {
+        QString customSpreadName = json["customSpreadName"].toString();
+        tarotScene->displaySavedSpread(spreadType, loadedCards, customSpreadName);
+    } else {
+        tarotScene->displaySavedSpread(spreadType, loadedCards);
+    }
+    //
+
+    //tarotScene->displaySavedSpread(spreadType, loadedCards);
 
     // Load reading
     if (json.contains("reading")) {
@@ -408,6 +483,70 @@ void MainWindow::onShowSpreads()
 
 void MainWindow::onShowAddDecks() {
     HelpDialog *dialog = new HelpDialog(HelpDialog::AddDecks, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);  // Make the dialog non-modal
+    dialog->show();  // Use show() instead of exec() for non-modal behavior
+}
+
+
+
+void MainWindow::onCreateCustomSpreadClicked()
+{
+    // Check if tarotScene is valid
+    if (!tarotScene) {
+        QMessageBox::critical(this, "Error", "Tarot scene is not initialized");
+        return;
+    }
+    tarotScene->clearScene();
+    // Create the custom spread designer dialog
+    CustomSpreadDesigner* designer = new CustomSpreadDesigner(tarotScene, this);
+
+    // Set delete-on-close attribute to ensure proper cleanup
+    designer->setAttribute(Qt::WA_DeleteOnClose);
+
+
+    //
+    QRect mainGeometry = this->geometry();
+    QPoint dialogPos = mainGeometry.topRight() + QPoint(20, 50); // 20px right, 50px down
+    designer->move(dialogPos);
+    //
+
+    // Show the dialog
+    designer->show();
+
+}
+
+bool MainWindow::onDisplayCustomSpread(const QString& spreadName) {
+    bool success = tarotScene->displayCustomSpread(spreadName);
+    if (success) {
+        currentCustomSpreadName = spreadName;
+    }
+    return success;
+}
+
+void MainWindow::onShowCustomSpreads()
+{
+    HelpDialog *dialog = new HelpDialog(HelpDialog::CustomSpreads, this);
+    dialog->setTarotScene(tarotScene);
+
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);  // Make the dialog non-modal
+    dialog->show();  // Use show() instead of exec() for non-modal behavior
+}
+
+void MainWindow::onShowAddCustomSpreads()
+{
+    HelpDialog *dialog = new HelpDialog(HelpDialog::CustomSpreadHelp, this);
+
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);  // Make the dialog non-modal
+    dialog->show();  // Use show() instead of exec() for non-modal behavior
+}
+
+void MainWindow::onShowChangelog()
+{
+    HelpDialog *dialog = new HelpDialog(HelpDialog::ChangeLogHelp, this);
+
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setModal(false);  // Make the dialog non-modal
     dialog->show();  // Use show() instead of exec() for non-modal behavior

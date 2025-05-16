@@ -1,7 +1,7 @@
 #include "cardloader.h"
 #include <QRandomGenerator>
 #include "dockcontrols.h"
-
+#include<QImageReader>
 CardLoader::CardLoader(const QString& path) : cardPath(path) {
 }
 
@@ -12,12 +12,31 @@ void CardLoader::loadCards()
     QStringList filters;
     filters << "*.jpg" << "*.png" << "*.jpeg";
 
+
     for(const QString& file : dir.entryList(filters)) {
         if (file.length() >= 6 && file[0].isDigit() && file[1].isDigit()) {
             int number = file.left(2).toInt();
-            cardImages[number] = QPixmap(dir.filePath(file));
+
+            // Use QImageReader for better quality loading
+            QImageReader reader(dir.filePath(file));
+            reader.setAutoTransform(true);
+            reader.setQuality(100);
+
+            QImage image = reader.read();
+            if (!image.isNull()) {
+                // For high DPI displays
+                qreal dpr = qApp->devicePixelRatio();
+                if (dpr > 1.0) {
+                    image.setDevicePixelRatio(dpr);
+                }
+
+                cardImages[number] = QPixmap::fromImage(image);
+            } else {
+                qWarning() << "Failed to load card image:" << dir.filePath(file) << reader.errorString();
+            }
         }
     }
+
 
     //QString backPath = cardPath + "/back.png";
     QString backPath = QFile::exists(cardPath + "/back.png") ? cardPath + "/back.png" :
@@ -27,7 +46,26 @@ void CardLoader::loadCards()
                                           (QFile::exists(cardPath + "/back.jpeg") ? cardPath + "/back.jpeg" :
                                                cardPath + "/Back.jpeg"))));
 
-    cardBack = QPixmap(backPath);
+    //cardBack = QPixmap(backPath);
+    QImageReader backReader(backPath);
+    backReader.setAutoTransform(true);
+    backReader.setQuality(100);
+
+    QImage backImage = backReader.read();
+    if (!backImage.isNull()) {
+        // For high DPI displays
+        qreal dpr = qApp->devicePixelRatio();
+        if (dpr > 1.0) {
+            backImage.setDevicePixelRatio(dpr);
+        }
+
+        cardBack = QPixmap::fromImage(backImage);
+    } else {
+        qWarning() << "Failed to load card back image:" << backPath << backReader.errorString();
+    }
+
+    // Pre-cache scaled versions for better performance
+    preScaleCards();
 }
 
 
@@ -48,12 +86,27 @@ QString CardLoader::formatName(const QString &rawName)
 }
 
 QPixmap CardLoader::getCardBack() const {
-    return cardBack.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    //return cardBack.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    return scaledCardBack;
+
 }
 
 
 QPixmap CardLoader::getCardImage(int number) {
-    return cardImages.value(number).scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    //return cardImages.value(number).scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    // Return pre-scaled version if available
+    if (scaledCardImages.contains(number)) {
+        return scaledCardImages[number];
+    }
+
+    // Fall back to scaling on-demand if not pre-cached
+    if (cardImages.contains(number)) {
+        return cardImages[number].scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+    // Return empty pixmap if card not found
+    qWarning() << "Card number not found:" << number;
+    return QPixmap();
 
 }
 
@@ -73,4 +126,26 @@ QVector<CardLoader::CardData> CardLoader::getRandomCards(int count, bool allowRe
         }
     }
     return cards;
+}
+void CardLoader::preScaleCards() {
+    // Pre-scale all cards for better performance
+    for (auto it = cardImages.begin(); it != cardImages.end(); ++it) {
+        scaledCardImages[it.key()] = it.value().scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+    // Pre-scale back card
+    scaledCardBack = cardBack.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+}
+
+
+void CardLoader::loadDeck(const QString& path)
+{
+    // Clear existing card images
+    cardImages.clear();
+
+    // Set the new path
+    cardPath = path;
+
+    // Load cards from the new path
+    loadCards();
 }

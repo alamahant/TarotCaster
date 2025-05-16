@@ -32,7 +32,14 @@ private:
     QMap<int, QPixmap> cardImages;   // number -> card image
     QString formatName(const QString& rawName);
     QPixmap cardBack;
+    QMap<int, QPixmap> scaledCardImages; // Pre-scaled versions for better performance
+    QPixmap scaledCardBack; // Pre-scaled back card
 
+    void preScaleCards(); // Method to pre-scale all cards
+
+public:
+    void loadDeck(const QString& path);
+    const QString& getPath() const { return cardPath; }
 };
 
 #endif // CARDLOADER_H

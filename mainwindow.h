@@ -13,13 +13,13 @@
 #include<QMenu>
 #include<QMenuBar>
 #include<QStandardPaths>
-#include <QDialogButtonBox>
 #include "meaningdisplay.h"
 #include "tarotscene.h"
 #include "dockcontrols.h"
 #include"mistralapi.h"
 #include"helpdialog.h"
-
+#include "customspreaddesigner.h"
+#include <QSize>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -27,11 +27,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void testCards();
     void clearMeaningDisplay();
 
 private slots:
-    void setupUI();
     void createDocks();
     void onDeckLoaded(CardLoader* loader);
     void onReversedCardsToggled(bool allowed);
@@ -40,6 +38,7 @@ public slots:
    void showCardMeaning(int cardNumber);
     void onDealClicked();
    void onGetReadingClicked();
+    void onCreateCustomSpreadClicked();
 
 private:
     QGraphicsView *centralView;
@@ -70,5 +69,14 @@ private slots:
     void onShowInstructions();
     void onShowSpreads();
     void onShowAddDecks();
+    bool onDisplayCustomSpread(const QString& spreadName);
+    void onShowCustomSpreads();
+    void onShowAddCustomSpreads();
+    void onShowChangelog();
+private:
+    //CustomSpreadDesigner* m_spreadDesigner;
+    QString currentCustomSpreadName;
+
+
 };
 #endif // MAINWINDOW_H

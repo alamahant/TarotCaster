@@ -6,6 +6,7 @@
 #include <QTextBrowser>
 #include <QPushButton>
 #include <QLabel>
+#include "tarotscene.h"
 
 class HelpDialog : public QDialog
 {
@@ -16,11 +17,21 @@ public:
         About,
         Instructions,
         Spreads,
-        AddDecks
+        AddDecks,
+        CustomSpreads,
+        CustomSpreadHelp,
+        ChangeLogHelp
+
     };
 
     explicit HelpDialog(DialogType type, QWidget *parent = nullptr);
-
+    void setTarotScene(TarotScene* scene) {
+        tarotScene = scene;
+        // Only refresh if this is a CustomSpreads dialog
+        if (tarotScene && currentType == CustomSpreads) {
+            setupCustomSpreads();
+        }
+    }
 private:
     void setupAbout();
     void setupInstructions();
@@ -30,6 +41,11 @@ private:
     QLabel *titleLabel;
     QTextBrowser *contentBrowser;
     QPushButton *closeButton;
+    void setupCustomSpreads();
+    TarotScene* tarotScene = nullptr;
+    DialogType currentType;
+    void setupCustomSpreadHelp();
+    void setupChangelogHelp();
 };
 
 #endif // HELPDIALOG_H

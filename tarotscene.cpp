@@ -3,7 +3,9 @@
 
 void TarotScene::setCardLoader(CardLoader* newCardLoader)
 {
-    cardLoader = *newCardLoader;
+    //cardLoader = *newCardLoader;
+    cardLoader.loadDeck(newCardLoader->getPath());
+
 }
 
 void TarotScene::setReversedCardsAllowed(bool allowed)
@@ -60,8 +62,8 @@ void TarotScene::displayCelticCross() {
     // Display the cards (existing code)
     const qreal CARD_WIDTH = 150;
     const qreal CARD_HEIGHT = 225;
-    const qreal HORIZONTAL_SPACING = 40;
-    const qreal VERTICAL_SPACING = CARD_HEIGHT + 100;
+    const qreal HORIZONTAL_SPACING = 50;
+    const qreal VERTICAL_SPACING = CARD_HEIGHT + 90;
     QPointF center = sceneRect().center();
 
     // 1. Center card (Present)
@@ -99,7 +101,9 @@ void TarotScene::clearScene() {
         delete item;
     }
 
+    //emit viewRefreshRequested();
 }
+
 void TarotScene::setAllowReversedCards(bool allow) {
     allowReversedCards = allow;
 }
@@ -112,7 +116,9 @@ void TarotScene::displayThreeCardSpread() {
 
     const qreal CARD_WIDTH = 150;
     const qreal CARD_HEIGHT = 225;
-    const qreal HORIZONTAL_SPACING = 40;
+    //const qreal CARD_WIDTH = 300;    // 150 * 2
+    //const qreal CARD_HEIGHT = 450;   // 225 * 2
+    const qreal HORIZONTAL_SPACING = 65; //40
 
     QPointF center = sceneRect().center();
 
@@ -141,8 +147,8 @@ void TarotScene::displaySingleCard() {
     readingRequested = false;
     currentCards = cardLoader.getRandomCards(1, allowReversedCards);
 
-    const qreal CARD_WIDTH = 150;
-    const qreal CARD_HEIGHT = 225;
+    const qreal CARD_WIDTH = 150; //150
+    const qreal CARD_HEIGHT = 225;  //225
 
     QPointF center = sceneRect().center();
 
@@ -187,13 +193,18 @@ void TarotScene::displayFullDeck() {
     const int CARDS_PER_ROW = 8;  // Reduced from 13
     const qreal CARD_WIDTH = 120;  // Slightly larger cards
     const qreal CARD_HEIGHT = 180;
-    const qreal SPACING = 30;
+    const qreal VERTICAL_SPACING = 110;
+    const qreal HORIZONTAL_SPACING = 30;
+
+    //const qreal SPACING = 30;
 
     for(int i = 0; i < 78; i++) {
         int row = i / CARDS_PER_ROW;
         int col = i % CARDS_PER_ROW;
 
-        QPointF pos(col * (CARD_WIDTH + SPACING), row * (CARD_HEIGHT + SPACING));
+        //QPointF pos(col * (CARD_WIDTH + SPACING), row * (CARD_HEIGHT + SPACING));
+        QPointF pos(col * (CARD_WIDTH + HORIZONTAL_SPACING), row * (CARD_HEIGHT + VERTICAL_SPACING));
+
         TarotCardItem* card = new TarotCardItem(cardLoader.getCardImage(i),
                                                 cardLoader.getCardBack(), i);
         card->setPos(pos);
@@ -369,6 +380,75 @@ QString TarotScene::generateReadingPrompt() const {
         prompt += "\nPlease interpret these cards in the context of a Zodiac spread, explaining how each card influences the corresponding house in the querent's life. Consider both the zodiac sign's energy and the house's domain when interpreting each position.";
         break;
 
+    case Custom:
+    {
+
+        // Get all custom spreads
+        QVector<CustomSpread> spreads = getCustomSpreads();
+
+        // Find the current custom spread by name
+        const CustomSpread* selectedSpread = nullptr;
+        for (const auto& spread : spreads) {
+            if (spread.name == currentCustomSpreadName) {
+                selectedSpread = &spread;
+                break;
+            }
+        }
+
+        if (selectedSpread && !selectedSpread->positions.isEmpty()) {
+            // We found a valid spread
+
+            prompt = QString("Please provide a tarot reading for a '%1' spread with the following cards:\n\n")
+                         .arg(selectedSpread->name);
+
+            // Add description if available
+            if (!selectedSpread->description.isEmpty()) {
+                prompt += "Spread Description: " + selectedSpread->description + "\n\n";
+            }
+
+            // Add each card with its position information
+            for (int i = 0; i < currentCards.size() && i < selectedSpread->positions.size(); i++) {
+                QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+                QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
+
+                // Get position details
+                const CustomSpreadPosition& pos = selectedSpread->positions[i];
+
+                prompt += QString("Position %1 (%2): %3 (%4)\n")
+                              .arg(pos.number)
+                              .arg(pos.name)
+                              .arg(cardName)
+                              .arg(orientation);
+
+                // Add significance if available
+                if (!pos.significance.isEmpty()) {
+                    prompt += QString("   Significance: %1\n").arg(pos.significance);
+                }
+            }
+
+            prompt += "\nPlease interpret these cards in the context of the '" + selectedSpread->name +
+                      "' spread, explaining the significance of each position and how the cards interact with each other.";
+
+        } else {
+
+            // No valid spread found - use a generic prompt
+            prompt = "Please provide a tarot reading for a Custom spread with the following cards:\n\n";
+
+            for (int i = 0; i < currentCards.size(); i++) {
+                QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+                QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
+
+                prompt += QString("Position %1: %2 (%3)\n")
+                              .arg(i + 1)
+                              .arg(cardName)
+                              .arg(orientation);
+            }
+
+            prompt += "\nPlease interpret these cards in the context of this custom spread, explaining how they relate to each other and the querent's situation.";
+        }
+    }
+    break;
+
     default:
         return "Error: Unknown spread type.";
     }
@@ -386,9 +466,8 @@ void TarotScene::setReadingRequested(bool newReadingRequested)
     readingRequested = newReadingRequested;
 }
 
-//save load
 
-void TarotScene::displaySavedSpread(SpreadType type, const QVector<CardLoader::CardData>& savedCards) {
+void TarotScene::displaySavedSpread(SpreadType type, const QVector<CardLoader::CardData>& savedCards, const QString& customSpreadName) {
     clearScene();
     currentCards = savedCards;
     currentSpreadType = type;
@@ -410,11 +489,25 @@ void TarotScene::displaySavedSpread(SpreadType type, const QVector<CardLoader::C
     case ZodiacSpread:
         displaySavedZodiacSpread(savedCards);
         break;
+    case Custom:
+        // For custom spreads, we need the name to load the layout
+        if (!customSpreadName.isEmpty()) {
+            displaySavedCustomSpread(savedCards, customSpreadName);
+
+        } else {
+            // Handle error - missing custom spread name
+            qWarning() << "Cannot display saved custom spread: missing spread name";
+        }
+        break;
     default:
         // Handle error
+        qWarning() << "Unknown spread type:" << type;
         break;
     }
 }
+
+
+
 
 void TarotScene::displaySavedSingleCard(const QVector<CardLoader::CardData>& savedCards) {
     if (savedCards.isEmpty()) return;
@@ -589,5 +682,271 @@ void TarotScene::displaySavedZodiacSpread(const QVector<CardLoader::CardData>& s
         displayCard(savedCards[i].number, savedCards[i].reversed, QPointF(x, y), beRevealed);
     }
 }
+
+bool TarotScene::saveCustomSpread(const TarotScene::CustomSpread& spread)
+{
+
+    // Load existing spreads
+    QVector<CustomSpread> spreads = getCustomSpreads();
+
+    // Check if a spread with this name already exists
+    bool updated = false;
+    for (int i = 0; i < spreads.size(); ++i) {
+        if (spreads[i].name == spread.name) {
+            // Update existing spread
+            spreads[i] = spread;
+            updated = true;
+            break;
+        }
+    }
+
+    if (!updated) {
+        // Add new spread
+        spreads.append(spread);
+    }
+
+    // Save all spreads to file
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/custom_spreads.json");
+    if (!file.open(QIODevice::WriteOnly)) {
+        qWarning() << "Failed to open custom spreads file for writing:" << file.errorString();
+        return false;
+    }
+
+    QJsonArray spreadsArray;
+    for (const auto& s : spreads) {
+        QJsonObject spreadObj;
+        spreadObj["name"] = s.name;
+        spreadObj["description"] = s.description;
+
+        QJsonArray positionsArray;
+        for (const auto& p : s.positions) {
+            QJsonObject posObj;
+            posObj["number"] = p.number;
+            posObj["name"] = p.name;
+            posObj["significance"] = p.significance;
+            posObj["x"] = p.x;
+            posObj["y"] = p.y;
+            positionsArray.append(posObj);
+        }
+
+        spreadObj["positions"] = positionsArray;
+        spreadsArray.append(spreadObj);
+    }
+
+    QJsonDocument doc(spreadsArray);
+    if (file.write(doc.toJson()) == -1) {
+        qWarning() << "Failed to write custom spreads data:" << file.errorString();
+        return false;
+    }
+
+    return true;
+}
+
+
+QVector<TarotScene::CustomSpread> TarotScene::getCustomSpreads() const
+{
+    QVector<CustomSpread> spreads;
+
+    // Load spreads from file
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/custom_spreads.json");
+    if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
+        return spreads;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    if (doc.isArray()) {
+        QJsonArray spreadsArray = doc.array();
+        for (const auto& spreadValue : spreadsArray) {
+            if (spreadValue.isObject()) {
+                QJsonObject spreadObj = spreadValue.toObject();
+
+                CustomSpread spread;
+                spread.name = spreadObj["name"].toString();
+                spread.description = spreadObj["description"].toString();
+
+                QJsonArray positionsArray = spreadObj["positions"].toArray();
+                for (const auto& posValue : positionsArray) {
+                    if (posValue.isObject()) {
+                        QJsonObject posObj = posValue.toObject();
+
+                        CustomSpreadPosition pos;
+                        pos.number = posObj["number"].toInt();
+                        pos.name = posObj["name"].toString();
+                        pos.significance = posObj["significance"].toString();
+                        pos.x = posObj["x"].toDouble();
+                        pos.y = posObj["y"].toDouble();
+
+                        spread.positions.append(pos);
+                    }
+                }
+
+                spreads.append(spread);
+            }
+        }
+    }
+
+    return spreads;
+}
+
+bool TarotScene::displayCustomSpread(const QString& spreadName)
+{
+
+    // Load custom spreads
+    QVector<CustomSpread> spreads = getCustomSpreads();
+
+    // Find the requested spread
+    const CustomSpread* selectedSpread = nullptr;
+    for (const auto& spread : spreads) {
+        if (spread.name == spreadName) {
+            selectedSpread = &spread;
+            break;
+        }
+    }
+
+    if (!selectedSpread) {
+        qWarning() << "Custom spread not found:" << spreadName;
+        return false;
+    }
+
+    // Clear the scene
+    clearScene();
+
+    // Set current spread type
+    currentCustomSpreadName = spreadName;
+
+    currentSpreadType = Custom;
+    readingRequested = false;
+
+    // Get random cards
+    currentCards = cardLoader.getRandomCards(selectedSpread->positions.size(), allowReversedCards);
+
+    // Display cards at their positions
+    for (int i = 0; i < selectedSpread->positions.size(); ++i) {
+        const auto& pos = selectedSpread->positions[i];
+
+        // Make sure we have enough cards
+        if (i < currentCards.size()) {
+            // Display the card
+            QPointF position(pos.x, pos.y);
+            displayCard(currentCards[i].number,
+                        currentCards[i].reversed,
+                        position,
+                        false);  // Not revealed initially
+
+            // Find the card we just added to set data on it
+            for (auto item : items()) {
+                if (auto cardItem = dynamic_cast<TarotCardItem*>(item)) {
+                    if (cardItem->getCardNumber() == currentCards[i].number) {
+                        // Set position data
+                        cardItem->setData(1, pos.number);
+                        cardItem->setData(2, pos.name);
+                        cardItem->setData(3, pos.significance);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+void TarotScene::displaySavedCustomSpread(const QVector<CardLoader::CardData>& savedCards, const QString& spreadName) {
+
+    // Load the custom spread layout
+    QVector<CustomSpread> spreads = getCustomSpreads();
+    const CustomSpread* selectedSpread = nullptr;
+
+    // Find the requested spread
+    for (const auto& spread : spreads) {
+        if (spread.name == spreadName) {
+            selectedSpread = &spread;
+            break;
+        }
+    }
+
+    if (!selectedSpread) {
+        qWarning() << "Custom spread not found:" << spreadName;
+        return;
+    }
+
+    // Make sure we have enough cards
+    if (savedCards.size() < selectedSpread->positions.size()) {
+        qWarning() << "Not enough saved cards for this spread";
+        return;
+    }
+
+    beRevealed = true; // Cards in saved readings are always revealed
+
+    // Display saved cards at their positions
+    for (int i = 0; i < selectedSpread->positions.size(); ++i) {
+        const auto& pos = selectedSpread->positions[i];
+
+        // Make sure we don't go out of bounds
+        if (i < savedCards.size()) {
+            const auto& card = savedCards[i];
+
+            // Display the card at its position
+            QPointF position(pos.x, pos.y);
+            displayCard(card.number, card.reversed, position, beRevealed);
+
+        }
+    }
+
+}
+
+
+bool TarotScene::deleteCustomSpread(const QString& spreadName)
+{
+    // Load all spreads
+    QVector<CustomSpread> spreads = getCustomSpreads();
+
+    // Find and remove the spread with the given name
+    bool found = false;
+    for (int i = 0; i < spreads.size(); i++) {
+        if (spreads[i].name == spreadName) {
+            spreads.remove(i);
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        return false;
+    }
+
+    // Save the updated spreads list
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/custom_spreads.json");
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+
+    QJsonArray spreadsArray;
+    for (const auto& spread : spreads) {
+        QJsonObject spreadObj;
+        spreadObj["name"] = spread.name;
+        spreadObj["description"] = spread.description;
+
+        QJsonArray positionsArray;
+        for (const auto& pos : spread.positions) {
+            QJsonObject posObj;
+            posObj["number"] = pos.number;
+            posObj["name"] = pos.name;
+            posObj["significance"] = pos.significance;
+            posObj["x"] = pos.x;
+            posObj["y"] = pos.y;
+            positionsArray.append(posObj);
+        }
+
+        spreadObj["positions"] = positionsArray;
+        spreadsArray.append(spreadObj);
+    }
+
+    QJsonDocument doc(spreadsArray);
+    file.write(doc.toJson());
+
+    return true;
+}
+
 
 

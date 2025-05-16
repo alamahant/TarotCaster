@@ -60,6 +60,36 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="1.2.0" date="2025-05-16">
+      <description>
+        <p>New Features:</p>
+        <ul>
+          <li>Custom Spread Designer: Create and save your own custom card layouts with intuitive drag-and-drop interface</li>
+          <li>Card-specific zoom functionality: Ctrl+mouse wheel to examine card details up to 3x magnification</li>
+        </ul>
+        <p>Visual Enhancements:</p>
+        <ul>
+          <li>Optimized card rendering with pre-scaling for improved performance and image quality</li>
+          <li>Implemented OpenGL rendering for hardware-accelerated graphics performance</li>
+          <li>Enhanced golden shadow highlighting and smooth transitions between card states</li>
+        </ul>
+        <p>Technical Improvements:</p>
+        <ul>
+          <li>Proper event handling for wheel events in card items</li>
+          <li>Optimized rendering with Qt::SmoothTransformation for high-quality card display</li>
+          <li>GPU-accelerated compositing for shadow effects and transparency</li>
+          <li>Added fallback rendering path for systems without OpenGL support</li>
+          <li>Pre-scaling system that scales card images once during loading rather than repeatedly during display</li>
+        </ul>
+        <p>User Experience:</p>
+        <ul>
+          <li>Enhanced card examination capabilities while preserving spread context</li>
+          <li>Improved accessibility with clearer card details</li>
+          <li>Significantly improved animation smoothness and overall responsiveness</li>
+          <li>Reduced CPU usage during card animations and transitions</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.1.0" date="2025-04-29">
       <description>
         <p>New Content:</p>
@@ -109,8 +139,4 @@
   </categories>
   <launchable type="desktop-id">io.github.alamahant.TarotCaster.desktop</launchable>
 </component>
-
-
-
-
 
