@@ -58,6 +58,10 @@
       <caption>Three Card Spread</caption>
       <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/3card.png</image>
     </screenshot>
+    <screenshot>
+      <caption>Custom Spread Designer</caption>
+      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/310f2ab1f41a27171ebd2358b2ffb05e8fbe5855/screenshots/CustomSpreadDesigner.png</image>
+    </screenshot>
   </screenshots>
   <releases>
     <release version="1.2.0" date="2025-05-16">
@@ -139,4 +143,6 @@
   </categories>
   <launchable type="desktop-id">io.github.alamahant.TarotCaster.desktop</launchable>
 </component>
+
+
 
