@@ -58,12 +58,25 @@
       <caption>Three Card Spread</caption>
       <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/3card.png</image>
     </screenshot>
-    <screenshot>
-      <caption>Custom Spread Designer</caption>
-      <image>https://raw.githubusercontent.com/alamahant/TarotCaster/310f2ab1f41a27171ebd2358b2ffb05e8fbe5855/screenshots/CustomSpreadDesigner.png</image>
-    </screenshot>
   </screenshots>
   <releases>
+    <release version="1.2.1" date="2025-07-31">
+      <description>
+        <p>New Features:</p>
+        <ul>
+          <li>Added Sola Busca Tarot deck with public domain images from Wikimedia Commons</li>
+          <li>Universal zoom slider to adjust overall card scaling across spreads</li>
+          <li>Checkbox to swap Strength and Justice cards (VIII/XI) for decks like Marseille</li>
+          <li>View menu checkboxes to toggle visibility of left/right docks for focused readings</li>
+          <li>Deck renaming dialog to help convert custom decks into TarotCaster format for easy import</li>
+        </ul>
+        <p>Rendering Enhancements:</p>
+        <ul>
+          <li>Improved sharpness and clarity of all cards, especially at higher zoom levels</li>
+          <li>General performance improvements and code refinements for smoother operation</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.2.0" date="2025-05-16">
       <description>
         <p>New Features:</p>
@@ -143,6 +156,3 @@
   </categories>
   <launchable type="desktop-id">io.github.alamahant.TarotCaster.desktop</launchable>
 </component>
-
-
-

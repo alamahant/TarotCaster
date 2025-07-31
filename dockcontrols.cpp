@@ -1,5 +1,7 @@
 #include "dockcontrols.h"
 #include<QThread>
+#include"Globals.h"
+
 QRandomGenerator DockControls::randomGen;
 
 
@@ -61,7 +63,26 @@ DockControls::DockControls(QWidget *parent)
     QGroupBox* optionsGroup = new QGroupBox("Options", this);
     QVBoxLayout* optionsLayout = new QVBoxLayout(optionsGroup);
     allowReversed = new QCheckBox("Allow Reversed Cards", this);
+    allowReversed->setToolTip("By checking this checkbox you will allow reversed cards displayed");
+    swapEightEleven = new QCheckBox("Swap Eighth with Eleventh", this);
+    swapEightEleven->setToolTip("In some decks like Marseille, these two cards are swapped.\n"
+                                "By checking this checkbox you will get the correct card meanings displayed");
+    //
+    QLabel* zoomLabel = new QLabel("Zoom Level:", this);
+    zoomSlider = new QSlider(Qt::Horizontal, this);
+    zoomSlider->setRange(50, 200); // 50% to 200%
+    zoomSlider->setValue(100);     // Start at 100%
+    zoomSlider->setTickInterval(25);
+    zoomSlider->setTickPosition(QSlider::TicksBelow);
+    zoomSlider->setToolTip("Adjust view zoom level");
+
+    //
     optionsLayout->addWidget(allowReversed);
+    optionsLayout->addWidget(swapEightEleven);
+
+    optionsLayout->addWidget(zoomLabel);
+    optionsLayout->addWidget(zoomSlider);
+
     layout->addWidget(optionsGroup);
 
     // Create action buttons
@@ -105,6 +126,10 @@ DockControls::DockControls(QWidget *parent)
 
     connect(allowReversed, &QCheckBox::toggled,
             this, &DockControls::reversedCardsToggled);
+    connect(swapEightEleven, &QCheckBox::toggled,
+            this, &DockControls::swapEightElevenToggled);
+
+
     connect(spreadSelector, &QComboBox::currentTextChanged,
             this, &DockControls::spreadTypeChanged);
     connect(dealButton, &QPushButton::clicked, this, &DockControls::onDealClicked);
@@ -212,15 +237,20 @@ void DockControls::loadAvailableDecks() {
         appName = "TarotCaster"; // Fallback if app name isn't set
     }
 
-    QString userDecksPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/decks";
+    //QString userDecksPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/decks";
+    //QString unorderedDecksPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/unordered_decks";
 
 
     // Create user decks directory if it doesn't exist
-    QDir userDecksDir(userDecksPath);
+    QDir userDecksDir(getUserDecksDirPath());
     if (!userDecksDir.exists()) {
         bool created = userDecksDir.mkpath(".");
     }
-
+    // create unordered decks dir
+    QDir unorderedDecksDir(getUnorderedDecksDirPath());
+    if (!unorderedDecksDir.exists()) {
+        bool created = unorderedDecksDir.mkpath(".");
+    }
     // Load system decks
     QDir systemDecksDir(systemDecksPath);
     QStringList systemDeckDirs = systemDecksDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -238,15 +268,20 @@ void DockControls::loadAvailableDecks() {
         // Check if this deck name already exists in system decks
         if (systemDeckDirs.contains(deckName)) {
             // Add with a "(User)" suffix to distinguish
-            deckSelector->addItem(deckName + " (User)", userDecksPath + "/" + deckName);
+            deckSelector->addItem(deckName + " (User)", getUserDecksDirPath() + "/" + deckName);
         } else {
-            deckSelector->addItem(deckName, userDecksPath + "/" + deckName);
+            deckSelector->addItem(deckName, getUserDecksDirPath() + "/" + deckName);
         }
     }
 
     if (deckSelector->count() > 0) {
         deckSelector->setCurrentIndex(0);
     }
+}
+
+QSlider *DockControls::getZoomSlider() const
+{
+    return zoomSlider;
 }
 
 

@@ -40,6 +40,9 @@ private:
 public:
     void loadDeck(const QString& path);
     const QString& getPath() const { return cardPath; }
+private:
+    QPixmap loadCrispPixmap(const QString& path);
+
 };
 
 #endif // CARDLOADER_H

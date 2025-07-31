@@ -28,12 +28,16 @@ public:
     QPushButton* dealButton;
     QPushButton* clearButton;
     QCheckBox* allowReversed;
+    QCheckBox* swapEightEleven;
+
     QComboBox* spreadSelector;
     static QRandomGenerator randomGen;
 
 signals:
     void deckLoaded(CardLoader* loader);
     void reversedCardsToggled(bool allowed);
+    void swapEightElevenToggled(bool allowed);
+
     void spreadTypeChanged(const QString& spreadType);
     void dealRequested();
     void displayFullDeckRequested();
@@ -59,9 +63,14 @@ private:
 public:
     QPushButton* getReadingButton;
     QTextEdit* readingDisplay;
+    QSlider *getZoomSlider() const;
+
 private:
     void loadAvailableDecks();
     TarotScene* tarotScene;
+
+private:
+    QSlider* zoomSlider;
 };
 
 #endif // DOCKCONTROLS_H

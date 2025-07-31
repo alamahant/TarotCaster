@@ -13,13 +13,7 @@ finish-args:
 modules:
   - name: tarotcaster
     buildsystem: cmake-ninja
-    build-options:
-      strip: true
-      no-debuginfo: true
-      no-debuginfo-compression: true
-    config-opts:
-      - -DCMAKE_BUILD_TYPE=Release
     sources:
       - type: git
         url: https://github.com/alamahant/TarotCaster.git
-        tag: v1.2.0
+        tag: v1.2.1

@@ -5,7 +5,7 @@
 CardLoader::CardLoader(const QString& path) : cardPath(path) {
 }
 
-
+/*
 void CardLoader::loadCards()
 {
     QDir dir(cardPath);
@@ -31,6 +31,7 @@ void CardLoader::loadCards()
                 }
 
                 cardImages[number] = QPixmap::fromImage(image);
+
             } else {
                 qWarning() << "Failed to load card image:" << dir.filePath(file) << reader.errorString();
             }
@@ -60,11 +61,41 @@ void CardLoader::loadCards()
         }
 
         cardBack = QPixmap::fromImage(backImage);
+
     } else {
         qWarning() << "Failed to load card back image:" << backPath << backReader.errorString();
     }
 
     // Pre-cache scaled versions for better performance
+    preScaleCards();
+}
+*/
+
+void CardLoader::loadCards()
+{
+    QDir dir(cardPath);
+    QStringList filters;
+    filters << "*.jpg" << "*.png" << "*.jpeg";
+
+    for(const QString& file : dir.entryList(filters)) {
+        if (file.length() >= 6 && file[0].isDigit() && file[1].isDigit()) {
+            int number = file.left(2).toInt();
+            cardImages[number] = loadCrispPixmap(dir.filePath(file));
+        }
+    }
+
+    // Find back image (keeping your existing logic)
+// Find back image (keeping your existing logic)
+
+    QString backPath = QFile::exists(cardPath + "/back.png") ? cardPath + "/back.png" :
+                           (QFile::exists(cardPath + "/Back.png") ? cardPath + "/Back.png" :
+                                (QFile::exists(cardPath + "/back.jpg") ? cardPath + "/back.jpg" :
+                                     (QFile::exists(cardPath + "/Back.jpg") ? cardPath + "/Back.jpg" :
+                                          (QFile::exists(cardPath + "/back.jpeg") ? cardPath + "/back.jpeg" :
+                                               cardPath + "/Back.jpeg"))));
+    cardBack = loadCrispPixmap(backPath);
+
+    // Pre-cache scaled versions
     preScaleCards();
 }
 
@@ -148,4 +179,29 @@ void CardLoader::loadDeck(const QString& path)
 
     // Load cards from the new path
     loadCards();
+}
+
+QPixmap CardLoader::loadCrispPixmap(const QString &path)
+{
+    QImageReader reader(path);
+    reader.setAutoTransform(true);
+    reader.setQuality(100);
+
+    QImage image = reader.read();
+    if (image.isNull()) {
+        qWarning() << "Failed to load image:" << path << reader.errorString();
+        return QPixmap();
+    }
+
+    // For high DPI displays
+    qreal dpr = qApp->devicePixelRatio();
+    if (!qFuzzyCompare(dpr, 1.0)) {
+        image = image.scaled(image.size() * dpr,
+                             Qt::KeepAspectRatio,
+                             Qt::SmoothTransformation);
+        image.setDevicePixelRatio(dpr);
+    }
+
+    return QPixmap::fromImage(image);
+
 }

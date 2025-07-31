@@ -40,6 +40,10 @@ qt_add_executable(TarotCaster
         resources.qrc
         helpdialog.h helpdialog.cpp
         customspreaddesigner.h customspreaddesigner.cpp
+        tarotorderdialog.h tarotorderdialog.cpp
+        Globals.h
+        Globals.cpp
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET TarotCaster APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

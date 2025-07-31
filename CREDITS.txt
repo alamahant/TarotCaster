@@ -8,7 +8,10 @@
 - Images sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:Tarot_de_Marseille_(Single_Cards))
 - These images are in the public domain due to their age and historical nature
 
-
+#### Sola Busca Tarot  
+- The Sola Busca Tarot is a 15th-century Italian tarot deck, notable as the oldest complete tarot deck known and for being the first to depict full scenes on the minor arcana  
+- Images sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:Sola-Busca_tarot_deck)  
+- These images are in the public domain due to their age and historical significance
 
 ### Tarot Interpretations
 - Traditional card meanings adapted from [Corpora Project](https://github.com/dariusk/corpora/blob/master/data/divination/tarot_interpretations.json)

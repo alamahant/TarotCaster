@@ -33,6 +33,7 @@ private slots:
     void createDocks();
     void onDeckLoaded(CardLoader* loader);
     void onReversedCardsToggled(bool allowed);
+    void onSwapEightElevenToggled(bool allowed);
 
 public slots:
    void showCardMeaning(int cardNumber);
@@ -76,6 +77,15 @@ private slots:
 private:
     //CustomSpreadDesigner* m_spreadDesigner;
     QString currentCustomSpreadName;
+    //swap 8-11
+    bool swapEightEleven = false;
+    // order deck
+    void orderDeck();
+    qreal currentZoomLevel = 1.0; // Track current zoom
+
+    //zoom
+private slots:
+    void handleZoomSlider(int value);
 
 
 };

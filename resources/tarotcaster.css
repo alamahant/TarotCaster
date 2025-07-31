@@ -192,3 +192,49 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
     width: 0px;
 }
 
+/* Ultra-Thin Golden Slider */
+QSlider::groove:horizontal {
+    border: 1px solid gold;
+    height: 2px;          /* Half the previous thickness */
+    background: #2a2a2a;
+    margin: 0px 0;        /* No vertical margin */
+}
+
+QSlider::handle:horizontal {
+    background: darkgoldenrod;
+    border: 1px solid gold;
+    width: 8px;           /* Smaller handle */
+    height: 8px;          /* Compact square */
+    margin: -4px 0;       /* Tight fit */
+    border-radius: 1px;   /* Minimal rounding */
+}
+
+QSlider::handle:horizontal:hover {
+    background: #d4af37;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0;
+}
+
+QSlider::sub-page:horizontal {
+    background: darkgoldenrod;
+    height: 1px;          /* Hairline thickness */
+}
+
+QSlider::add-page:horizontal {
+    background: #3a3a3a;
+    height: 1px;          /* Hairline thickness */
+}
+
+/* Tick marks - ultra subtle */
+QSlider::tick-mark:horizontal {
+    background: #d4af37;
+    width: 1px;
+    height: 2px;          /* Tiny ticks */
+}
+
+
+
+
+
+

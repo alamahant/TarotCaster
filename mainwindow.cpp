@@ -3,6 +3,9 @@
 #include <QtOpenGLWidgets/QtOpenGLWidgets>
 #include <QSurfaceFormat>
 #include <QStyleFactory>
+#include"tarotorderdialog.h"
+#include"Globals.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
@@ -13,27 +16,32 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("TarotCaster");
 
     tarotScene = new TarotScene(this);
+
+    tarotScene->setItemIndexMethod(QGraphicsScene::NoIndex); // Better for movable items
+    tarotScene->setBackgroundBrush(Qt::black);
+
     centralView = new QGraphicsView(tarotScene);  // Set scene immediately
+
+    centralView->setCacheMode(QGraphicsView::CacheBackground);
+    centralView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     centralView->setBackgroundBrush(Qt::black);
     centralView->setRenderHint(QPainter::Antialiasing);
     centralView->setRenderHint(QPainter::SmoothPixmapTransform);
+    centralView->setRenderHint(QPainter::TextAntialiasing, true);
+    centralView->setOptimizationFlags(QGraphicsView::DontSavePainterState | QGraphicsView::DontAdjustForAntialiasing);
+    centralView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 
 #ifndef QT_NO_OPENGL
-    QOpenGLWidget *glWidget = new QOpenGLWidget();
-    QSurfaceFormat format = glWidget->format();
+    QSurfaceFormat format;// = glWidget->format();
     format.setSamples(4);  // 4x MSAA
     format.setSwapInterval(1);  // Enable VSync
+    format.setColorSpace(QSurfaceFormat::sRGBColorSpace); // Better color accuracy
+    //use either this or     glWidget->setFormat(format);
+    //QSurfaceFormat::setDefaultFormat(format);  // Must be set before glWidget is created
+    QOpenGLWidget *glWidget = new QOpenGLWidget();
     glWidget->setFormat(format);
     centralView->setViewport(glWidget);
 #endif
-
-    // Set viewport update mode for smoother rendering
-    centralView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-
-    // Optimize for quality over speed
-    centralView->setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
-
-    //
     setCentralWidget(centralView);
 
     createDocks();
@@ -73,21 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dockControls->getReadingButton, &QPushButton::clicked,
             this, &MainWindow::onGetReadingClicked);
 
-    /*
-    connect(tarotScene, &TarotScene::viewRefreshRequested, this, [this](){
-        tarotScene->clear();
-        centralView->resetTransform();
-        centralView->centerOn(0, 0);
-        //tarotScene->setSceneRect(-500, -500, 1000, 1000);
 
-        // Ensure scrollbars are in the right state
-        centralView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        centralView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-        // Update the view
-        centralView->update();
-    });
-    */
 
     QMenu* fileMenu = menuBar()->addMenu("&File");
     QAction* saveAction = fileMenu->addAction("&Save Reading", this, &MainWindow::onSaveReading);
@@ -96,7 +90,24 @@ MainWindow::MainWindow(QWidget *parent)
     loadAction->setShortcut(QKeySequence::Open);
     fileMenu->addSeparator();
     fileMenu->addAction("&Exit", this, &QWidget::close, QKeySequence::Quit);
+    //view menu
+    // Create View menu
+    QMenu* viewMenu = menuBar()->addMenu("&View");
 
+    // Add toggle actions for dock widgets
+    QAction* toggleLeftDockAction = viewMenu->addAction("&Left Panel");
+    toggleLeftDockAction->setCheckable(true);
+    toggleLeftDockAction->setChecked(true); // Visible by default
+    toggleLeftDockAction->setShortcut(QKeySequence("Ctrl+L")); // Optional shortcut
+    connect(toggleLeftDockAction, &QAction::toggled, leftDock, &QDockWidget::setVisible);
+
+    QAction* toggleRightDockAction = viewMenu->addAction("&Right Panel");
+    toggleRightDockAction->setCheckable(true);
+    toggleRightDockAction->setChecked(true); // Visible by default
+    toggleRightDockAction->setShortcut(QKeySequence("Ctrl+R")); // Optional shortcut
+    connect(toggleRightDockAction, &QAction::toggled, rightDock, &QDockWidget::setVisible);
+
+    //
     // Edit Menu
     QMenu *editMenu = menuBar()->addMenu("&Edit");
     editMenu->addAction("&Mistral API Key", this, &MainWindow::onEditApiKey);
@@ -113,6 +124,9 @@ MainWindow::MainWindow(QWidget *parent)
     QAction* createSpreadAction = toolsMenu->addAction("&Custom Spread Designer");
     connect(createSpreadAction, &QAction::triggered, this, &MainWindow::onCreateCustomSpreadClicked);
 
+    // ImportDeck
+    QAction* importDeckAction = toolsMenu->addAction("&Import Deck");
+    connect(importDeckAction, &QAction::triggered, this, &MainWindow::orderDeck);
     // Help Menu
     QMenu *helpMenu = menuBar()->addMenu("&Help");
     helpMenu->addAction("&About", this, &MainWindow::onShowAbout);
@@ -123,6 +137,7 @@ MainWindow::MainWindow(QWidget *parent)
     helpMenu->addAction("&Custom Spreads", this, &MainWindow::onShowCustomSpreads);
     helpMenu->addAction("&ChangeLog", this, &MainWindow::onShowChangelog);
 
+    connect(dockControls->getZoomSlider(), &QSlider::valueChanged, this, &MainWindow::handleZoomSlider);
 
 }
 
@@ -144,7 +159,9 @@ void MainWindow::createDocks() {
 
     //leftDock->setStyleSheet("QDockWidget::title { text-align: center; }");
 
-    leftDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    //leftDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    leftDock->setFeatures(QDockWidget::DockWidgetClosable); // Makes it hideable
+
     dockControls = new DockControls(this);
     leftDock->setWidget(dockControls);
     leftDock->setAllowedAreas(Qt::LeftDockWidgetArea);
@@ -153,7 +170,9 @@ void MainWindow::createDocks() {
     rightDock = new QDockWidget("Card Meaning",this);
     //rightDock->setStyleSheet("QDockWidget::title { text-align: center; }");
 
-    rightDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    //rightDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    leftDock->setFeatures(QDockWidget::DockWidgetClosable); // Makes it hideable
+
     meaningDisplay = new MeaningDisplay(this);
     rightDock->setWidget(meaningDisplay);
     rightDock->setAllowedAreas(Qt::RightDockWidgetArea);
@@ -164,6 +183,8 @@ void MainWindow::createDocks() {
             this, &MainWindow::onDeckLoaded);
     connect(dockControls, &DockControls::reversedCardsToggled,
             this, &MainWindow::onReversedCardsToggled);
+    connect(dockControls, &DockControls::swapEightElevenToggled,
+            this, &MainWindow::onSwapEightElevenToggled);
 }
 
 
@@ -176,6 +197,14 @@ void MainWindow::clearMeaningDisplay()
 }
 
 void MainWindow::showCardMeaning(int cardNumber) {
+    // Apply Justice/Strength numbering swap if enabled
+    if (swapEightEleven) {
+        if (cardNumber == 8) {
+            cardNumber = 11;  // Treat 8 as Strength (XI)
+        } else if (cardNumber == 11) {
+            cardNumber = 8;   // Treat 11 as Justice (VIII)
+        }
+    }
     if (cardMeanings.contains(cardNumber)) {
         meaningDisplay->displayMeaning(cardMeanings[cardNumber]);
     }
@@ -190,6 +219,18 @@ void MainWindow::onDeckLoaded(CardLoader* loader) {
 void MainWindow::onReversedCardsToggled(bool allowed) {
     // Enable/disable reversed cards in the scene
     tarotScene->setReversedCardsAllowed(allowed);
+}
+
+void MainWindow::onSwapEightElevenToggled(bool allowed)
+{
+    if (allowed){
+        swapEightEleven = true;
+        tarotScene->swapEightEleven = true;
+
+    }else{
+        swapEightEleven = false;
+        tarotScene->swapEightEleven = false;
+    }
 }
 
 
@@ -550,4 +591,43 @@ void MainWindow::onShowChangelog()
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->setModal(false);  // Make the dialog non-modal
     dialog->show();  // Use show() instead of exec() for non-modal behavior
+}
+
+void MainWindow::orderDeck()
+{
+    QMessageBox::StandardButton reply = QMessageBox::information(
+        this,
+        "Deck Preparation Assistant",
+        QString("This will help you assign names to your Tarot card images that are compatible with TarotCaster expected format.\n\n"
+                "Please place a COPY of your unordered deck in:\n%1\n\n"
+                "Supported formats: PNG, JPG\n\n"
+                "Click OK to proceed or Cancel to exit and copy your deck first.")
+            .arg(getUserDecksDirPath() + "/"),
+        QMessageBox::Ok | QMessageBox::Cancel,
+        QMessageBox::Ok
+        );
+
+    if (reply != QMessageBox::Ok) {
+        return;  // User canceled
+    }
+
+    QString deckPath = QFileDialog::getExistingDirectory(this, "Select Deck Directory",
+                                                         getUserDecksDirPath());
+    if (deckPath.isEmpty()) return;
+
+    TarotOrderDialog dialog(deckPath, this);
+    dialog.exec();
+
+}
+
+void MainWindow::handleZoomSlider(int value)
+{
+    qreal newZoom = value / 100.0; // Convert percentage to factor
+
+    // Calculate the transformation needed
+    QTransform transform;
+    transform.scale(newZoom, newZoom);
+    centralView->setTransform(transform);
+
+    currentZoomLevel = newZoom;
 }

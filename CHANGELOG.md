@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.2.1] - 2025-07-31
+
+### New Features
+- **Sola Busca Tarot Deck Support**:
+  - Added full support for the historical Sola Busca Tarot deck
+  - Images sourced from Wikimedia Commons and rendered with high fidelity
+  - Deck selectable from the deck manager alongside Rider-Waite and Marseille
+
+- **Universal Zoom Slider**:
+  - Added a global zoom control slider to set overall card scaling
+  - Affects all cards in the spread uniformly for personalized viewing comfort
+
+- **Strength–Justice Swap Option**:
+  - Added checkbox setting to swap cards VIII and XI (Strength and Justice)
+  - Supports historical deck orders like Tarot de Marseille
+  - Swap applies dynamically per selected deck where applicable
+
+- **Dock Visibility Toggles**:
+  - Under the **View** menu, users can now toggle visibility of left/right docks
+  - Allows full focus on the card spread without UI distractions
+ 
+- **Deck Renaming Utility Dialog**:
+  - New tool to help users rename cards of custom digital decks
+  - Automatically converts filenames to the naming convention used by TarotCaster
+  - Ensures smooth import and compatibility with app features
+
+### Visual and Technical Enhancements
+- Improved card rendering clarity with updated scaling and anti-aliasing techniques
+- Enhanced sharpness and detail for all decks, especially at higher zoom levels
+- Continued optimization of rendering pipeline for smoother performance
+- General code cleanup and minor polish for better maintainability and stability
+
 ## [1.2.0] - 2025-05-16
 
 ### New Features

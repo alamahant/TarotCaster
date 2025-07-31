@@ -6,6 +6,11 @@ TarotCardItem::TarotCardItem(const QPixmap &front, const QPixmap &back, int numb
     setFlag(QGraphicsItem::ItemIsMovable);
     //setFlag(QGraphicsItem::ItemIsSelectable);
     setTransformationMode(Qt::SmoothTransformation);
+    //increase crispness
+    // Enable high-quality antialiasing for this item
+    setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+    setCacheMode(QGraphicsItem::ItemCoordinateCache);
+    //
     // Enable wheel events
     setFlag(QGraphicsItem::ItemIsFocusable);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);

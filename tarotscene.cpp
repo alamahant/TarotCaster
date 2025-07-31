@@ -1,5 +1,6 @@
 #include "tarotscene.h"
 #include "mainwindow.h"
+#include<QHash>
 
 void TarotScene::setCardLoader(CardLoader* newCardLoader)
 {
@@ -62,15 +63,15 @@ void TarotScene::displayCelticCross() {
     // Display the cards (existing code)
     const qreal CARD_WIDTH = 150;
     const qreal CARD_HEIGHT = 225;
-    const qreal HORIZONTAL_SPACING = 50;
-    const qreal VERTICAL_SPACING = CARD_HEIGHT + 90;
+    const qreal HORIZONTAL_SPACING = 55;
+    const qreal VERTICAL_SPACING = CARD_HEIGHT + 100;
     QPointF center = sceneRect().center();
 
     // 1. Center card (Present)
     displayCard(currentCards[0].number, currentCards[0].reversed, center);
     // 2. Crossing card (Challenge)
     displayCard(currentCards[1].number, currentCards[1].reversed,
-                QPointF(center.x() - (CARD_WIDTH * 3) - (HORIZONTAL_SPACING * 3), center.y()));
+                QPointF(center.x() - (CARD_WIDTH * 2.3) - (HORIZONTAL_SPACING * 2.3), center.y()));
     // 3. Below (Foundation)
     displayCard(currentCards[2].number, currentCards[2].reversed,
                 QPointF(center.x(), center.y() + VERTICAL_SPACING));
@@ -268,7 +269,9 @@ QString TarotScene::generateReadingPrompt() const {
     case SingleCard:
         prompt = "Please provide a tarot reading for a Single Card draw:\n\n";
         {
-            QString cardName = cardNames.value(currentCards[0].number, "Unknown Card");
+            //QString cardName = cardNames.value(currentCards[0].number, "Unknown Card");
+            QString cardName = getCardName(currentCards[0].number);
+
             QString orientation = currentCards[0].reversed ? "Reversed" : "Upright";
             prompt += QString("Card: %1 (%2)\n")
                           .arg(cardName)
@@ -286,7 +289,9 @@ QString TarotScene::generateReadingPrompt() const {
         };
 
         for (int i = 0; i < currentCards.size() && i < 3; i++) {
-            QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            //QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            QString cardName = getCardName(currentCards[i].number);
+
             QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
 
             prompt += QString("Position %1 (%2): %3 (%4)\n")
@@ -311,7 +316,9 @@ QString TarotScene::generateReadingPrompt() const {
         };
 
         for (int i = 0; i < currentCards.size() && i < 7; i++) {
-            QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            //QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            QString cardName = getCardName(currentCards[i].number);
+
             QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
 
             prompt += QString("Position %1 (%2): %3 (%4)\n")
@@ -339,7 +346,8 @@ QString TarotScene::generateReadingPrompt() const {
         };
 
         for (int i = 0; i < currentCards.size() && i < 10; i++) {
-            QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            //QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            QString cardName = getCardName(currentCards[i].number);
             QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
 
             prompt += QString("Position %1 (%2): %3 (%4)\n")
@@ -369,7 +377,9 @@ QString TarotScene::generateReadingPrompt() const {
         };
 
         for (int i = 0; i < currentCards.size() && i < 12; i++) {
-            QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            //QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+            QString cardName = getCardName(currentCards[i].number);
+
             QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
             prompt += QString("%1: %2 (%3)\n")
                           .arg(positions[i])
@@ -408,7 +418,9 @@ QString TarotScene::generateReadingPrompt() const {
 
             // Add each card with its position information
             for (int i = 0; i < currentCards.size() && i < selectedSpread->positions.size(); i++) {
-                QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+                //QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+                QString cardName = getCardName(currentCards[i].number);
+
                 QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
 
                 // Get position details
@@ -435,7 +447,9 @@ QString TarotScene::generateReadingPrompt() const {
             prompt = "Please provide a tarot reading for a Custom spread with the following cards:\n\n";
 
             for (int i = 0; i < currentCards.size(); i++) {
-                QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+                //QString cardName = cardNames.value(currentCards[i].number, "Unknown Card");
+                QString cardName = getCardName(currentCards[i].number);
+
                 QString orientation = currentCards[i].reversed ? "Reversed" : "Upright";
 
                 prompt += QString("Position %1: %2 (%3)\n")
@@ -949,4 +963,20 @@ bool TarotScene::deleteCustomSpread(const QString& spreadName)
 }
 
 
+QString TarotScene::getCardName(int cardNumber) const
+{
+    // Default lookup
+    QString name = cardNames.value(cardNumber, "Unknown Card");
+
+    // Apply swaps if enabled
+    if (swapEightEleven) {
+        switch(cardNumber) {
+        case 11:  return "Strength";
+        case 8: return "Justice";
+        default: return name;
+        }
+    }
+    return name;
+
+}
 

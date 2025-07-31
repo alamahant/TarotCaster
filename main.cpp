@@ -2,12 +2,22 @@
 
 #include <QApplication>
 #include <QSettings>
+#include"Globals.h"
+#include<QDir>
+#include<QDebug>
+#include<QFile>
+#include<QCoreApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("");
     QCoreApplication::setApplicationName("TarotCaster");
+    QCoreApplication::setApplicationVersion("1.2.1");
+    QDir().mkpath(getLocalDataDirPath());
+    QDir().mkpath(getUserDecksDirPath());
+    QDir().mkpath(getUnorderedDecksDirPath());
+
     a.setWindowIcon(QIcon(":/resources/app-blue.png"));
 
 
@@ -24,5 +34,6 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
     return a.exec();
 }
