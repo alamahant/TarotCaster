@@ -106,8 +106,11 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.TarotCaster.png
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/OriginalRiderWaite
         DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
 
-      install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/TarotdeMarseille
-              DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/TarotdeMarseille
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/Solabusca
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/card_meanings.json
         DESTINATION ${CMAKE_INSTALL_BINDIR})
