@@ -5,7 +5,7 @@
 #include <QStyleFactory>
 #include"tarotorderdialog.h"
 #include"Globals.h"
-
+#include "donationdialog.h"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
@@ -136,9 +136,19 @@ MainWindow::MainWindow(QWidget *parent)
     helpMenu->addAction("&How to Add Custom Spreads", this, &MainWindow::onShowAddCustomSpreads);
     helpMenu->addAction("&Custom Spreads", this, &MainWindow::onShowCustomSpreads);
     helpMenu->addAction("&ChangeLog", this, &MainWindow::onShowChangelog);
-
+    QAction *supportAction = helpMenu->addAction(tr("Support Us"));
+        connect(supportAction, &QAction::triggered, this, [this]() {
+            DonationDialog supportusDialog(this);
+            supportusDialog.setObjectName("donationDialog");
+            supportusDialog.setStyleSheet("background-color: white; color: black;");
+            supportusDialog.exec();
+        });
     connect(dockControls->getZoomSlider(), &QSlider::valueChanged, this, &MainWindow::handleZoomSlider);
 
+    connect(tarotScene, &TarotScene::viewRefreshRequested,[this]{
+        //clearQuestionButton->click();
+        meaningDisplay->clear();
+    });
 }
 
 MainWindow::~MainWindow()
@@ -167,17 +177,67 @@ void MainWindow::createDocks() {
     leftDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     addDockWidget(Qt::LeftDockWidgetArea, leftDock);
 
-    rightDock = new QDockWidget("Card Meaning",this);
+
+    //
+    rightDock = new QDockWidget("Card Meanings", this);
     //rightDock->setStyleSheet("QDockWidget::title { text-align: center; }");
+    leftDock->setFeatures(QDockWidget::DockWidgetClosable);
 
-    //rightDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    leftDock->setFeatures(QDockWidget::DockWidgetClosable); // Makes it hideable
+    // Create a container widget for the question input and meaning display
+    QWidget *rightDockWidget = new QWidget(this);
+    QVBoxLayout *rightLayout = new QVBoxLayout(rightDockWidget);
 
+    // Create question section
+    /*
+    QGroupBox *questionGroup = new QGroupBox("Question", this);
+    QVBoxLayout *questionLayout = new QVBoxLayout(questionGroup);
+
+    // Create question input and button
+    QTextEdit *questionInput = new QTextEdit(this);
+    questionInput->setPlaceholderText("Enter your question for the reading...");
+    questionInput->setMaximumHeight(80);
+
+    QPushButton *setQuestionButton = new QPushButton("Set Question", this);
+
+    questionLayout->addWidget(questionInput);
+    questionLayout->addWidget(setQuestionButton);
+
+    // Add question section to right layout
+    rightLayout->addWidget(questionGroup);
+    */
+
+
+    QGroupBox *questionGroup = new QGroupBox("Question", this);
+    QVBoxLayout *questionLayout = new QVBoxLayout(questionGroup);
+
+    // Create question input and button
+    questionInput = new QTextEdit(this);
+    questionInput->setPlaceholderText("Enter your question for the reading...");
+    questionInput->setMaximumHeight(80);
+
+    // Create buttons and arrange them horizontally
+    QPushButton *setQuestionButton = new QPushButton("Set Question", this);
+    clearQuestionButton = new QPushButton("Clear", this);
+
+    // Create horizontal layout for buttons
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addWidget(setQuestionButton);
+    buttonLayout->addWidget(clearQuestionButton);
+
+    questionLayout->addWidget(questionInput);
+    questionLayout->addLayout(buttonLayout);  // Add the horizontal button layout
+
+    // Add question section to right layout
+    rightLayout->addWidget(questionGroup);
+
+    // Add meaning display
     meaningDisplay = new MeaningDisplay(this);
-    rightDock->setWidget(meaningDisplay);
+    rightLayout->addWidget(meaningDisplay, 1); // Give meaning display most space
+
+    rightDock->setWidget(rightDockWidget);
     rightDock->setAllowedAreas(Qt::RightDockWidgetArea);
     addDockWidget(Qt::RightDockWidgetArea, rightDock);
-
+    //
     // Connect the new signals
     connect(dockControls, &DockControls::deckLoaded,
             this, &MainWindow::onDeckLoaded);
@@ -185,6 +245,18 @@ void MainWindow::createDocks() {
             this, &MainWindow::onReversedCardsToggled);
     connect(dockControls, &DockControls::swapEightElevenToggled,
             this, &MainWindow::onSwapEightElevenToggled);
+    connect(setQuestionButton, &QPushButton::clicked, [this]{
+        QString question = questionInput->toPlainText().trimmed();
+        if (question.isEmpty()) return;
+        mistralApi->setQuery(question);
+        QMessageBox::information(this, "Question Set", "Your question has been set.\n"
+                                                       "Now deal the cards and request ai for interpretation.");
+    });
+
+    connect(clearQuestionButton, &QPushButton::clicked, [this]{
+        questionInput->clear();
+        mistralApi->setQuery(QString());
+    });
 }
 
 
@@ -235,6 +307,7 @@ void MainWindow::onSwapEightElevenToggled(bool allowed)
 
 
 void MainWindow::onDealClicked() {
+    readingDisplayed = false;
     QString currentSpread = dockControls->spreadSelector->currentText();
 
     // Check for built-in spreads first
@@ -262,6 +335,10 @@ void MainWindow::onDealClicked() {
 
 
 void MainWindow::onGetReadingClicked() {
+    if(tarotScene->getReadingRequested() && readingDisplayed) return;
+
+
+    dockControls->readingDisplay->clear();
     // Check if we have an API key
     if (!mistralApi->hasApiKey()) {
         // Show dialog to get API key
@@ -276,16 +353,17 @@ void MainWindow::onGetReadingClicked() {
             return;
         }
     }
-    if(tarotScene->getReadingRequested())
-        return;
+
 
     // Get the prompt from TarotScene
     QString prompt = tarotScene->generateReadingPrompt();
 
     if (prompt.startsWith("Error:")) {
         dockControls->readingDisplay->setText(prompt);
+        readingDisplayed = false;
         return;
     }
+
 
     // Show loading message
     dockControls->readingDisplay->setText("Generating reading...");
@@ -297,7 +375,9 @@ void MainWindow::onGetReadingClicked() {
 
 void MainWindow::onReadingReady(const QString& reading) {
     // Display the reading
-    dockControls->readingDisplay->setText(reading);
+    QString html = markdownToHtml(reading);
+    dockControls->readingDisplay->setText(html);
+    readingDisplayed = true;
 }
 
 void MainWindow::onApiError(const QString& errorMessage) {
@@ -359,6 +439,7 @@ void MainWindow::onSaveReading() {
     //
 
     json["reading"] = dockControls->readingDisplay->toPlainText();
+    json["query"] = questionInput->toPlainText().trimmed();
 
     QJsonArray cardsArray;
     const QVector<CardLoader::CardData>& cards = tarotScene->getCurrentCards();
@@ -448,6 +529,10 @@ void MainWindow::onLoadReading() {
     // Load reading
     if (json.contains("reading")) {
         dockControls->readingDisplay->setText(json["reading"].toString());
+    }
+
+    if (json.contains("query")) {
+        questionInput->setText(json["query"].toString());
     }
 
     QMessageBox::information(this, "Load Successful",
@@ -544,12 +629,12 @@ void MainWindow::onCreateCustomSpreadClicked()
 
     // Set delete-on-close attribute to ensure proper cleanup
     designer->setAttribute(Qt::WA_DeleteOnClose);
-
-
+    designer->setAttribute(Qt::WA_TranslucentBackground);
+    designer->setWindowOpacity(0.8);
     //
-    QRect mainGeometry = this->geometry();
-    QPoint dialogPos = mainGeometry.topRight() + QPoint(20, 50); // 20px right, 50px down
-    designer->move(dialogPos);
+    //QRect mainGeometry = this->geometry();
+    //QPoint dialogPos = mainGeometry.topRight() + QPoint(20, 50); // 20px right, 50px down
+    //designer->move(dialogPos);
     //
 
     // Show the dialog
@@ -630,4 +715,45 @@ void MainWindow::handleZoomSlider(int value)
     centralView->setTransform(transform);
 
     currentZoomLevel = newZoom;
+}
+
+
+QString MainWindow::markdownToHtml(const QString &markdown)
+{
+    QString html = markdown;
+
+    // Convert headers
+    html.replace(QRegularExpression("^###### (.*)$", QRegularExpression::MultilineOption), "<h6>\\1</h6>");
+    html.replace(QRegularExpression("^##### (.*)$", QRegularExpression::MultilineOption), "<h5>\\1</h5>");
+    html.replace(QRegularExpression("^#### (.*)$", QRegularExpression::MultilineOption), "<h4>\\1</h4>"); 
+    html.replace(QRegularExpression("^### (.*)$", QRegularExpression::MultilineOption), "<h3>\\1</h3>");
+    html.replace(QRegularExpression("^## (.*)$", QRegularExpression::MultilineOption), "<h2>\\1</h2>");
+    html.replace(QRegularExpression("^# (.*)$", QRegularExpression::MultilineOption), "<h1>\\1</h1>");
+
+    // Convert bold (**text**)
+    html.replace(QRegularExpression("\\*\\*(.*?)\\*\\*"), "<b>\\1</b>");
+
+    // Convert italic (*text*)
+    html.replace(QRegularExpression("\\*(.*?)\\*"), "<i>\\1</i>");
+
+    // Convert bullet points
+    //html.replace(QRegularExpression("^\\- (.*)$", QRegularExpression::MultilineOption), "• \\1<br>");
+    //html.replace(QRegularExpression("^\\- (.*)$", QRegularExpression::MultilineOption), "• \\1<br>");
+
+    // Handle • bullets (with optional whitespace)
+    html.replace(QRegularExpression("^[\\s]*\\•[\\s]+(.*)$", QRegularExpression::MultilineOption), "• \\1<br>");
+
+    // Handle - bullets (with optional whitespace)
+    html.replace(QRegularExpression("^[\\s]*\\-[\\s]+(.*)$", QRegularExpression::MultilineOption), "• \\1<br>");
+
+    // Handle * bullets (with optional whitespace)
+    html.replace(QRegularExpression("^[\\s]*\\*[\\s]+(.*)$", QRegularExpression::MultilineOption), "• \\1<br>");
+
+    // Convert horizontal rules (---, ***, ___) with optional spaces
+    html.replace(QRegularExpression("^\\s*(---|\\*\\*\\*|___)\\s*$", QRegularExpression::MultilineOption), "<hr>");
+
+    html.replace("\n", "<br>");
+
+    //return "<html><body>" + html + "</body></html>";
+    return html;
 }

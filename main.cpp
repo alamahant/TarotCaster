@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("");
     QCoreApplication::setApplicationName("TarotCaster");
-    QCoreApplication::setApplicationVersion("1.2.1");
+    QCoreApplication::setApplicationVersion("1.2.2");
     QDir().mkpath(getLocalDataDirPath());
     QDir().mkpath(getUserDecksDirPath());
     QDir().mkpath(getUnorderedDecksDirPath());

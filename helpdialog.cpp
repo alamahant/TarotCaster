@@ -96,7 +96,9 @@ void HelpDialog::setupAbout()
         <li>Save and load readings</li>
     </ul>
     <p>Built with Qt 6 and C++.</p>
-    <p>Visit <a href="https://github.com/alamahant/TarotCaster">https://github.com/alamahant/TarotCaster</a> for more information.</p>
+    <p>Available for Linux, Windows, Macos and Flatpak.</p>
+
+    <p>Visit <a href="https://github.com/alamahant/TarotCaster/releases/latest">https://github.com/alamahant/TarotCaster/releases/latest</a> for more information.</p>
 )").arg(QApplication::applicationVersion());
 
 
@@ -450,6 +452,55 @@ void HelpDialog::setupChangelogHelp()
     titleLabel->setText("TarotCaster Version History");
     QString content = R"(
         <h2 align='center'>Changelog</h2>
+<hr>
+
+<h3 style='color:#8C6D46;'>Version 1.2.2 - October 29, 2025</h3>
+
+<h4>Technical Updates</h4>
+<ul>
+    <li><strong>Updated KDE Runtime:</strong>
+        <ul>
+            <li>Upgraded KDEFLTAPAK runtime to version 6.9 for improved performance and compatibility</li>
+            <li>Ensures better system integration and future-proof security</li>
+        </ul>
+    </li>
+
+<br>
+    <li><strong>New Feature: Question Box:</strong>
+        <ul>
+        <li>Added a question box, so that the user can set a question before dealing the cards</li>
+        <li>Then the ai will interpret the spread taking in cosideration the user's question</li>
+        </ul>
+    </li>
+</ul>
+
+<br>
+    <li><strong>Enhanced AI Response Capacity:</strong>
+        <ul>
+            <li>Updated MistralAPI class to increase allocated token limit for AI responses</li>
+            <li>Allows for more detailed and comprehensive spread interpretations</li>
+            <li>Better handles longer, in-depth readings without truncation</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>Visual Enhancements</h4>
+<ul>
+    <li><strong>HTML Rendering for AI Responses:</strong>
+        <ul>
+            <li>Implemented markdown-to-HTML conversion for AI spread interpretations</li>
+            <li>Delivers visually stunning rendition of tarot readings with proper formatting</li>
+            <li>Enhances readability and presentation of AI-generated content</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>Technical Improvements</h4>
+<ul>
+    <li>Performed comprehensive code polishing and optimization</li>
+    <li>Various under-the-hood improvements for stability and maintainability</li>
+    <li>Refined existing features for smoother user experience</li>
+</ul>
         <hr>
 
         <h3 style='color:#8C6D46;'>Version 1.2.1 - July 31, 2025</h3>

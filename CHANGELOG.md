@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.2.2] - 2025-10-29
+
+### Technical Updates
+- **Updated KDE Runtime**:
+  - Upgraded KDE Flatpak runtime to version 6.9 for improved performance and compatibility
+  - Ensures better system integration and future-proof security
+
+- **New Feature: Question Box**:
+  - Added a question box, so that the user can set a question before dealing the cards
+  - Then the ai will interpret the spread taking in cosideration the user's question
+
+- **Enhanced AI Response Capacity**:
+  - Updated MistralAPI class to increase allocated token limit for AI responses
+  - Allows for more detailed and comprehensive spread interpretations
+  - Better handles longer, in-depth readings without truncation
+
+### Visual Enhancements
+- **HTML Rendering for AI Responses**:
+  - Implemented markdown-to-HTML conversion for AI spread interpretations
+  - Delivers visually stunning rendition of tarot readings with proper formatting
+  - Enhances readability and presentation of AI-generated content
+
+### Technical Improvements
+- Performed comprehensive code polishing and optimization
+- Various under-the-hood improvements for stability and maintainability
+- Refined existing features for smoother user experience
+
 ## [1.2.1] - 2025-07-31
 
 ### New Features

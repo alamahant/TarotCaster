@@ -47,8 +47,9 @@ private:
 
     // Create the JSON request for Mistral AI
     QJsonDocument createRequestJson(const QString& prompt);
-
+    QString query;
 public:
     QString getApiKey() const { return apiKey; }
-};
+    void setQuery(const QString &newQuery);
+    };
 

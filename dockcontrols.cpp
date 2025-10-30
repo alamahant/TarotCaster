@@ -1,9 +1,9 @@
 #include "dockcontrols.h"
 #include<QThread>
 #include"Globals.h"
+#include<QSplitter>
 
 QRandomGenerator DockControls::randomGen;
-
 
 DockControls::DockControls(QWidget *parent)
     : QWidget{parent},
@@ -107,6 +107,7 @@ DockControls::DockControls(QWidget *parent)
 
     // Create the reading display area directly in the main layout
     readingDisplay = new QTextEdit(this);
+    readingDisplay->setAcceptRichText(true);
     readingDisplay->setReadOnly(true);
     //readingDisplay->setStyleSheet("background-color: #1a1a1a; color: gold; border: none;");
     readingDisplay->setMinimumHeight(200);
@@ -146,6 +147,7 @@ DockControls::DockControls(QWidget *parent)
     //full deck
     connect(displayFullDeckButton, &QPushButton::clicked, this, &DockControls::onDisplayFullDeckClicked);
 }
+
 
 DockControls::~DockControls()
 {

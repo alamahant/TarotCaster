@@ -43,6 +43,7 @@ qt_add_executable(TarotCaster
         tarotorderdialog.h tarotorderdialog.cpp
         Globals.h
         Globals.cpp
+        donationdialog.cpp donationdialog.h
 
     )
 # Define target properties for Android with Qt 6 as:

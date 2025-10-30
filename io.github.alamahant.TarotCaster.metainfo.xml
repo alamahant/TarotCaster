@@ -59,7 +59,36 @@
       <image>https://raw.githubusercontent.com/alamahant/TarotCaster/master/screenshots/3card.png</image>
     </screenshot>
   </screenshots>
+
   <releases>
+
+    <release version="1.2.2" date="2025-10-29">
+      <description>
+        <p>Technical Updates:</p>
+        <ul>
+          <li>Upgraded KDE Flatpak runtime to version 6.9 for improved performance and compatibility</li>
+          <li>Enhanced MistralAPI class with increased token limit for longer AI responses</li>
+        </ul>
+
+	<p>New Features::</p>
+        <ul>
+          <li>Added a question box, so that the user can set a question before dealing the cards</li>
+          <li>Then the ai will interpret the spread taking in cosideration the user's question</li>
+        </ul>
+
+        <p>Visual Enhancements:</p>
+        <ul>
+          <li>Implemented HTML rendering for AI markdown responses with stunning visual presentation</li>
+        </ul>
+        <p>Technical Improvements:</p>
+        <ul>
+          <li>Performed comprehensive code polishing and optimization</li>
+          <li>Various under-the-hood improvements for stability and maintainability</li>
+        </ul>
+      </description>
+    </release>
+
+
     <release version="1.2.1" date="2025-07-31">
       <description>
         <p>New Features:</p>
@@ -77,6 +106,7 @@
         </ul>
       </description>
     </release>
+
     <release version="1.2.0" date="2025-05-16">
       <description>
         <p>New Features:</p>
@@ -107,6 +137,7 @@
         </ul>
       </description>
     </release>
+
     <release version="1.1.0" date="2025-04-29">
       <description>
         <p>New Content:</p>

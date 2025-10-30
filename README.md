@@ -22,11 +22,7 @@ An AI-powered tarot reading application built with Qt that combines traditional 
 
 ## Installation
 
-- [Flatpak](https://flathub.org/en/apps/io.github.alamahant.TarotCaster)
-- [Linux AppImage and Windows Deploy](https://github.com/alamahant/TarotCaster/releases/latest)
-
-### Flatpak
-
+### Flatpak (Coming Soon)
 ```bash
 flatpak install io.github.alamahant.TarotCaster
 ```

@@ -86,7 +86,10 @@ private:
     //zoom
 private slots:
     void handleZoomSlider(int value);
-
-
+private:
+    QString markdownToHtml(const QString &markdown);
+    QPushButton *clearQuestionButton = nullptr;
+    QTextEdit *questionInput = nullptr;
+    bool readingDisplayed = false;
 };
 #endif // MAINWINDOW_H

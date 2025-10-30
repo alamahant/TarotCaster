@@ -102,7 +102,7 @@ void TarotScene::clearScene() {
         delete item;
     }
 
-    //emit viewRefreshRequested();
+    emit viewRefreshRequested();
 }
 
 void TarotScene::setAllowReversedCards(bool allow) {

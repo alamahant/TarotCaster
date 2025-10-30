@@ -109,10 +109,17 @@ QJsonDocument MistralAPI::createRequestJson(const QString& prompt)
 {
     QJsonObject systemMessage;
     systemMessage["role"] = "system";
+    if(query.isEmpty()) {
     systemMessage["content"] = "You are a skilled tarot reader with deep knowledge of tarot symbolism and interpretation. "
                                "Provide insightful, thoughtful readings that connect the cards to the querent's situation. "
                                "Be mystical but practical, offering both spiritual insights and actionable advice.";
-
+    }else {
+        systemMessage["content"] = QString("You are a skilled tarot reader with deep knowledge of tarot symbolism and interpretation. "
+                                   "Focus primarily and directly on the querent's specific question:\n"
+                                    "**Question:** '%1'\n"
+                                   "Provide a reading that directly addresses their concerns and offers practical insights. "
+                                   "Structure your response to answer their question clearly while interpreting the cards in that context.").arg(query);
+    }
     QJsonObject userMessage;
     userMessage["role"] = "user";
     userMessage["content"] = prompt;
@@ -125,7 +132,12 @@ QJsonDocument MistralAPI::createRequestJson(const QString& prompt)
     requestObject["model"] = "mistral-medium";  // Use appropriate model
     requestObject["messages"] = messages;
     requestObject["temperature"] = 0.7;  // Adjust for creativity vs consistency
-    requestObject["max_tokens"] = 2000;  // Adjust based on desired response length
+    requestObject["max_tokens"] = 4096;  // Adjust based on desired response length
 
     return QJsonDocument(requestObject);
+}
+
+void MistralAPI::setQuery(const QString &newQuery)
+{
+    query = newQuery;
 }
