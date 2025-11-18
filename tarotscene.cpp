@@ -15,7 +15,11 @@ void TarotScene::setReversedCardsAllowed(bool allowed)
 }
 
 TarotScene::TarotScene(QObject *parent) : QGraphicsScene(parent),
+    #ifdef GENTOO_BUILD
+    cardLoader("/usr/share/tarotcaster/decks/OriginalRiderWaite")
+    #else
     cardLoader(QApplication::applicationDirPath() + "/decks/OriginalRiderWaite")
+    #endif
 {
     setBackgroundBrush(Qt::black);
     cardLoader.loadCards();  // Load initial deck

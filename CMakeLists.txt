@@ -9,6 +9,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(GENTOO_BUILD "Build for Gentoo" OFF)
+if(GENTOO_BUILD)
+    add_compile_definitions(GENTOO_BUILD)
+endif()
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Network Qt6OpenGLWidgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network OpenGLWidgets)
 #configure_file(card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)

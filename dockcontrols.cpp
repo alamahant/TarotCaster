@@ -7,8 +7,11 @@ QRandomGenerator DockControls::randomGen;
 
 DockControls::DockControls(QWidget *parent)
     : QWidget{parent},
+      #ifdef GENTOO_BUILD
+      cardLoader("/usr/share/tarotcaster/decks/OriginalRiderWaite") // Initialize here
+      #else
       cardLoader(QApplication::applicationDirPath() + "/decks/OriginalRiderWaite") // Initialize here
-
+      #endif
 {
 
     generateSeed();
@@ -231,7 +234,11 @@ void DockControls::loadAvailableDecks() {
     deckSelector->clear();
 
     // System decks location (application directory)
+#ifdef GENTOO_BUILD
+    QString systemDecksPath = "/usr/share/tarotcaster/decks";
+#else
     QString systemDecksPath = QCoreApplication::applicationDirPath() + "/decks";
+#endif
 
     // User decks location - use the application name from QCoreApplication
     QString appName = QCoreApplication::applicationName();
@@ -296,7 +303,12 @@ void DockControls::onDeckSelected(const QString& deckName) {
 
     // If the path is empty (for backward compatibility), use the old method
     if (deckPath.isEmpty()) {
+#ifdef GENTOO_BUILD
+        deckPath = "/usr/share/tarotcaster/decks/" + deckName;
+
+#else
         deckPath = QApplication::applicationDirPath() + "/decks/" + deckName;
+#endif
     }
 
 
