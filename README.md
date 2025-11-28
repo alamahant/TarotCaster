@@ -1,8 +1,8 @@
 # TarotCaster
 
-An AI-powered tarot reading application built with Qt that combines traditional tarot wisdom with modern artificial intelligence.
-
 ![TarotCaster Screenshot](screenshots/Screenshot8.png)
+
+An AI-powered tarot reading application built with Qt that combines traditional tarot wisdom with modern artificial intelligence.
 
 ## Features
 
