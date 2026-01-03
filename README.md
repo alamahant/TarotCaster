@@ -4,6 +4,9 @@
 
 An AI-powered tarot reading application built with Qt that combines traditional tarot wisdom with modern artificial intelligence.
 
+Available in Flathub:
+https://flathub.org/en/apps/search?q=alamahant
+
 ## Features
 
 - **Multiple Tarot Decks Support**: Includes the classic Rider-Waite deck with support for adding your own custom decks
