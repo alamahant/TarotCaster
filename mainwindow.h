@@ -64,7 +64,6 @@ private slots:
     void onLoadReading();
 
 private slots:
-    void onEditApiKey();
     void onOpenPreferences();
     void onShowAbout();
     void onShowInstructions();
@@ -91,5 +90,7 @@ private:
     QPushButton *clearQuestionButton = nullptr;
     QTextEdit *questionInput = nullptr;
     bool readingDisplayed = false;
+    void configureAIModels();
+
 };
 #endif // MAINWINDOW_H

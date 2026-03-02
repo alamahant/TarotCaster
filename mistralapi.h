@@ -18,11 +18,6 @@ public:
     // Generate a tarot reading based on the provided card information
     void generateReading(const QString& prompt);
 
-    // Check if API key exists
-    bool hasApiKey() const;
-
-    // Set API key
-    void setApiKey(const QString& apiKey);
 
 signals:
     // Signal emitted when reading is ready
@@ -37,19 +32,22 @@ private slots:
 
 private:
     QNetworkAccessManager* networkManager;
-    QString apiKey;
-
-    // Load API key from settings
-    void loadApiKey();
-
-    // Save API key to settings
-    void saveApiKey();
 
     // Create the JSON request for Mistral AI
     QJsonDocument createRequestJson(const QString& prompt);
     QString query;
 public:
-    QString getApiKey() const { return apiKey; }
+    QString getApiKey() const { return m_apiKey; }
     void setQuery(const QString &newQuery);
-    };
+
+private:
+    QString m_apiKey;
+    QString m_apiEndpoint;
+    QString m_model;
+    int m_maxTokens;
+    double m_temperature;
+    QString m_lastError;
+public slots:
+        bool loadActiveModel();
+};
 

@@ -6,6 +6,8 @@
 #include"tarotorderdialog.h"
 #include"Globals.h"
 #include "donationdialog.h"
+#include "modelselectordialog.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 
@@ -42,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
     glWidget->setFormat(format);
     centralView->setViewport(glWidget);
 #endif
+
+
     setCentralWidget(centralView);
 
     createDocks();
@@ -107,15 +111,78 @@ MainWindow::MainWindow(QWidget *parent)
     toggleRightDockAction->setShortcut(QKeySequence("Ctrl+R")); // Optional shortcut
     connect(toggleRightDockAction, &QAction::toggled, rightDock, &QDockWidget::setVisible);
 
-    //
-    // Edit Menu
-    QMenu *editMenu = menuBar()->addMenu("&Edit");
-    editMenu->addAction("&Mistral API Key", this, &MainWindow::onEditApiKey);
+
 
     // Settings Menu
     QMenu *settingsMenu = menuBar()->addMenu("&Settings");
-    // We'll populate this later
-    settingsMenu->addAction("&Preferences", this, &MainWindow::onOpenPreferences);
+
+    //
+    QAction *aiModelsAction = settingsMenu->addAction("Configure AI &Models...", this, &MainWindow::configureAIModels);
+
+
+
+    QAction *checkModelAction = settingsMenu->addAction("Check AI Model &Status", this, [this]() {
+        if (!activeModelLoaded) {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("AI Model Not Configured");
+            msgBox.setText("No active AI model found. You need to configure a model to get chart interpretations.");
+            msgBox.setInformativeText("Would you like to configure one now?\n\n"
+                                      "Note: If you've been using Mistral, you can add it as a provider with your API key.");
+
+            QPushButton *configureButton = msgBox.addButton("Configure Models", QMessageBox::ActionRole);
+            QPushButton *closeButton = msgBox.addButton(QMessageBox::Close);
+
+            msgBox.exec();
+
+            if (msgBox.clickedButton() == configureButton) {
+                configureAIModels();
+            }
+        } else {
+            // Load the active model settings
+            QSettings settings;
+            settings.beginGroup("Models");
+            QString activeModelName = settings.value("ActiveModel").toString();
+            settings.beginGroup(activeModelName);
+
+            QString provider = settings.value("provider").toString();
+            QString endpoint = settings.value("endpoint").toString();
+            QString modelName = settings.value("modelName").toString();
+            QString apiKey = settings.value("apiKey").toString();
+            double temperature = settings.value("temperature", 0.7).toDouble();
+            int maxTokens = settings.value("maxTokens", 8192).toInt();
+
+            settings.endGroup();
+            settings.endGroup();
+
+            // Build status message
+            QString statusMessage = QString(
+                "<b>Active Model:</b> %1<br><br>"
+                "<b>Provider:</b> %2<br>"
+                "<b>Model:</b> %3<br>"
+                "<b>Endpoint:</b> %4<br>"
+                "<b>Temperature:</b> %5<br>"
+                "<b>Max Tokens:</b> %6<br>"
+                "<b>API Key:</b> %7"
+            ).arg(activeModelName)
+             .arg(provider)
+             .arg(modelName)
+             .arg(endpoint)
+             .arg(temperature)
+             .arg(maxTokens)
+             .arg(apiKey.isEmpty() ? "<font color='red'><b>MISSING</b></font>" : "<font color='green'><b>Configured</b></font>");
+
+            // Check if API key is missing for cloud providers (not local)
+            if (apiKey.isEmpty() && !endpoint.contains("localhost") && !endpoint.contains("127.0.0.1")) {
+                statusMessage += "<br><br><font color='red'><b>WARNING:</b> This appears to be a cloud provider but no API key is set. Interpretations will fail.</font>";
+            }
+
+            QMessageBox::information(this, "AI Model Status", statusMessage);
+        }
+    });
+    checkModelAction->setIcon(QIcon::fromTheme("dialog-information"));
+    //
+
+    //settingsMenu->addAction("&Preferences", this, &MainWindow::onOpenPreferences);
 
     // Tools Menu (create if it doesn't exist)
     QMenu* toolsMenu = menuBar()->addMenu("&Tools");
@@ -212,11 +279,14 @@ void MainWindow::createDocks() {
 
     // Create question input and button
     questionInput = new QTextEdit(this);
+    questionInput->setToolTip("Your question will be forwarded to the AI for interpretation");
     questionInput->setPlaceholderText("Enter your question for the reading...");
     questionInput->setMaximumHeight(80);
 
     // Create buttons and arrange them horizontally
     QPushButton *setQuestionButton = new QPushButton("Set Question", this);
+    //setQuestionButton->setToolTip("Your question will be forwarded to the AI for interpretation");
+
     clearQuestionButton = new QPushButton("Clear", this);
 
     // Create horizontal layout for buttons
@@ -340,18 +410,34 @@ void MainWindow::onGetReadingClicked() {
 
     dockControls->readingDisplay->clear();
     // Check if we have an API key
-    if (!mistralApi->hasApiKey()) {
-        // Show dialog to get API key
-        bool ok;
-        QString apiKey = QInputDialog::getText(this, "Mistral API Key",
-                                               "Please enter your Mistral AI API key:",
-                                               QLineEdit::Normal, "", &ok);
-        if (ok && !apiKey.isEmpty()) {
-            mistralApi->setApiKey(apiKey);
+    if (!activeModelLoaded) {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle("AI Model Not Configured");
+        msgBox.setText("No active AI model found.");
+        msgBox.setInformativeText("Please configure an AI model in Settings → Configure AI Models before generating readings.\n\n"
+                                  "You can use Mistral (get your free key at mistral.ai), OpenAI, Groq, or local models like Ollama.");
+
+        QPushButton *openSettingsButton = msgBox.addButton("Open Settings", QMessageBox::ActionRole);
+        QPushButton *closeButton = msgBox.addButton(QMessageBox::Close);
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == openSettingsButton) {
+            // Open your model selector dialog
+            ModelSelectorDialog dlg(this);
+            dlg.exec();
+
+            // Reload model after dialog closes
+            activeModelLoaded = mistralApi->loadActiveModel();
+
+            // If still not loaded, show error
+            if (!activeModelLoaded) {
+                dockControls->readingDisplay->setText("No AI model configured. Please configure one and try again.");
+            }
         } else {
-            dockControls->readingDisplay->setText("API key is required to generate readings.");
-            return;
+            dockControls->readingDisplay->setText("AI model configuration is required to generate readings.");
         }
+        return;
     }
 
 
@@ -539,43 +625,6 @@ void MainWindow::onLoadReading() {
                              "Reading loaded successfully from " + fileName);
 }
 
-void MainWindow::onEditApiKey()
-{
-    // Create a custom dialog with information
-    QDialog dialog(this);
-    dialog.setWindowTitle("Mistral API Key");
-
-    QVBoxLayout *layout = new QVBoxLayout(&dialog);
-
-    // Add information label with link
-    QLabel *infoLabel = new QLabel("Enter your Mistral API key below. You can get a free API key from:");
-    layout->addWidget(infoLabel);
-
-    // Add clickable link
-    //QLabel *linkLabel = new QLabel("<a href='https://mistral.ai'>https://mistral.ai</a>");
-    QLabel *linkLabel = new QLabel("<a href='https://mistral.ai' style='color: gold;'>https://mistral.ai</a>");
-
-    linkLabel->setOpenExternalLinks(true); // Makes the link clickable
-    layout->addWidget(linkLabel);
-
-    // Add line edit for API key
-    QLineEdit *keyEdit = new QLineEdit();
-    keyEdit->setText(mistralApi->getApiKey());
-    keyEdit->setEchoMode(QLineEdit::Password); // Hide the API key
-    layout->addWidget(keyEdit);
-
-    // Add buttons
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    layout->addWidget(buttonBox);
-
-    // Show dialog and process result
-    if (dialog.exec() == QDialog::Accepted) {
-        QString newKey = keyEdit->text().trimmed();
-        mistralApi->setApiKey(newKey);
-    }
-}
 
 
 void MainWindow::onOpenPreferences()
@@ -756,4 +805,28 @@ QString MainWindow::markdownToHtml(const QString &markdown)
 
     //return "<html><body>" + html + "</body></html>";
     return html;
+}
+
+
+
+void MainWindow::configureAIModels()
+{
+    ModelSelectorDialog dlg(this);
+
+    // Connect to activeModelChanged signal
+       connect(&dlg, &ModelSelectorDialog::activeModelChanged, this, [this](const QString &modelName) {
+           // When active model changes, reload it in MistralAPI
+           // This will update GlobalFlags::activeModelLoaded internally
+           mistralApi->loadActiveModel();
+
+           // Optional: Show status message
+           statusBar()->showMessage(tr("Active model changed to: %1").arg(modelName), 3000);
+       });
+
+       dlg.exec();  // Just show the dialog, no need to process results
+
+        mistralApi->loadActiveModel();
+
+       // The dialog saves changes to QSettings automatically
+       // The MistralAPI class will read the active model from QSettings when needed
 }

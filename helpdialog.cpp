@@ -159,6 +159,31 @@ void HelpDialog::setupInstructions()
             <li>Take time to reflect on each card before requesting an interpretation.</li>
             <li>Remember that tarot is a tool for reflection and insight, not absolute prediction.</li>
         </ul>
+
+        <h3>Multi-Provider AI Model Selector</h3>
+        <p>TaroCaster now supports multiple AI providers for flexible tarot interpretations:</p>
+        <ol>
+            <li><strong>Configure Models:</strong> Go to Settings → Configure AI Models</li>
+            <li><strong>Add Provider:</strong> Click "Add" and enter:
+                <ul>
+                    <li>Friendly Name (e.g., "My Mistral")</li>
+                    <li>Provider name (Mistral, OpenAI, Groq, Ollama)</li>
+                    <li>Endpoint URL (pre-filled for common providers)</li>
+                    <li>API Key (required for cloud providers, optional for Ollama)</li>
+                    <li>Model Name (e.g., mistral-medium, gpt-4, llama3)</li>
+                    <li>Temperature and Max Tokens (adjustable)</li>
+                </ul>
+            </li>
+            <li><strong>Set Active:</strong> Select a model and click "Set Active"</li>
+            <li><strong>Check Status:</strong> Settings → Check AI Model Status shows:
+                <ul>
+                    <li>Currently active model details</li>
+                    <li>API key status (green if set, red if missing)</li>
+                    <li>Warnings for cloud providers missing keys</li>
+                </ul>
+            </li>
+        </ol>
+
     )";
 
     contentBrowser->setHtml(instructionsText);
@@ -453,6 +478,32 @@ void HelpDialog::setupChangelogHelp()
     QString content = R"(
         <h2 align='center'>Changelog</h2>
 <hr>
+
+<h3 style='color:#8C6D46;'>Version 1.2.3 - March 3, 2026</h3>
+
+<h4>Multi-Provider AI Integration</h4>
+<ul>
+    <li><strong>Model Selector Dialog:</strong> Add, edit, delete and set active AI models</li>
+    <li><strong>Provider Support:</strong> Mistral, OpenAI (ChatGPT), Groq, Ollama (local), and any OpenAI-compatible API</li>
+    <li><strong>Dynamic Configuration:</strong> Endpoint, API key, model name, temperature, max tokens stored in QSettings</li>
+    <li><strong>API Refactor:</strong> TarotAPI now provider-agnostic with loadActiveModel() method</li>
+    <li><strong>Status Check:</strong> "Check AI Model Status" shows active model details with API key warnings</li>
+</ul>
+
+<h4>Public Domain Visconti Tarot</h4>
+<ul>
+    <li><strong>Historical Deck:</strong> Added complete Visconti-Sforza tarot deck (15th century, public domain)</li>
+    <li><strong>High-Resolution:</strong> Authentic scanned images properly integrated</li>
+    <li><strong>Deck Selector:</strong> Visconti now available alongside existing decks</li>
+</ul>
+
+<h4>Custom Spread Designer - Fully Debugged</h4>
+<ul>
+    <li><strong>Complete Overhaul:</strong> All known issues fixed - now works flawlessly</li>
+    <li><strong>Drag-and-Drop:</strong> Pixel-perfect card positioning with proper serialization</li>
+    <li><strong>Position Management:</strong> Names and descriptions persist correctly</li>
+    <li><strong>Validation & Preview:</strong> Spread validation ensures proper layout before use</li>
+</ul>
 
 <h3 style='color:#8C6D46;'>Version 1.2.2 - October 29, 2025</h3>
 

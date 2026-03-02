@@ -13,6 +13,8 @@ QString getLocalDataDirPath() {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
+bool activeModelLoaded = false;
+
 const QMap<QString, QString> tarotNames = {
     // Major Arcana (0-21)
     {"00", "The Fool"},

@@ -54,6 +54,29 @@ void CustomSpreadDesigner::setupUI()
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
+
+    QLabel* instructionsLabel = new QLabel(this);
+    instructionsLabel->setText(
+        "Instructions:\n"
+        "- Click 'Add Card' to add a new position.\n"
+        "- Click a position in the 'Defined Positions' list to view or edit\n"
+        " its name and significance.\n"
+        "- Fill in both name and significance before adding the next card\n"
+        " or saving.\n"
+        "- You can rearrange cards in the scene by dragging.\n"
+        "- Press 'Save Spread' when finished."
+    );
+    instructionsLabel->setWordWrap(true);
+    //instructionsLabel->setStyleSheet("color: #444; font-style: italic; font-size: 11pt;");
+    instructionsLabel->setStyleSheet("color: gold; font-weight: bold; font-size: 11pt;");
+    instructionsLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    //instructionsLabel->setMaximumWidth(230);                   // Restrict width to dialog width
+    //instructionsLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum); // Let height grow as needed
+
+    // Add it to the main layout at the top
+    mainLayout->addWidget(instructionsLabel);
+    //mainLayout->addSpacing(2);
+
     // Spread Information Group
     QGroupBox* spreadInfoGroup = new QGroupBox("Spread Information", this);
     QFormLayout* spreadInfoLayout = new QFormLayout(spreadInfoGroup);
@@ -67,7 +90,7 @@ void CustomSpreadDesigner::setupUI()
     // Position Details Group
     QGroupBox* positionGroup = new QGroupBox("Position Details", this);
     QFormLayout* positionLayout = new QFormLayout(positionGroup);
-    m_positionNumberLabel = new QLabel("1", this);
+    m_positionNumberLabel = new QLabel("None", this);
     positionLayout->addRow("Position Number:", m_positionNumberLabel);
     m_positionNameEdit = new QLineEdit(this);
     positionLayout->addRow("Position Name:", m_positionNameEdit);
@@ -90,7 +113,7 @@ void CustomSpreadDesigner::setupUI()
     m_manageSpreadsButton = new QPushButton("Manage Spreads", this);
     buttonsLayout->addWidget(m_manageSpreadsButton);
 
-    buttonsLayout->addStretch();
+    //buttonsLayout->addStretch();
 
     m_saveSpreadButton = new QPushButton("Save Spread", this);
     m_saveSpreadButton->setEnabled(false);
@@ -132,9 +155,10 @@ void CustomSpreadDesigner::setupUI()
 }
 
 
-
+/*
 void CustomSpreadDesigner::addCard()
 {
+    commitCurrentEdits();
     try {
         if (!m_scene) {
             QMessageBox::warning(this, "Error", "Scene is not available");
@@ -189,7 +213,93 @@ void CustomSpreadDesigner::addCard()
         m_currentPositionNumber++;
 
         // Update position number label for next card
-        m_positionNumberLabel->setText(QString::number(m_currentPositionNumber));
+        //m_positionNumberLabel->setText(QString::number(m_currentPositionNumber - 1));
+
+        if (m_positions.isEmpty())
+            m_positionNumberLabel->setText("None");
+        else
+            m_positionNumberLabel->setText(QString::number(m_currentPositionNumber - 1));
+
+    } catch (const std::exception& e) {
+        QMessageBox::critical(this, "Error", QString("Exception in addCard: %1").arg(e.what()));
+    } catch (...) {
+        QMessageBox::critical(this, "Error", "Unknown exception in addCard");
+    }
+}
+
+*/
+
+void CustomSpreadDesigner::addCard()
+{
+    // Save the UI fields for the current card (if there is one)
+    if (!m_positions.isEmpty()) {
+        int lastIndex = m_positions.size() - 1;
+        m_positions[lastIndex].name = m_positionNameEdit->text();
+        m_positions[lastIndex].significance = m_positionSignificanceEdit->toPlainText();
+    }
+
+    try {
+        if (!m_scene) {
+            QMessageBox::warning(this, "Error", "Scene is not available");
+            return;
+        }
+
+        // Get the card back pixmap
+        QPixmap cardBackPixmap = m_scene->getCardLoader().getCardBack();
+        if (cardBackPixmap.isNull()) {
+            QMessageBox::warning(this, "Warning", "Failed to get card back image");
+            return;
+        }
+
+        // Create a new card item
+        TarotCardItem* card = new TarotCardItem(
+            cardBackPixmap,
+            cardBackPixmap,
+            -1 // Placeholder
+        );
+        card->setAcceptHoverEvents(false);
+
+        // Set custom data to identify it
+        card->setData(0, "spreadDesignerCard");
+        card->setData(1, m_currentPositionNumber);
+
+        // Position it in the center of the scene
+        QPointF center = m_scene->sceneRect().center();
+        card->setPos(center);
+
+        // Add to scene
+        m_scene->addItem(card);
+
+        // Create position data from the current UI fields
+        CardPosition position;
+        position.number = m_currentPositionNumber;
+        position.name = m_positionNameEdit->text().isEmpty()
+                            ? QString("Position %1").arg(m_currentPositionNumber)
+                            : m_positionNameEdit->text();
+        position.significance = m_positionSignificanceEdit->toPlainText();
+        position.position = center;
+
+        // Add to positions list
+        m_positions.append(position);
+
+        // Update UI
+        updatePositionList();
+        m_saveSpreadButton->setEnabled(true);
+
+        // Clear the UI fields for the next card
+        m_positionNameEdit->clear();
+        m_positionSignificanceEdit->clear();
+
+        // Enable editing fields
+        m_positionNameEdit->setEnabled(true);
+        m_positionSignificanceEdit->setEnabled(true);
+
+        // Increment position counter for next card
+        m_currentPositionNumber++;
+
+        // Update position number label for next card
+        m_positionNumberLabel->setText(QString::number(m_currentPositionNumber - 1));
+
     } catch (const std::exception& e) {
         QMessageBox::critical(this, "Error", QString("Exception in addCard: %1").arg(e.what()));
     } catch (...) {
@@ -200,12 +310,10 @@ void CustomSpreadDesigner::addCard()
 
 
 
-
-
-
+/*
 void CustomSpreadDesigner::saveSpread()
 {
-
+    commitCurrentEdits();
     // Update positions from scene before saving
     updatePositionsFromScene();
 
@@ -242,12 +350,57 @@ void CustomSpreadDesigner::saveSpread()
         QMessageBox::critical(this, "Error", "Failed to save the spread.");
     }
 }
+*/
+
+void CustomSpreadDesigner::saveSpread()
+{
+    // Commit the current UI fields for the last card
+    if (!m_positions.isEmpty()) {
+        int lastIndex = m_positions.size() - 1;
+        m_positions[lastIndex].name = m_positionNameEdit->text();
+        m_positions[lastIndex].significance = m_positionSignificanceEdit->toPlainText();
+    }
+
+    // Update positions from scene coordinates
+    updatePositionsFromScene();
+
+    if (!validateSpread()) {
+        return;
+    }
+
+    // Create a custom spread object
+    TarotScene::CustomSpread spread;
+    spread.name = m_spreadNameEdit->text();
+    spread.description = m_spreadDescriptionEdit->toPlainText();
+
+    // Add all positions
+    for (const auto& pos : m_positions) {
+        TarotScene::CustomSpreadPosition position;
+        position.number = pos.number;
+        position.name = pos.name;
+        position.significance = pos.significance;
+        position.x = pos.position.x();
+        position.y = pos.position.y();
+        spread.positions.append(position);
+    }
+
+    // Save the spread using TarotScene
+    if (m_scene && m_scene->saveCustomSpread(spread)) {
+        QMessageBox::information(this, "Success",
+                                 QString("Spread '%1' saved successfully with %2 positions.")
+                                     .arg(spread.name)
+                                     .arg(spread.positions.size()));
+        accept();
+    } else {
+        QMessageBox::critical(this, "Error", "Failed to save the spread.");
+    }
+}
 
 
-
-
+/*
 void CustomSpreadDesigner::positionSelected(int index)
 {
+    commitCurrentEdits();
     // Safety check
     if (index < 0 || index >= m_positions.size()) {
         m_selectedPositionIndex = -1;
@@ -273,7 +426,46 @@ void CustomSpreadDesigner::positionSelected(int index)
     highlightSelectedCard(position.number);
 }
 
+*/
 
+
+void CustomSpreadDesigner::positionSelected(int index)
+{
+    // Save current UI fields into previous selected position
+    if (m_selectedPositionIndex >= 0 && m_selectedPositionIndex < m_positions.size()) {
+        m_positions[m_selectedPositionIndex].name = m_positionNameEdit->text();
+        m_positions[m_selectedPositionIndex].significance = m_positionSignificanceEdit->toPlainText();
+    }
+
+    // Safety check
+    if (index < 0 || index >= m_positions.size()) {
+        m_selectedPositionIndex = -1;
+        clearPositionFields();
+        return;
+    }
+
+    // Store new selected index
+    m_selectedPositionIndex = index;
+    const CardPosition& position = m_positions[index];
+
+    // Block signals temporarily to avoid overwriting data while updating fields
+    m_positionNameEdit->blockSignals(true);
+    m_positionSignificanceEdit->blockSignals(true);
+
+    m_positionNumberLabel->setText(QString::number(position.number));
+    m_positionNameEdit->setText(position.name);
+    m_positionSignificanceEdit->setText(position.significance);
+
+    m_positionNameEdit->blockSignals(false);
+    m_positionSignificanceEdit->blockSignals(false);
+
+    // Enable editing fields
+    m_positionNameEdit->setEnabled(true);
+    m_positionSignificanceEdit->setEnabled(true);
+
+    // Highlight the selected card in the scene
+    highlightSelectedCard(position.number);
+}
 
 void CustomSpreadDesigner::updatePositionList()
 {
@@ -487,4 +679,16 @@ void CustomSpreadDesigner::manageCustomSpreads()
     dialog.exec();
 }
 
+void CustomSpreadDesigner::commitCurrentEdits()
+{
+    if (m_selectedPositionIndex < 0 ||
+        m_selectedPositionIndex >= m_positions.size())
+        return;
+
+    m_positions[m_selectedPositionIndex].name =
+        m_positionNameEdit->text();
+
+    m_positions[m_selectedPositionIndex].significance =
+        m_positionSignificanceEdit->toPlainText();
+}
 

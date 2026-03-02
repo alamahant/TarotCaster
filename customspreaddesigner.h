@@ -63,6 +63,7 @@ private:
     void highlightSelectedCard(int positionNumber);
     //managespreads
     QPushButton* m_manageSpreadsButton;
+    void commitCurrentEdits();
 
 };
 

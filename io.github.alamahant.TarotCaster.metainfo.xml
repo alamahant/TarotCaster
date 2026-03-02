@@ -5,6 +5,7 @@
   <summary>Cast in Style</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
+  <url type="vcs-browser">https://github.com/alamahant/TarotCaster</url>
   <description>
     <p>
       TarotCaster is a comprehensive tarot card reading application that combines traditional tarot wisdom with modern AI technology.
@@ -61,6 +62,41 @@
   </screenshots>
 
   <releases>
+
+    <release version="1.2.3" date="2026-03-03">
+      <description>
+
+	<p>Technical Updates:</p>
+        <ul>
+          <li>Upgraded KDE Flatpak runtime to version 6.10 for improved performance and compatibility</li>
+          <li>Enhanced MistralAPI class with increased token limit for longer AI responses</li>
+        </ul>
+
+
+        <p>Multi-Provider AI Integration:</p>
+        <ul>
+          <li>Added Model Selector Dialog to add, edit, delete and set active AI models</li>
+          <li>Support for Mistral, OpenAI, Groq, Ollama and any OpenAI-compatible API</li>
+          <li>Dynamic model configuration (endpoint, API key, model name, temperature, max tokens) stored in QSettings</li>
+          <li>Refactored TarotAPI to be provider-agnostic with loadActiveModel() method</li>
+          <li>Added "Check AI Model Status" menu option showing active model details with API key warnings</li>
+        </ul>
+
+        <p>Public Domain Visconti Tarot:</p>
+        <ul>
+          <li>Added complete Visconti-Sforza tarot deck (15th century, public domain)</li>
+          <li>High-resolution scanned images properly integrated into deck selector</li>
+        </ul>
+
+        <p>Custom Spread Designer - Fully Debugged:</p>
+        <ul>
+          <li>Complete overhaul with all known issues fixed - now works flawlessly</li>
+          <li>Drag-and-drop card positioning with proper serialization</li>
+          <li>Position names and descriptions now persist correctly</li>
+          <li>Spread validation ensures proper layout before use</li>
+        </ul>
+      </description>
+    </release>
 
     <release version="1.2.2" date="2025-10-29">
       <description>

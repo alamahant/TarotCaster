@@ -3,6 +3,8 @@
 #include <QNetworkRequest>
 #include <QUrlQuery>
 #include <QDebug>
+#include "Globals.h"
+#include<QMessageBox>
 
 MistralAPI::MistralAPI(QObject *parent) : QObject(parent)
 {
@@ -10,8 +12,8 @@ MistralAPI::MistralAPI(QObject *parent) : QObject(parent)
     connect(networkManager, &QNetworkAccessManager::finished,
             this, &MistralAPI::handleNetworkReply);
 
-    // Load API key from settings if available
-    loadApiKey();
+    activeModelLoaded = loadActiveModel();
+
 }
 
 MistralAPI::~MistralAPI()
@@ -21,30 +23,35 @@ MistralAPI::~MistralAPI()
 
 void MistralAPI::generateReading(const QString& prompt)
 {
-    if (apiKey.isEmpty()) {
-        emit errorOccurred("API key is not set. Please set your Mistral AI API key.");
-        return;
+    if (!activeModelLoaded) {
+        loadActiveModel();
+        if (!activeModelLoaded) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("AI Model Not Configured");
+            msgBox.setText("No active AI model or API key found.");
+            msgBox.setInformativeText("Please configure an AI model in Settings → Configure AI Models.\n\n"
+                                      "Compatible providers: Mistral, OpenAI, Groq, Ollama (local), and any OpenAI-compatible API.");
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.addButton(QMessageBox::Ok);
+            msgBox.exec();
+
+            //emit errorOccurred("No active AI model configured. Please configure one in Settings.");
+            return;
+        }
     }
 
-    QNetworkRequest request(QUrl("https://api.mistral.ai/v1/chat/completions"));
+    QUrl url(m_apiEndpoint);
+    QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(apiKey).toUtf8());
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_apiKey).toUtf8());
 
     QJsonDocument requestData = createRequestJson(prompt);
 
     networkManager->post(request, requestData.toJson());
 }
 
-bool MistralAPI::hasApiKey() const
-{
-    return !apiKey.isEmpty();
-}
 
-void MistralAPI::setApiKey(const QString& newApiKey)
-{
-    apiKey = newApiKey;
-    saveApiKey();
-}
+
 
 void MistralAPI::handleNetworkReply(QNetworkReply* reply)
 {
@@ -69,7 +76,7 @@ void MistralAPI::handleNetworkReply(QNetworkReply* reply)
             }
         }
 
-        emit errorOccurred("Invalid response format from Mistral AI");
+        emit errorOccurred("Invalid response format from AI");
     } else {
         QString errorString = reply->errorString();
         QByteArray responseData = reply->readAll();
@@ -93,32 +100,22 @@ void MistralAPI::handleNetworkReply(QNetworkReply* reply)
     reply->deleteLater();
 }
 
-void MistralAPI::loadApiKey()
-{
-    QSettings settings;
-    apiKey = settings.value("mistral/apiKey", "").toString();
-}
 
-void MistralAPI::saveApiKey()
-{
-    QSettings settings;
-    settings.setValue("mistral/apiKey", apiKey);
-}
 
 QJsonDocument MistralAPI::createRequestJson(const QString& prompt)
 {
     QJsonObject systemMessage;
     systemMessage["role"] = "system";
     if(query.isEmpty()) {
-    systemMessage["content"] = "You are a skilled tarot reader with deep knowledge of tarot symbolism and interpretation. "
-                               "Provide insightful, thoughtful readings that connect the cards to the querent's situation. "
-                               "Be mystical but practical, offering both spiritual insights and actionable advice.";
+        systemMessage["content"] = "You are a skilled tarot reader with deep knowledge of tarot symbolism and interpretation. "
+                                   "Provide insightful, thoughtful readings that connect the cards to the querent's situation. "
+                                   "Be mystical but practical, offering both spiritual insights and actionable advice.";
     }else {
         systemMessage["content"] = QString("You are a skilled tarot reader with deep knowledge of tarot symbolism and interpretation. "
-                                   "Focus primarily and directly on the querent's specific question:\n"
-                                    "**Question:** '%1'\n"
-                                   "Provide a reading that directly addresses their concerns and offers practical insights. "
-                                   "Structure your response to answer their question clearly while interpreting the cards in that context.").arg(query);
+                                           "Focus primarily and directly on the querent's specific question:\n"
+                                           "**Question:** '%1'\n"
+                                           "Provide a reading that directly addresses their concerns and offers practical insights. "
+                                           "Structure your response to answer their question clearly while interpreting the cards in that context.").arg(query);
     }
     QJsonObject userMessage;
     userMessage["role"] = "user";
@@ -129,10 +126,14 @@ QJsonDocument MistralAPI::createRequestJson(const QString& prompt)
     messages.append(userMessage);
 
     QJsonObject requestObject;
-    requestObject["model"] = "mistral-medium";  // Use appropriate model
+
+
+    // Use m_model instead of hardcoded "mistral-medium"
+    requestObject["model"] = m_model;
     requestObject["messages"] = messages;
-    requestObject["temperature"] = 0.7;  // Adjust for creativity vs consistency
-    requestObject["max_tokens"] = 4096;  // Adjust based on desired response length
+    requestObject["temperature"] = m_temperature;
+    requestObject["max_tokens"] = m_maxTokens;
+
 
     return QJsonDocument(requestObject);
 }
@@ -140,4 +141,34 @@ QJsonDocument MistralAPI::createRequestJson(const QString& prompt)
 void MistralAPI::setQuery(const QString &newQuery)
 {
     query = newQuery;
+}
+
+
+bool MistralAPI::loadActiveModel()
+{
+    QSettings settings;
+    settings.beginGroup("Models");
+
+    // Get the active model name
+    QString activeModelName = settings.value("ActiveModel").toString();
+    if (activeModelName.isEmpty()) {
+        m_lastError = "No active model selected";
+        return false;
+    }
+
+    // Load only the active model's settings
+    settings.beginGroup(activeModelName);
+    m_apiEndpoint = settings.value("endpoint").toString();
+    m_apiKey = settings.value("apiKey").toString();
+    m_model = settings.value("modelName").toString();
+    m_temperature = settings.value("temperature", 0.7).toDouble();
+    m_maxTokens = settings.value("maxTokens", 4096).toInt();
+
+
+
+
+    settings.endGroup();
+    settings.endGroup();
+
+    return !m_apiEndpoint.isEmpty() && !m_model.isEmpty();
 }

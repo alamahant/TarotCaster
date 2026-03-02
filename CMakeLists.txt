@@ -49,6 +49,7 @@ qt_add_executable(TarotCaster
         Globals.h
         Globals.cpp
         donationdialog.cpp donationdialog.h
+        model.h modelselectordialog.cpp modelselectordialog.h
 
     )
 # Define target properties for Android with Qt 6 as:
@@ -116,6 +117,9 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/TarotdeMarseille
         DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/Solabusca
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/decks/Visconti
         DESTINATION ${CMAKE_INSTALL_BINDIR}/decks)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/card_meanings.json

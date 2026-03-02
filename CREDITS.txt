@@ -13,6 +13,12 @@
 - Images sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:Sola-Busca_tarot_deck)  
 - These images are in the public domain due to their age and historical significance
 
+#### Visconti-Sforza Tarot
+- One of the oldest surviving tarot decks, created in the 15th century for the Visconti-Sforza family of Milan
+- Images sourced from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:Visconti-Sforza_tarot_deck)
+- These hand-painted cards represent the earliest known complete tarot deck and are in the public domain due to their historical age
+
+
 ### Tarot Interpretations
 - Traditional card meanings adapted from [Corpora Project](https://github.com/dariusk/corpora/blob/master/data/divination/tarot_interpretations.json)
 - AI interpretations powered by Mistral AI

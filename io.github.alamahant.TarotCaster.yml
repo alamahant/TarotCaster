@@ -1,6 +1,6 @@
 app-id: io.github.alamahant.TarotCaster
 runtime: org.kde.Platform
-runtime-version: "6.9"
+runtime-version: "6.10"
 sdk: org.kde.Sdk
 command: TarotCaster
 finish-args:
@@ -9,11 +9,10 @@ finish-args:
   - --socket=fallback-x11
   - --socket=wayland
   - --device=dri
-
 modules:
   - name: tarotcaster
     buildsystem: cmake-ninja
     sources:
       - type: git
         url: https://github.com/alamahant/TarotCaster.git
-        tag: v1.2.2
+        tag: v1.2.3

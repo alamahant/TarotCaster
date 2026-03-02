@@ -164,7 +164,7 @@ QLabel {
 /* Scrollbars */
 QScrollBar:vertical {
     background-color: #1a1a1a;
-    width: 12px;
+    width: 8px;
     margin: 0px;
 }
 
@@ -179,7 +179,7 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
 
 QScrollBar:horizontal {
     background-color: #1a1a1a;
-    height: 12px;
+    height: 10px;
     margin: 0px;
 }
 

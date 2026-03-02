@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.2.3] - 2026-03-03
+
+### Technical Updates
+- **Updated KDE Runtime**:
+  - Upgraded KDE Flatpak runtime to version 6.10 for improved performance and compatibility
+  - Ensures better system integration and future-proof security
+
+### Multi-Provider AI Integration
+- **Model Selector Dialog**: Add, edit, delete and set active AI models via Settings menu
+- **Provider Support**: Now works with Mistral, OpenAI (ChatGPT), Groq, Ollama (local), and any OpenAI-compatible API
+- **Dynamic Configuration**: Endpoint, API key, model name, temperature, max tokens stored in QSettings
+- **API Refactor**: TarotAPI now provider-agnostic with dynamic model loading
+- **Status Check**: "Check AI Model Status" menu option shows active model details with API key warnings
+
+### Public Domain Visconti Tarot
+- **Historical Deck**: Added complete Visconti-Sforza tarot deck (15th century, public domain)
+- **High-Resolution Scans**: Authentic images properly integrated into deck selector
+- **Cultural Heritage**: One of the oldest surviving tarot decks now available alongside modern decks
+
+### Custom Spread Designer - Fully Debugged
+- **Complete Overhaul**: All known issues fixed - now works flawlessly
+- **Drag-and-Drop**: Pixel-perfect card positioning with proper serialization
+- **Position Management**: Names and descriptions now persist correctly
+- **Validation & Preview**: Spread validation ensures proper layout before use
+- **Save/Load**: Custom spreads save and load reliably
+
 ## [1.2.2] - 2025-10-29
 
 ### Technical Updates
