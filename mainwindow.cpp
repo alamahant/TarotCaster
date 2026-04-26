@@ -92,8 +92,29 @@ MainWindow::MainWindow(QWidget *parent)
     saveAction->setShortcut(QKeySequence::Save);
     QAction* loadAction = fileMenu->addAction("&Load Reading", this, &MainWindow::onLoadReading);
     loadAction->setShortcut(QKeySequence::Open);
+
+
+    fileMenu->addSeparator();
+
+    QAction *openFolderAction = fileMenu->addAction("&Open Data Directory");
+    connect(openFolderAction, &QAction::triggered, this, &MainWindow::openFolder);
+    fileMenu->addSeparator();
+
+    fileMenu->addSeparator();
+    QAction *createSymlinkAction = fileMenu->addAction("Create Shortcut to TarotCaster Data");
+    connect(createSymlinkAction, &QAction::triggered, this, &MainWindow::createSymlink);
+
+
+
+
     fileMenu->addSeparator();
     fileMenu->addAction("&Exit", this, &QWidget::close, QKeySequence::Quit);
+
+
+
+
+
+
     //view menu
     // Create View menu
     QMenu* viewMenu = menuBar()->addMenu("&View");
@@ -254,51 +275,12 @@ void MainWindow::createDocks() {
     QWidget *rightDockWidget = new QWidget(this);
     QVBoxLayout *rightLayout = new QVBoxLayout(rightDockWidget);
 
-    // Create question section
-    /*
-    QGroupBox *questionGroup = new QGroupBox("Question", this);
-    QVBoxLayout *questionLayout = new QVBoxLayout(questionGroup);
-
-    // Create question input and button
-    QTextEdit *questionInput = new QTextEdit(this);
-    questionInput->setPlaceholderText("Enter your question for the reading...");
-    questionInput->setMaximumHeight(80);
-
-    QPushButton *setQuestionButton = new QPushButton("Set Question", this);
-
-    questionLayout->addWidget(questionInput);
-    questionLayout->addWidget(setQuestionButton);
-
-    // Add question section to right layout
-    rightLayout->addWidget(questionGroup);
-    */
-
-
-    QGroupBox *questionGroup = new QGroupBox("Question", this);
-    QVBoxLayout *questionLayout = new QVBoxLayout(questionGroup);
-
-    // Create question input and button
-    questionInput = new QTextEdit(this);
-    questionInput->setToolTip("Your question will be forwarded to the AI for interpretation");
-    questionInput->setPlaceholderText("Enter your question for the reading...");
-    questionInput->setMaximumHeight(80);
-
-    // Create buttons and arrange them horizontally
-    QPushButton *setQuestionButton = new QPushButton("Set Question", this);
-    //setQuestionButton->setToolTip("Your question will be forwarded to the AI for interpretation");
-
-    clearQuestionButton = new QPushButton("Clear", this);
-
-    // Create horizontal layout for buttons
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    buttonLayout->addWidget(setQuestionButton);
-    buttonLayout->addWidget(clearQuestionButton);
-
-    questionLayout->addWidget(questionInput);
-    questionLayout->addLayout(buttonLayout);  // Add the horizontal button layout
-
-    // Add question section to right layout
-    rightLayout->addWidget(questionGroup);
+    // Create question button
+    openQuestionDialogButton = new QPushButton("Set a Question", this);
+    openQuestionDialogButton->setToolTip("Pose a question to be forwarded to AI");
+    connect(openQuestionDialogButton, &QPushButton::clicked, this, &MainWindow::onSetQuestion);
+    rightLayout->addWidget(openQuestionDialogButton);
+    //
 
     // Add meaning display
     meaningDisplay = new MeaningDisplay(this);
@@ -315,21 +297,7 @@ void MainWindow::createDocks() {
             this, &MainWindow::onReversedCardsToggled);
     connect(dockControls, &DockControls::swapEightElevenToggled,
             this, &MainWindow::onSwapEightElevenToggled);
-    connect(setQuestionButton, &QPushButton::clicked, [this]{
-        QString question = questionInput->toPlainText().trimmed();
-        if (question.isEmpty()) return;
-        mistralApi->setQuery(question);
-        QMessageBox::information(this, "Question Set", "Your question has been set.\n"
-                                                       "Now deal the cards and request ai for interpretation.");
-    });
-
-    connect(clearQuestionButton, &QPushButton::clicked, [this]{
-        questionInput->clear();
-        mistralApi->setQuery(QString());
-    });
 }
-
-
 
 void MainWindow::clearMeaningDisplay()
 {
@@ -829,4 +797,196 @@ void MainWindow::configureAIModels()
 
        // The dialog saves changes to QSettings automatically
        // The MistralAPI class will read the active model from QSettings when needed
+}
+
+
+void MainWindow::onSetQuestion() {
+    // Create dialog and widgets only once
+    if (!questionDialog) {
+        questionDialog = new QDialog(this);
+        questionDialog->setWindowTitle("Set Your Question");
+        questionDialog->resize(500, 300);
+
+        QVBoxLayout *mainLayout = new QVBoxLayout(questionDialog);
+
+        // Question group
+        QGroupBox *questionGroup = new QGroupBox("Your Question", questionDialog);
+        QVBoxLayout *questionLayout = new QVBoxLayout(questionGroup);
+
+        // Create question input
+        questionInput = new QTextEdit(questionDialog);
+        questionInput->setToolTip("Your question will be forwarded to the AI for interpretation");
+        questionInput->setPlaceholderText("Enter your question for the reading...");
+        questionInput->setMaximumHeight(100);
+
+        // Create buttons
+        QPushButton* setQuestionButton = new QPushButton("Set Question", questionDialog);
+        QPushButton* clearQuestionButton = new QPushButton("Clear", questionDialog);
+
+        // Connect buttons
+        connect(setQuestionButton, &QPushButton::clicked, this, [this]() {
+
+            QString question = questionInput->toPlainText().trimmed();
+            if (question.isEmpty()) return;
+            currentQuestion = question;
+            mistralApi->setQuery(question);
+            openQuestionDialogButton->setToolTip("Pose a question to be forwarded to AI\n\n"
+                                          "Current question:\n\n"
+                                          + question);
+
+
+
+
+            QMessageBox::information(this, "Question Set", "Your question has been set.\n"
+                                                           "Now deal the cards and request ai for interpretation.");
+        });
+        connect(clearQuestionButton, &QPushButton::clicked, this, [this]() {
+            questionInput->clear();
+            currentQuestion.clear();
+        });
+
+        QPushButton* closeQuestionDialogButton = new QPushButton("Close", questionDialog);
+        connect(closeQuestionDialogButton, &QPushButton::clicked, this, [this](){
+            questionDialog->hide();
+        });
+
+        // Create horizontal layout for buttons
+        QHBoxLayout *buttonLayout = new QHBoxLayout();
+        buttonLayout->addWidget(setQuestionButton);
+        buttonLayout->addWidget(clearQuestionButton);
+
+        questionLayout->addWidget(questionInput);
+        questionLayout->addLayout(buttonLayout);
+        questionLayout->addWidget(closeQuestionDialogButton);
+
+        mainLayout->addWidget(questionGroup);
+
+    }
+
+    // Update with existing question if any
+    if (!currentQuestion.isEmpty()) {
+        questionInput->setText(currentQuestion);
+    } else {
+        questionInput->clear();
+    }
+
+    questionDialog->show();
+}
+
+////////////
+
+void MainWindow::createSymlink()
+{
+#ifdef FLATPAK_BUILD
+    QString msg = "";
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Flatpak Permission Required");
+    msgBox.setText(QString(
+                       "%1 is running as a Flatpak and may not have access to your home directory.\n\n"
+                       "To create a symlink, you may need to grant home directory access first.\n\n"
+                       "Option 1 - Terminal:\n"
+                       "  Grant access:\n"
+                       "    flatpak override --user --filesystem=home io.github.alamahant.%1\n\n"
+                       "  Revoke access later:\n"
+                       "    flatpak override --user --nofilesystem=home io.github.alamahant.%1\n\n"
+                       "Option 2 - Flatseal:\n"
+                       "  Install Flatseal from Flathub and grant 'Home' access to %1.\n\n"
+                       "If you have already granted permissions, you can continue."
+                       ).arg(QApplication::applicationName()));
+
+    msgBox.setIcon(QMessageBox::Information);
+
+    QPushButton *continueButton = msgBox.addButton("Continue", QMessageBox::AcceptRole);
+    QPushButton *cancelButton = msgBox.addButton("Cancel", QMessageBox::RejectRole);
+    msgBox.setDefaultButton(cancelButton);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() != continueButton) {
+        return; // User cancelled
+    }
+
+#endif
+    // Open dialog to select destination folder
+    QString destinationDir = QFileDialog::getExistingDirectory(
+                this,
+                "Select Destination Folder for Symlink",
+                QDir::homePath(),
+                QFileDialog::ShowDirsOnly
+                );
+
+    if (destinationDir.isEmpty()) {
+        return; // User cancelled
+    }
+
+    // Create symlink path
+    QString symlinkPath = QDir(destinationDir).filePath(QApplication::applicationName());
+    // Check if symlink already exists
+    if (QFile::exists(symlinkPath) || QFileInfo(symlinkPath).isSymLink()) {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+                    this,
+                    "Symlink Exists",
+                    QString("A file or symlink already exists at:\n%1\n\nOverwrite?").arg(symlinkPath),
+                    QMessageBox::Yes | QMessageBox::No
+                    );
+
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
+
+        // Remove existing file/symlink
+        if (!QFile::remove(symlinkPath)) {
+            QMessageBox::warning(this, "Error", "Could not remove existing file/symlink");
+            return;
+        }
+    }
+
+    // Create the symlink
+    QString targetPath = getLocalDataDirPath();
+
+    if (!QFile::exists(targetPath)) {
+        QMessageBox::warning(this, "Error",
+                             QString("Target directory does not exist:\n%1").arg(targetPath));
+        return;
+    }
+
+    if (QFile::link(targetPath, symlinkPath)) {
+        QMessageBox::information(
+                    this,
+                    "Symlink Created",
+                    QString("Symlink created successfully!\n\n"
+                            "Name: %3\n"
+                            "Location: %1\n\n"
+                            "Now you can access %3 data from:\n%2")
+                    .arg(destinationDir)
+                    .arg(symlinkPath)
+                    .arg(QApplication::applicationName())
+                    );
+    } else {
+        QMessageBox::warning(
+                    this,
+                    "Error",
+                    QString("Failed to create symlink.\n\n"
+                            "Destination: %1\n"
+                            "Target: %2\n\n"
+                            "Possible reasons:\n"
+                            "• Insufficient permissions\n"
+                            "• Invalid destination path\n"
+                            "• Filesystem doesn't support symlinks")
+                    .arg(symlinkPath)
+                    .arg(targetPath)
+                    );
+    }
+}
+
+void MainWindow::openFolder() {
+    // Optional: Check if the folder exists
+    QDir dir(getLocalDataDirPath());
+    if (!dir.exists()) {
+        return;
+    }
+
+    // Convert local path to URL and open
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(getLocalDataDirPath()))) {
+    }
 }

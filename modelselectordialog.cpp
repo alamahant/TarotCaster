@@ -64,7 +64,8 @@ ModelSelectorDialog::ModelSelectorDialog(QWidget *parent)
 
     //QLabel *infoLabel = new QLabel(tr("Note: Works best with Mistral, OpenAI (ChatGPT), and Ollama (local) models."));
     //infoLabel->setToolTip("");
-    QLabel *infoLabel = new QLabel(tr("Note: Works with any OpenAI-compatible API model.Hover for details"));
+    QLabel *infoLabel = new QLabel(tr("Note: Works with any OpenAI-compatible API model.Hover for details.\n"
+                                      "You MUST restart TarotCaster after configuring your first model."));
     infoLabel->setToolTip(tr(
         "<b>✅ Fully compatible (OpenAI format):</b><br>"
         "• Mistral<br>"

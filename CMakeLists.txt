@@ -14,8 +14,13 @@ if(GENTOO_BUILD)
     add_compile_definitions(GENTOO_BUILD)
 endif()
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Network Qt6OpenGLWidgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network OpenGLWidgets)
+option(FLATPAK_BUILD "Build for Flatpak" OFF)
+if(FLATPAK_BUILD)
+    add_compile_definitions(FLATPAK_BUILD)
+endif()
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Network Qt6OpenGL Qt6OpenGLWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network OpenGL OpenGLWidgets)
 #configure_file(card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
 configure_file(resources/card_meanings.json ${CMAKE_BINARY_DIR} COPYONLY)
 
@@ -70,7 +75,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(TarotCaster PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::Network Qt6::OpenGLWidgets)
+target_link_libraries(TarotCaster PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt6::Network Qt6::OpenGL Qt6::OpenGLWidgets)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

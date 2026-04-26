@@ -20,6 +20,8 @@
 #include"helpdialog.h"
 #include "customspreaddesigner.h"
 #include <QSize>
+#include<QDialog>
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -85,12 +87,19 @@ private:
     //zoom
 private slots:
     void handleZoomSlider(int value);
+    void onSetQuestion();
+    void createSymlink();
+    void openFolder();
+
 private:
     QString markdownToHtml(const QString &markdown);
-    QPushButton *clearQuestionButton = nullptr;
     QTextEdit *questionInput = nullptr;
     bool readingDisplayed = false;
     void configureAIModels();
+    QPushButton* openQuestionDialogButton;
+
+    QDialog* questionDialog = nullptr;
+    QString currentQuestion = "";
 
 };
 #endif // MAINWINDOW_H
