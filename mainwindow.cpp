@@ -10,6 +10,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , questionInput(new QTextEdit(this))
 
 {
     this->setMinimumSize(1200, 800);
@@ -446,6 +447,11 @@ void MainWindow::onSaveReading() {
         return;
     }
 
+    if (!questionInput) {
+        QMessageBox::warning(this, "Save Error", "Please set a question first!");
+        return;
+    }
+
     // Get the proper data location for the application
     QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (dataLocation.isEmpty()) {
@@ -492,6 +498,9 @@ void MainWindow::onSaveReading() {
     }
     //
 
+
+
+
     json["reading"] = dockControls->readingDisplay->toPlainText();
     json["query"] = questionInput->toPlainText().trimmed();
 
@@ -513,6 +522,8 @@ void MainWindow::onSaveReading() {
     QMessageBox::information(this, "Save Successful",
                              "Reading saved successfully to " + fileName);
 }
+
+
 
 void MainWindow::onLoadReading() {
     // Get the proper data location for the application
@@ -814,7 +825,7 @@ void MainWindow::onSetQuestion() {
         QVBoxLayout *questionLayout = new QVBoxLayout(questionGroup);
 
         // Create question input
-        questionInput = new QTextEdit(questionDialog);
+        //questionInput = new QTextEdit(questionDialog);
         questionInput->setToolTip("Your question will be forwarded to the AI for interpretation");
         questionInput->setPlaceholderText("Enter your question for the reading...");
         questionInput->setMaximumHeight(100);

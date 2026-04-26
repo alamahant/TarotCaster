@@ -63,6 +63,26 @@
 
   <releases>
 
+<release version="1.2.5" date="2026-04-26">
+  <description>
+    <p>New Features:</p>
+    <ul>
+      <li>Open Data Directory: New Help menu action to open user data folder in native file manager</li>
+      <li>Create Data Symlink: Create symlink from Flatpak sandbox data directory to any location in ~/</li>
+    </ul>
+
+    <p>UI Improvements:</p>
+    <ul>
+      <li>Cleaner Interface: Moved "Ask a Question to AI" to dedicated dialog, reducing main window clutter</li>
+    </ul>
+
+    <p>Bug Fixes:</p>
+    <ul>
+      <li>Fixed critical crash when saving readings without opening question dialog first</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.2.4" date="2026-04-26">
   <description>
     <p>New Features:</p>

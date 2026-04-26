@@ -1,5 +1,28 @@
 # Changelog
 
+
+## [1.2.5] - 2026-04-26
+
+### Added
+- **Open Data Directory**: New action to open user data folder in native file manager
+  - Supports Nautilus, Dolphin, Thunar, and other file managers
+  - Access your tarot decks, spreads, and settings directly from file manager
+
+- **Create Data Symlink**: Create symlink from Flatpak sandbox to any location in your home directory
+  - Easy access to app data without navigating Flatpak directories
+  - Useful for backup, syncing, or manual deck management
+
+### UI Improvements
+- **Cleaner Interface**: Moved "Ask a Question to AI" functionality behind a dedicated dialog
+  - Reduces main window clutter
+  - Access via button 
+  - More focused AI interaction experience
+
+### Bug Fixes
+- Fixed critical crash when saving readings without opening question dialog first
+
+---
+
 ## [1.2.4] - 2026-04-26
 
 ### Added
