@@ -4,8 +4,13 @@
 
 An AI-powered tarot reading application built with Qt that combines traditional tarot wisdom with modern artificial intelligence.
 
-Available in Flathub:
-https://flathub.org/en/apps/search?q=alamahant
+## Download Options
+
+| Platform | Where to Get It |
+| :--- | :--- |
+| **Linux** | [Flathub](https://flathub.org/en/apps/io.github.alamahant.TarotCaster) |
+| **Windows** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/l/jbvxsi) - Pre-compiled binary, no compilation needed |
+
 
 ## Features
 
