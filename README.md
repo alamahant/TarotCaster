@@ -9,8 +9,7 @@ An AI-powered tarot reading application built with Qt that combines traditional 
 | Platform | Where to Get It |
 | :--- | :--- |
 | **Linux** | [Flathub](https://flathub.org/en/apps/search?q=alamahant) |
-| **Windows** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/l/jbvxsi) - Pre-compiled binary, no compilation needed |
-
+| **Windows and Mac** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/) - Pre-compiled binary, no compilation needed |
 
 ## Features
 
