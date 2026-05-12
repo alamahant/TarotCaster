@@ -13,6 +13,10 @@ QString getLocalDataDirPath() {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
+QString getJournalDirPath() {
+    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/journal";
+}
+
 bool activeModelLoaded = false;
 
 const QMap<QString, QString> tarotNames = {

@@ -212,6 +212,7 @@ public:
         {"76", "queen of coins"},
         {"77", "king of coins"}
     };
+    void redrawCurrentSpread();
 
 
 };

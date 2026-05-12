@@ -63,6 +63,16 @@
 
   <releases>
 
+<release version="1.2.6" date="2026-05-12">
+  <description>
+    <p>New Features:</p>
+    <ul>
+      <li>Journal System: Track and record tarot readings with automatic saving, calendar view with visual indicators, and instant restore of saved spreads from journal entries</li>
+      <li>Show Spread in Different Deck: View any existing spread with any installed deck via non-modal dialog prompt</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.2.5" date="2026-04-26">
   <description>
     <p>New Features:</p>
@@ -253,9 +263,31 @@
   </releases>
   <content_rating type="oars-1.1" />
   <developer_name>Alamahant</developer_name>
+
   <categories>
+    <category>Education</category>
+    <category>Spirituality</category>
     <category>Utility</category>
     <category>Game</category>
   </categories>
+
+<keywords>
+    <keyword>tarot</keyword>
+    <keyword>tarot reading</keyword>
+    <keyword>divination</keyword>
+    <keyword>ai interpretation</keyword>
+    <keyword>llm</keyword>
+    <keyword>spreads</keyword>
+    <keyword>celtic cross</keyword>
+    <keyword>rider waite</keyword>
+    <keyword>journal</keyword>
+    <keyword>card meanings</keyword>
+    <keyword>fortune telling</keyword>
+    <keyword>spirituality</keyword>
+    <keyword>oracle</keyword>
+    <keyword>intuition</keyword>
+    <keyword>self reflection</keyword>
+</keywords>
+
   <launchable type="desktop-id">io.github.alamahant.TarotCaster.desktop</launchable>
 </component>

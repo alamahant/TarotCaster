@@ -55,6 +55,8 @@ qt_add_executable(TarotCaster
         Globals.cpp
         donationdialog.cpp donationdialog.h
         model.h modelselectordialog.cpp modelselectordialog.h
+        journalcalendar.cpp journalcalendar.h journalmanager.cpp journalmanager.h
+        journaldialog.cpp journaldialog.h
 
     )
 # Define target properties for Android with Qt 6 as:

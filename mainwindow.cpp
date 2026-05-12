@@ -7,10 +7,12 @@
 #include"Globals.h"
 #include "donationdialog.h"
 #include "modelselectordialog.h"
+#include"journalmanager.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , questionInput(new QTextEdit(this))
+    , journalDialog(new JournalDialog(this))
 
 {
     this->setMinimumSize(1200, 800);
@@ -105,16 +107,8 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *createSymlinkAction = fileMenu->addAction("Create Shortcut to TarotCaster Data");
     connect(createSymlinkAction, &QAction::triggered, this, &MainWindow::createSymlink);
 
-
-
-
     fileMenu->addSeparator();
     fileMenu->addAction("&Exit", this, &QWidget::close, QKeySequence::Quit);
-
-
-
-
-
 
     //view menu
     // Create View menu
@@ -133,15 +127,11 @@ MainWindow::MainWindow(QWidget *parent)
     toggleRightDockAction->setShortcut(QKeySequence("Ctrl+R")); // Optional shortcut
     connect(toggleRightDockAction, &QAction::toggled, rightDock, &QDockWidget::setVisible);
 
-
-
-    // Settings Menu
+   // Settings Menu
     QMenu *settingsMenu = menuBar()->addMenu("&Settings");
 
     //
     QAction *aiModelsAction = settingsMenu->addAction("Configure AI &Models...", this, &MainWindow::configureAIModels);
-
-
 
     QAction *checkModelAction = settingsMenu->addAction("Check AI Model &Status", this, [this]() {
         if (!activeModelLoaded) {
@@ -238,6 +228,10 @@ MainWindow::MainWindow(QWidget *parent)
         //clearQuestionButton->click();
         meaningDisplay->clear();
     });
+
+    connect(journalDialog, &JournalDialog::loadReadingRequested,
+            this, &MainWindow::loadReading);
+
 }
 
 MainWindow::~MainWindow()
@@ -282,6 +276,26 @@ void MainWindow::createDocks() {
     connect(openQuestionDialogButton, &QPushButton::clicked, this, &MainWindow::onSetQuestion);
     rightLayout->addWidget(openQuestionDialogButton);
     //
+
+    openJournalButton = new QPushButton("Journal", this);
+    //openJournalButton->setCheckable(true);
+    //openJournalButton->setChecked(false);
+    openJournalButton->setToolTip("Open the journal");
+    connect(openJournalButton, &QPushButton::clicked, this, [this](){
+            journalDialog->refreshForDate(QDate::currentDate());  // Refresh to current date
+            journalDialog->show();
+    });
+    rightLayout->addWidget(openJournalButton);
+
+
+
+    switchDeckButton = new QPushButton("Switch Deck", this);
+
+    switchDeckButton->setToolTip("See your spread in different deck");
+    connect(switchDeckButton, &QPushButton::clicked, this, &MainWindow::onShowInOtherDeck);
+    rightLayout->addWidget(switchDeckButton);
+
+
 
     // Add meaning display
     meaningDisplay = new MeaningDisplay(this);
@@ -492,14 +506,11 @@ void MainWindow::onSaveReading() {
     json["spreadType"] = static_cast<int>(tarotScene->getCurrentSpreadType());
 
     //
-    // Add this section to save the custom spread name
+    // save the custom spread name
     if (tarotScene->getCurrentSpreadType() == TarotScene::Custom) {
-        json["customSpreadName"] = currentCustomSpreadName; // You need to track this
+        json["customSpreadName"] = currentCustomSpreadName;
     }
     //
-
-
-
 
     json["reading"] = dockControls->readingDisplay->toPlainText();
     json["query"] = questionInput->toPlainText().trimmed();
@@ -519,10 +530,43 @@ void MainWindow::onSaveReading() {
     file.write(doc.toJson());
     file.close();
 
+    // ========== ADD JOURNAL ENTRY ==========
+    // Get spread type as string
+    QString spreadTypeStr;
+    switch (tarotScene->getCurrentSpreadType()) {
+        case TarotScene::CelticCross:
+            spreadTypeStr = "Celtic Cross";
+            break;
+        case TarotScene::ThreeCard:
+            spreadTypeStr = "Three Card";
+            break;
+        case TarotScene::SingleCard:
+            spreadTypeStr = "Single Card";
+            break;
+        case TarotScene::Horseshoe:
+            spreadTypeStr = "Horseshoe Spread";
+            break;
+        case TarotScene::ZodiacSpread:
+            spreadTypeStr = "Zodiac Spread";
+            break;
+        case TarotScene::Custom:
+            spreadTypeStr = currentCustomSpreadName;
+            break;
+        default:
+            spreadTypeStr = "Unknown";
+            break;
+    }
+
+    // Get deck name (if you have this info somewhere)
+    QString deckName = dockControls->getDeckSelector()->currentText();
+
+    // Add entry to journal (empty notes, just the reading)
+    JournalManager::instance().addEntry(spreadTypeStr, deckName, fileName, "");
+    // =====================================
+
     QMessageBox::information(this, "Save Successful",
                              "Reading saved successfully to " + fileName);
 }
-
 
 
 void MainWindow::onLoadReading() {
@@ -536,11 +580,13 @@ void MainWindow::onLoadReading() {
     QDir dir(dataLocation);
     QString loadDir = dir.exists() ? dataLocation : QDir::homePath();
 
+
     QString fileName = QFileDialog::getOpenFileName(this, "Load Reading",
                                                     loadDir,
                                                     "Tarot Readings (*.tarot)");
-    if (fileName.isEmpty())
+    if (fileName.isEmpty()) {
         return;
+    }
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -1000,4 +1046,123 @@ void MainWindow::openFolder() {
     // Convert local path to URL and open
     if (!QDesktopServices::openUrl(QUrl::fromLocalFile(getLocalDataDirPath()))) {
     }
+}
+
+
+void MainWindow::loadReading(const QString& filename) {
+    // Get the proper data location for the application
+    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dataLocation.isEmpty()) {
+        dataLocation = QDir::homePath() + "/.local/share/TaroCaster";
+    }
+
+    // Use the data location if it exists, otherwise fall back to home directory
+    QDir dir(dataLocation);
+    QString loadDir = dir.exists() ? dataLocation : QDir::homePath();
+
+
+    QString fileName = filename;
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(this, "Load Error",
+                             "Could not open file for reading: " + file.errorString());
+        return;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (doc.isNull() || !doc.isObject()) {
+        QMessageBox::warning(this, "Load Error", "Invalid file format.");
+        return;
+    }
+
+    QJsonObject json = doc.object();
+
+    // Load cards
+    QVector<CardLoader::CardData> loadedCards;
+    if (json.contains("cards") && json["cards"].isArray()) {
+        QJsonArray cardsArray = json["cards"].toArray();
+        for (const QJsonValue& value : cardsArray) {
+            if (value.isObject()) {
+                QJsonObject cardObj = value.toObject();
+                CardLoader::CardData card;
+                card.number = cardObj["number"].toInt();
+                card.reversed = cardObj["reversed"].toBool();
+                loadedCards.append(card);
+            }
+        }
+    }
+
+    // Load spread type and display cards
+    TarotScene::SpreadType spreadType = static_cast<TarotScene::SpreadType>(
+        json["spreadType"].toInt(TarotScene::NoSpread));
+
+    //
+    // Add this section to handle custom spreads
+    if (spreadType == TarotScene::Custom) {
+        QString customSpreadName = json["customSpreadName"].toString();
+        tarotScene->displaySavedSpread(spreadType, loadedCards, customSpreadName);
+    } else {
+        tarotScene->displaySavedSpread(spreadType, loadedCards);
+    }
+    //
+
+    //tarotScene->displaySavedSpread(spreadType, loadedCards);
+
+    // Load reading
+    if (json.contains("reading")) {
+        dockControls->readingDisplay->setText(json["reading"].toString());
+    }
+
+    if (json.contains("query")) {
+        questionInput->setText(json["query"].toString());
+    }
+
+    QMessageBox::information(this, "Load Successful",
+                             "Reading loaded successfully from " + fileName);
+}
+
+void MainWindow::onShowInOtherDeck()
+{
+    if (tarotScene->getCurrentCards().isEmpty()) {
+        QMessageBox::warning(this, "No Spread", "No spread is currently displayed.");
+        return;
+    }
+
+    // Create non-modal dialog
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("Show in Other Deck");
+    dialog->setMinimumSize(300, 120);
+    dialog->setModal(false);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+
+    QLabel* label = new QLabel("Select a different deck from the dropdown, then click Show:");
+    layout->addWidget(label);
+
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    QPushButton* showButton = new QPushButton("Show");
+    QPushButton* cancelButton = new QPushButton("Cancel");
+    buttonLayout->addWidget(showButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
+
+    connect(showButton, &QPushButton::clicked, [this, dialog]() {
+        // Just redraw with whatever deck is currently selected
+        if (!tarotScene->getCurrentCards().isEmpty()) {
+            tarotScene->redrawCurrentSpread();
+        }
+        dialog->close();
+    });
+
+    connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::close);
+
+    dialog->show();
 }

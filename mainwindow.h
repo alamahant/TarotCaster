@@ -21,6 +21,7 @@
 #include "customspreaddesigner.h"
 #include <QSize>
 #include<QDialog>
+#include"journaldialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -90,6 +91,8 @@ private slots:
     void onSetQuestion();
     void createSymlink();
     void openFolder();
+    void loadReading(const QString& filename);
+    void onShowInOtherDeck();
 
 private:
     QString markdownToHtml(const QString &markdown);
@@ -100,6 +103,8 @@ private:
 
     QDialog* questionDialog = nullptr;
     QString currentQuestion = "";
-
+    JournalDialog* journalDialog = nullptr;
+    QPushButton* openJournalButton;
+    QPushButton* switchDeckButton;
 };
 #endif // MAINWINDOW_H

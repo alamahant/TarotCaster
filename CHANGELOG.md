@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.2.6] - 2026-05-12
+
+### Added
+- **Journal System**: Track and record your tarot readings
+  - Save readings automatically to journal with spread type and deck used
+  - Calendar view with visual indicators (gold asterisks) for dates with entries
+  - Browse past entries by date
+  - Add personal notes to any date
+  - Click "Load Reading" from any journal entry to instantly restore a saved spread
+
+- **Show Spread in Different Deck**: View any existing spread with any installed deck
+  - Non-modal dialog prompts user to select a different deck
+  - Spread redraws instantly with the newly selected deck
+  - Compare how different decks represent the same reading
+
+### UI Improvements
+- **Splitter Layout**: Journal dialog now uses resizable QSplitter
+  - Adjustable calendar and entries sections
+  - Yellow handle for visual clarity
+
+- **Delete All Entries**: Quick deletion of all journal entries for a selected date
+
+- **Improved Entry Display**: HTML-formatted journal entries with embedded "Load Reading" links
+  - Clickable buttons styled with CSS
+  - URL-encoded file paths for reliable loading
+
+### Technical Changes
+- Added `JournalManager` singleton for persistent journal storage
+- Added `JournalCalendar` subclass with custom `paintCell()` for date indicators
+- Added `loadReading(const QString& filePath)` method for direct file loading
+- Journal entries now store: timestamp, spread type, deck name, file path, and notes
+- Auto-save journal entry when saving a reading (includes spread type, deck, and file reference)
+
+### Bug Fixes
+- Fixed calendar not showing indicators for dates with entries
+- Fixed link handling in QTextBrowser
+- Journal dialog now hides instead of closes for faster reopening
+
+---
 
 ## [1.2.5] - 2026-04-26
 

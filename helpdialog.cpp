@@ -78,34 +78,40 @@ HelpDialog::HelpDialog(DialogType type, QWidget *parent)
 
 void HelpDialog::setupAbout()
 {
-    setWindowTitle("About TaroCaster");
-    titleLabel->setText("About TaroCaster");
+    setWindowTitle("About TarotCaster");
+    titleLabel->setText("About TarotCaster");
 
     QString aboutText = QString(R"(
-    <h2 align="center">TaroCaster v%1</h2>
+    <h2 align="center">🎴 TarotCaster v%1</h2>
     <p align="center">A modern tarot reading application with AI interpretation</p>
-    <p align="center">© 2025 Alamahant</p>
+    <p align="center"><strong style="color: #27ae60;">✓ Free for Linux on Flathub</strong></p>
     <hr>
-    <p>TaroCaster is an open-source application that combines traditional tarot reading with
+    <p>TarotCaster is an open-source application that combines traditional tarot reading with
     modern AI interpretation capabilities.</p>
     <p>Features:</p>
     <ul>
-        <li>Multiple tarot decks</li>
-        <li>Various spread layouts</li>
-        <li>AI-powered reading interpretations</li>
-        <li>Save and load readings</li>
+        <li>Multiple tarot decks (Rider-Waite, Marseille, Visconti, Sola Busca)</li>
+        <li>Various spread layouts (1-card, 3-card, Celtic Cross, Horseshoe, Custom)</li>
+        <li>AI-powered reading interpretations (Mistral, OpenAI, Groq, Ollama)</li>
+        <li>Save and load readings in JSON format</li>
+        <li>Custom spread designer with drag-and-drop</li>
+        <li>Journal system to track and record readings</li>
+        <li>View spreads with different decks</li>
     </ul>
     <p>Built with Qt 6 and C++.</p>
-    <p>Available for Linux, Windows, Macos and Flatpak.</p>
 
-    <p>Visit <a href="https://github.com/alamahant/TarotCaster/releases/latest">https://github.com/alamahant/TarotCaster/releases/latest</a> for more information.</p>
+    <p><strong>Pre-built Windows & macOS Binaries:</strong><br>
+    <a href="https://jnanadhakini.gumroad.com/">→ https://jnanadhakini.gumroad.com/</a></p>
+
+    <p><strong>Source Code & Linux Version:</strong><br>
+    <a href="https://github.com/alamahant/TarotCaster">→ https://github.com/alamahant/TarotCaster</a></p>
+
+    <hr>
+    <p align="center" style="color: gray; font-size: 12px;">© 2025 Alamahant — GPL-3.0 License</p>
 )").arg(QApplication::applicationVersion());
-
-
 
     contentBrowser->setHtml(aboutText);
 }
-
 
 void HelpDialog::setupInstructions()
 {
@@ -478,6 +484,87 @@ void HelpDialog::setupChangelogHelp()
     QString content = R"(
         <h2 align='center'>Changelog</h2>
 <hr>
+
+
+<h3 style='color:#8C6D46;'>Version 1.2.6 - May 12, 2026</h3>
+
+<h4>Journal System</h4>
+<ul>
+    <li><strong>Track Readings:</strong> Save readings automatically with spread type and deck used</li>
+    <li><strong>Calendar View:</strong> Visual indicators (gold asterisks) for dates with entries</li>
+    <li><strong>Browse & Search:</strong> Navigate past entries by date, add personal notes to any date</li>
+    <li><strong>Instant Restore:</strong> Click "Load Reading" from any journal entry to instantly restore a saved spread</li>
+</ul>
+
+<h4>Show Spread in Different Deck</h4>
+<ul>
+    <li><strong>Compare Decks:</strong> View any existing spread with any installed deck</li>
+    <li><strong>Non-Modal Dialog:</strong> Simple prompt to select a different deck</li>
+    <li><strong>Instant Redraw:</strong> Spread redraws instantly with newly selected deck</li>
+</ul>
+
+<h4>UI Improvements</h4>
+<ul>
+    <li><strong>Resizable Journal:</strong> QSplitter layout with adjustable calendar and entries sections</li>
+    <li><strong>Yellow Handle:</strong> Visual clarity for splitter resize control</li>
+    <li><strong>Delete All Entries:</strong> Quick deletion of all journal entries for a selected date</li>
+    <li><strong>Styled Links:</strong> HTML-formatted entries with CSS-styled clickable "Load Reading" buttons</li>
+</ul>
+
+<h4>Technical Changes</h4>
+<ul>
+    <li>Added <code>JournalManager</code> singleton for persistent JSON storage</li>
+    <li>Added <code>JournalCalendar</code> subclass with custom <code>paintCell()</code> for date indicators</li>
+    <li>Added <code>loadReading(const QString&amp; filePath)</code> for direct file loading</li>
+    <li>Journal entries store: timestamp, spread type, deck name, file path, and notes</li>
+    <li>Auto-save journal entry when saving a reading</li>
+</ul>
+
+<h4>Bug Fixes</h4>
+<ul>
+    <li>Fixed calendar not showing indicators for dates with entries</li>
+    <li>Fixed link handling in QTextBrowser</li>
+    <li>Journal dialog now hides instead of closes for faster reopening</li>
+</ul>
+
+<hr>
+
+<h3 style='color:#8C6D46;'>Version 1.2.5 - April 26, 2026</h3>
+
+<h4>File System Integration</h4>
+<ul>
+    <li><strong>Open Data Directory:</strong> Open user data folder in native file manager (Nautilus, Dolphin, Thunar support)</li>
+    <li><strong>Create Data Symlink:</strong> Create symlink from Flatpak sandbox to any home directory location</li>
+    <li>Easy access for backup, syncing, or manual deck management</li>
+</ul>
+
+<h4>UI Improvements</h4>
+<ul>
+    <li><strong>Cleaner Interface:</strong> "Ask a Question to AI" moved to dedicated dialog</li>
+    <li>Reduces main window clutter for more focused interaction</li>
+</ul>
+
+<h4>Bug Fixes</h4>
+<ul>
+    <li>Fixed critical crash when saving readings without opening question dialog first</li>
+</ul>
+
+<hr>
+
+<h3 style='color:#8C6D46;'>Version 1.2.4 - April 26, 2026</h3>
+
+<h4>File System Integration</h4>
+<ul>
+    <li><strong>Open Data Directory:</strong> Open user data folder in native file manager (Nautilus, Dolphin, Thunar support)</li>
+    <li><strong>Create Data Symlink:</strong> Create symlink from Flatpak sandbox to any home directory location</li>
+    <li>Easy access for backup, syncing, or manual deck management</li>
+</ul>
+
+<h4>UI Improvements</h4>
+<ul>
+    <li><strong>Cleaner Interface:</strong> "Ask a Question to AI" moved to dedicated dialog</li>
+    <li>Reduces main window clutter for more focused interaction</li>
+</ul>
 
 <h3 style='color:#8C6D46;'>Version 1.2.3 - March 3, 2026</h3>
 

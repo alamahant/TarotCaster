@@ -68,14 +68,14 @@ void TarotScene::displayCelticCross() {
     const qreal CARD_WIDTH = 150;
     const qreal CARD_HEIGHT = 225;
     const qreal HORIZONTAL_SPACING = 55;
-    const qreal VERTICAL_SPACING = CARD_HEIGHT + 100;
+    const qreal VERTICAL_SPACING = CARD_HEIGHT + 85; // orig 100
     QPointF center = sceneRect().center();
 
     // 1. Center card (Present)
     displayCard(currentCards[0].number, currentCards[0].reversed, center);
     // 2. Crossing card (Challenge)
     displayCard(currentCards[1].number, currentCards[1].reversed,
-                QPointF(center.x() - (CARD_WIDTH * 2.3) - (HORIZONTAL_SPACING * 2.3), center.y()));
+                QPointF(center.x() - (CARD_WIDTH * 2.3) - (HORIZONTAL_SPACING * 1.8), center.y()));
     // 3. Below (Foundation)
     displayCard(currentCards[2].number, currentCards[2].reversed,
                 QPointF(center.x(), center.y() + VERTICAL_SPACING));
@@ -593,7 +593,7 @@ void TarotScene::displaySavedCelticCross(const QVector<CardLoader::CardData>& sa
     displayCard(savedCards[0].number, savedCards[0].reversed, center, beRevealed);
     // 2. Crossing card (Challenge)
     displayCard(savedCards[1].number, savedCards[1].reversed,
-                QPointF(center.x() - (CARD_WIDTH * 3) - (HORIZONTAL_SPACING * 3), center.y()), beRevealed);
+                QPointF(center.x() - (CARD_WIDTH * 3) - (HORIZONTAL_SPACING * 1.4), center.y()), beRevealed);
     // 3. Below (Foundation)
     displayCard(savedCards[2].number, savedCards[2].reversed,
                 QPointF(center.x(), center.y() + VERTICAL_SPACING), beRevealed);
@@ -984,3 +984,26 @@ QString TarotScene::getCardName(int cardNumber) const
 
 }
 
+void TarotScene::redrawCurrentSpread()
+{
+    if (currentCards.isEmpty()) {
+        return;
+    }
+
+    // Store current data
+    SpreadType currentType = currentSpreadType;
+    QString customName = currentCustomSpreadName;
+    QVector<CardLoader::CardData> savedCards = currentCards;
+    bool wasReadingRequested = readingRequested;
+
+    // Clear and redraw
+    clearScene();
+
+    if (currentType == Custom && !customName.isEmpty()) {
+        displaySavedCustomSpread(savedCards, customName);
+    } else {
+        displaySavedSpread(currentType, savedCards, customName);
+    }
+
+    readingRequested = wasReadingRequested;
+}
