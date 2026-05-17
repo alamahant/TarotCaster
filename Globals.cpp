@@ -108,3 +108,9 @@ const QMap<QString, QString> tarotNames = {
     {"76", "queen of coins"},
     {"77", "king of coins"}
 };
+
+QString g_currentSpreadName = "Single Card";
+bool g_isCustomSpread = false;
+QString g_currentDeckName = "OriginalRiderWaite";
+int g_currentSpreadType = 1;  // optional, for JSON
+QString g_currentDeckPath = "";

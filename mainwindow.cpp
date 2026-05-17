@@ -202,10 +202,16 @@ MainWindow::MainWindow(QWidget *parent)
     // Add custom spread designer action
     QAction* createSpreadAction = toolsMenu->addAction("&Custom Spread Designer");
     connect(createSpreadAction, &QAction::triggered, this, &MainWindow::onCreateCustomSpreadClicked);
-
+    toolsMenu->addSeparator();
     // ImportDeck
     QAction* importDeckAction = toolsMenu->addAction("&Import Deck");
     connect(importDeckAction, &QAction::triggered, this, &MainWindow::orderDeck);
+    toolsMenu->addSeparator();
+
+    //import physical spread
+    QAction* importSpreadAction = toolsMenu->addAction("Import Physicaal Spread");
+    connect(importSpreadAction, &QAction::triggered, this, &MainWindow::onImportPhysicalSpread);
+
     // Help Menu
     QMenu *helpMenu = menuBar()->addMenu("&Help");
     helpMenu->addAction("&About", this, &MainWindow::onShowAbout);
@@ -504,7 +510,7 @@ void MainWindow::onSaveReading() {
     json["version"] = "1.0";
     json["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
     json["spreadType"] = static_cast<int>(tarotScene->getCurrentSpreadType());
-
+    json["deckName"] = dockControls->getDeckSelector()->currentText();
     //
     // save the custom spread name
     if (tarotScene->getCurrentSpreadType() == TarotScene::Custom) {
@@ -605,6 +611,46 @@ void MainWindow::onLoadReading() {
     }
 
     QJsonObject json = doc.object();
+
+    // ========== DECK SWITCHING ==========
+    if (json.contains("deckName")) {
+        QString savedDeckName = json["deckName"].toString();
+        int deckIndex = dockControls->getDeckSelector()->findText(savedDeckName);
+
+        if (deckIndex != -1) {
+            // Saved deck exists in combobox
+            if (dockControls->getDeckSelector()->currentText() != savedDeckName) {
+                QMessageBox::StandardButton reply = QMessageBox::question(
+                    this,
+                    "Switch Deck",
+                    QString("This reading was saved using the deck:\n\n\"%1\"\n\n"
+                            "Your currently selected deck is:\n\n\"%2\"\n\n"
+                            "Switch to the saved deck before loading?")
+                        .arg(savedDeckName)
+                        .arg(dockControls->getDeckSelector()->currentText()),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+
+                if (reply == QMessageBox::Yes) {
+                    // Change the combobox
+                    dockControls->getDeckSelector()->setCurrentIndex(deckIndex);
+                    // This will trigger DockControls to emit deckLoaded signal
+                    // which calls onDeckLoaded and loads the deck automatically
+                }
+            }
+        } else {
+            // Saved deck not found
+            QMessageBox::warning(
+                this,
+                "Deck Not Found",
+                QString("This reading was saved using the deck:\n\n\"%1\"\n\n"
+                        "This deck is not available in your current deck list.\n"
+                        "Cards will be displayed using your current deck.")
+                    .arg(savedDeckName)
+            );
+        }
+    }
+    // ===================================
 
     // Load cards
     QVector<CardLoader::CardData> loadedCards;
@@ -1084,6 +1130,48 @@ void MainWindow::loadReading(const QString& filename) {
 
     QJsonObject json = doc.object();
 
+
+    // ========== DECK SWITCHING ==========
+    if (json.contains("deckName")) {
+        QString savedDeckName = json["deckName"].toString();
+        int deckIndex = dockControls->getDeckSelector()->findText(savedDeckName);
+
+        if (deckIndex != -1) {
+            // Saved deck exists in combobox
+            if (dockControls->getDeckSelector()->currentText() != savedDeckName) {
+                QMessageBox::StandardButton reply = QMessageBox::question(
+                    this,
+                    "Switch Deck",
+                    QString("This reading was saved using the deck:\n\n\"%1\"\n\n"
+                            "Your currently selected deck is:\n\n\"%2\"\n\n"
+                            "Switch to the saved deck before loading?")
+                        .arg(savedDeckName)
+                        .arg(dockControls->getDeckSelector()->currentText()),
+                    QMessageBox::Yes | QMessageBox::No
+                );
+
+                if (reply == QMessageBox::Yes) {
+                    // Change the combobox
+                    dockControls->getDeckSelector()->setCurrentIndex(deckIndex);
+                    // This will trigger DockControls to emit deckLoaded signal
+                    // which calls onDeckLoaded and loads the deck automatically
+                }
+            }
+        } else {
+            // Saved deck not found
+            QMessageBox::warning(
+                this,
+                "Deck Not Found",
+                QString("This reading was saved using the deck:\n\n\"%1\"\n\n"
+                        "This deck is not available in your current deck list.\n"
+                        "Cards will be displayed using your current deck.")
+                    .arg(savedDeckName)
+            );
+        }
+    }
+    // ===================================
+
+
     // Load cards
     QVector<CardLoader::CardData> loadedCards;
     if (json.contains("cards") && json["cards"].isArray()) {
@@ -1164,5 +1252,12 @@ void MainWindow::onShowInOtherDeck()
 
     connect(cancelButton, &QPushButton::clicked, dialog, &QDialog::close);
 
+    dialog->show();
+}
+
+void MainWindow::onImportPhysicalSpread()
+{
+    ImportPhysicalDialog* dialog = new ImportPhysicalDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
 }

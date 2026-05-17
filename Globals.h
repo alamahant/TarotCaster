@@ -10,4 +10,11 @@ QString getLocalDataDirPath();
 QString getJournalDirPath();
 extern bool activeModelLoaded;
 
+
+extern QString g_currentSpreadName;
+extern bool g_isCustomSpread;
+extern QString g_currentDeckName;
+extern int g_currentSpreadType;  // optional, for JSON
+extern QString g_currentDeckPath;
+
 #endif // GLOBALS_H

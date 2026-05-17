@@ -142,6 +142,56 @@ void HelpDialog::setupInstructions()
         <p>This interactive approach creates a stronger connection between you and your reading,
         similar to physically shuffling a deck of cards.</p>
 
+        <h3>Import Physical Spread (Tools Menu)</h3>
+        <ol>
+            <li><strong>Prepare your physical spread</strong>
+                <ul>
+                    <li>Lay out your physical tarot cards in the desired spread position</li>
+                    <li>Note which card (00-77) goes in each position</li>
+                    <li>Note whether each card is upright or reversed</li>
+                </ul>
+            </li>
+            <li><strong>Open the Import Dialog</strong>
+                <ul>
+                    <li>From the main menu bar, go to <strong>Tools → Import Physical Cards</strong></li>
+                    <li>Ensure you have already selected the target Deck and Spread from the main window before opening this dialog</li>
+                </ul>
+            </li>
+            <li><strong>Assign cards to positions</strong>
+                <ul>
+                    <li><strong>Left Panel (Available Cards):</strong> Select a card from the list (00-77 with card names)</li>
+                    <li><strong>Right Panel (Spread Positions):</strong> Click a position to select it</li>
+                    <li>Check <strong>"Reversed"</strong> if the physical card is reversed</li>
+                    <li>Click <strong>"Assign Card to Position"</strong> to assign the selected card to the chosen position</li>
+                </ul>
+            </li>
+            <li><strong>Verify assignments</strong>
+                <ul>
+                    <li>The right panel updates to show which card is assigned to each position</li>
+                    <li>You cannot assign the same card number to multiple positions</li>
+                </ul>
+            </li>
+            <li><strong>Complete all positions</strong>
+                <ul>
+                    <li>Every spread position must have a card assigned</li>
+                    <li>The "Save" button will warn you if any position is incomplete</li>
+                </ul>
+            </li>
+            <li><strong>Save the imported reading</strong>
+                <ul>
+                    <li>Click <strong>"Save"</strong> at the bottom of the dialog</li>
+                    <li>Choose a location and filename (defaults to .tarot extension)</li>
+                    <li>The reading is saved as a standard .tarot file</li>
+                </ul>
+            </li>
+            <li><strong>Journal entry</strong>
+                <ul>
+                    <li>An entry is automatically created in the Journal for this imported reading</li>
+                    <li>The entry includes spread type, deck name, and file path</li>
+                </ul>
+            </li>
+        </ol>
+
         <h3>AI Interpretation</h3>
         <p>TaroCaster uses Mistral AI's powerful language models to provide insightful tarot interpretations.
         To use this feature, you'll need a free Mistral API key:</p>
@@ -194,7 +244,6 @@ void HelpDialog::setupInstructions()
 
     contentBrowser->setHtml(instructionsText);
 }
-
 
 void HelpDialog::setupSpreads()
 {
@@ -483,6 +532,28 @@ void HelpDialog::setupChangelogHelp()
     titleLabel->setText("TarotCaster Version History");
     QString content = R"(
         <h2 align='center'>Changelog</h2>
+
+<hr>
+
+<h3 style='color:#8C6D46;'>Version 1.2.7 - May 17, 2026</h3>
+
+<h4>Show Spread in Different Deck</h4>
+<ul>
+    <li><strong>Compare Decks:</strong> View any existing spread with any installed deck</li>
+    <li><strong>Non-Modal Dialog:</strong> Simple prompt to select a different deck</li>
+    <li><strong>Instant Redraw:</strong> Spread redraws instantly with newly selected deck</li>
+</ul>
+
+<h4>Import Physical Cards</h4>
+<ul>
+    <li><strong>Manual Assignment:</strong> Assign physical tarot cards (00-77) to spread positions</li>
+    <li><strong>Upright or Reversed:</strong> Toggle orientation for each assigned card</li>
+    <li><strong>Duplicate Prevention:</strong> Prevents assigning the same card to multiple positions</li>
+    <li><strong>Validation:</strong> Ensures all positions have cards before saving</li>
+    <li><strong>Save as .tarot:</strong> Exports imported spreads to standard .tarot file format</li>
+    <li><strong>Auto-Journal Entry:</strong> Automatically creates journal entry for imported readings</li>
+</ul>
+
 <hr>
 
 

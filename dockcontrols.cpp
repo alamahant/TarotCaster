@@ -90,7 +90,10 @@ DockControls::DockControls(QWidget *parent)
 
     // Create action buttons
     shuffleButton = new QPushButton("Shuffle Deck", this);
-
+    shuffleButton->setToolTip("Press this button, concentrate on your query and move around the mouse cursor to gather entropy.\n"
+                              "This is the digital equivalent of physically shuffling the cards.\n"
+                              "Optionally you may wish to first 'Display Full Deck' and move around\n"
+                              "the cursor to infuse the cards with entropy. When done, 'Stop Shuffling' and 'Deal Cards'");
     dealButton = new QPushButton("Deal Cards", this);
 
     clearButton = new QPushButton("Clear Cards", this);
@@ -134,8 +137,34 @@ DockControls::DockControls(QWidget *parent)
             this, &DockControls::swapEightElevenToggled);
 
 
-    connect(spreadSelector, &QComboBox::currentTextChanged,
-            this, &DockControls::spreadTypeChanged);
+    //connect(spreadSelector, &QComboBox::currentTextChanged,
+      //      this, &DockControls::spreadTypeChanged);
+
+    connect(spreadSelector, &QComboBox::currentTextChanged, this, [this](const QString& spreadName) {
+        // Update globals
+        g_currentSpreadName = spreadName;
+        g_isCustomSpread = (spreadSelector->currentData().toString() == "custom");
+
+        if (!g_isCustomSpread) {
+            if (spreadName == "Single Card") {
+                g_currentSpreadType = 1;
+            } else if (spreadName == "Three Card") {
+                g_currentSpreadType = 2;
+            } else if (spreadName == "Celtic Cross") {
+                g_currentSpreadType = 4;
+            } else if (spreadName == "Horseshoe") {
+                g_currentSpreadType = 3;
+            } else if (spreadName == "ZodiacSpread") {
+                g_currentSpreadType = 5;
+            }
+        } else {
+            g_currentSpreadType = -1;
+        }
+
+        // Emit signal with the spread name
+        emit spreadTypeChanged(spreadName);
+    });
+
     connect(dealButton, &QPushButton::clicked, this, &DockControls::onDealClicked);
 
     // Connect the Get Reading button
@@ -297,9 +326,14 @@ QSlider *DockControls::getZoomSlider() const
 
 
 void DockControls::onDeckSelected(const QString& deckName) {
+
+    g_currentDeckName = deckName;
     // Get the full path from the item data
+
     int index = deckSelector->currentIndex();
     QString deckPath = deckSelector->itemData(index).toString();
+
+    g_currentDeckPath = deckPath;  // Also store path in global
 
     // If the path is empty (for backward compatibility), use the old method
     if (deckPath.isEmpty()) {

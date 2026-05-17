@@ -67,8 +67,7 @@ public:
         Horseshoe,
         CelticCross,
         ZodiacSpread,
-        Custom  // Add this
-
+        Custom
     };
 
     struct CustomSpreadPosition {
@@ -214,7 +213,10 @@ public:
     };
     void redrawCurrentSpread();
 
-
+private:
+    QVector<QPointF> getCelticCrossPositions() const;
+    QVector<QPointF> getHorseshoePositions() const;
+    QVector<QPointF> getZodiacPositions() const;
 };
 
 #endif

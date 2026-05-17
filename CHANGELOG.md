@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.2.7] - 2026-05-17
+
+### Added
+- **Show Spread in Different Deck**: View any existing spread with any installed deck
+  - Non-modal dialog prompts user to select a different deck
+  - Spread redraws instantly with the newly selected deck
+  - Compare how different decks represent the same reading
+
+- **Import Physical Cards**: Manually assign physical tarot cards to spread positions
+  - Left panel displays all available cards (00-77) with names
+  - Right panel shows spread positions with names
+  - Assign any card to any position with upright/reversed toggle
+  - Prevents duplicate card assignments across positions
+  - Validates all positions have cards before saving
+  - Saves imported spreads as `.tarot` files
+  - Automatically creates journal entry for imported readings
+
+---
+
 ## [1.2.6] - 2026-05-12
 
 ### Added

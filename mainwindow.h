@@ -22,6 +22,7 @@
 #include <QSize>
 #include<QDialog>
 #include"journaldialog.h"
+#include"importphysicaldialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -93,7 +94,7 @@ private slots:
     void openFolder();
     void loadReading(const QString& filename);
     void onShowInOtherDeck();
-
+    void onImportPhysicalSpread();
 private:
     QString markdownToHtml(const QString &markdown);
     QTextEdit *questionInput = nullptr;

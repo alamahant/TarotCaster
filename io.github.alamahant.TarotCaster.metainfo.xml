@@ -63,6 +63,16 @@
 
   <releases>
 
+<release version="1.2.7" date="2026-05-17">
+  <description>
+    <p>New Features:</p>
+    <ul>
+      <li>Show Spread in Different Deck: View any existing spread with any installed deck via non-modal dialog prompt. Spread redraws instantly to compare how different decks represent the same reading</li>
+      <li>Import Physical Cards: Manually assign physical tarot cards (00-77) to spread positions with upright and reversed toggle. Prevents duplicate card assignments, validates all positions before saving as .tarot files, and automatically creates journal entries for imported readings</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.2.6" date="2026-05-12">
   <description>
     <p>New Features:</p>
