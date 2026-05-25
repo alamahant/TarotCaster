@@ -1,6 +1,11 @@
 #include "tarotscene.h"
-#include "mainwindow.h"
 #include<QHash>
+#include<QVBoxLayout>
+#include<QLabel>
+#include<QPushButton>
+#include<QInputDialog>
+#include<QComboBox>
+#include<QLineEdit>
 
 void TarotScene::setCardLoader(CardLoader* newCardLoader)
 {
@@ -32,6 +37,10 @@ TarotScene::TarotScene(QObject *parent) : QGraphicsScene(parent),
 TarotScene::~TarotScene() {
     qDeleteAll(displayedCards);
     displayedCards.clear();
+    for(auto popup : activePopups){
+        delete popup;
+    }
+    activePopups.clear();
 }
 
 
@@ -62,7 +71,6 @@ void TarotScene::clearScene() {
         removeItem(item);
         delete item;
     }
-
     emit viewRefreshRequested();
 }
 
@@ -952,4 +960,122 @@ void TarotScene::displaySavedZodiacSpread(const QVector<CardLoader::CardData>& s
     for (int i = 0; i < positions.size(); ++i) {
         displayCard(savedCards[i].number, savedCards[i].reversed, positions[i], beRevealed);
     }
+}
+
+void TarotScene::showExtraCardPopup(int cardNumber, bool reversed) {
+    QWidget* mainWindow = QApplication::activeWindow();
+    QDialog* popup = new QDialog(mainWindow);
+    popup->setObjectName("extraCardPopup");
+    popup->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint);
+    popup->setModal(false);
+    activePopups.append(popup);
+
+    connect(popup, &QDialog::finished, this, [this, popup]() {
+        activePopups.removeAll(popup);
+    });
+
+    // Set initial window title
+    QString cardName = getCardName(cardNumber);
+    QString orientation = reversed ? "(R)" : QString();
+    popup->setWindowTitle("One More Card");
+
+    QVBoxLayout* mainLayout = new QVBoxLayout(popup);
+    mainLayout->setSpacing(5);
+    mainLayout->setContentsMargins(5, 5, 5, 5);
+
+    // Card image
+    QLabel* imageLabel = new QLabel();
+    QPixmap cardImage = cardLoader.getCardImage(cardNumber);
+    if (reversed) {
+        QTransform transform;
+        transform.rotate(180);
+        cardImage = cardImage.transformed(transform);
+    }
+    cardImage = cardImage.scaled(200, 300, Qt::KeepAspectRatio);
+    imageLabel->setPixmap(cardImage);
+    mainLayout->addWidget(imageLabel, 0, Qt::AlignCenter);
+
+    // Three buttons in one row
+    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    buttonLayout->setSpacing(0);
+    buttonLayout->setContentsMargins(0, 0, 0, 0);
+
+    // ComboBox - shows just number (00, 01, etc.), dropdown shows number + name
+    QComboBox* cardSelector = new QComboBox();
+    cardSelector->setObjectName("extraCardCombo");
+    for (int i = 0; i <= 77; i++) {
+        QString cardName2 = getCardName(i);
+        QString numberStr = QString("%1").arg(i, 2, 10, QChar('0'));
+        QString displayText = QString("%1: %2").arg(numberStr).arg(cardName2);
+        cardSelector->addItem(displayText, i);
+
+        // Set tooltip for this item (shown when hovering over it in dropdown)
+        cardSelector->setItemData(i, displayText, Qt::ToolTipRole);
+    }
+
+    cardSelector->setCurrentIndex(cardNumber);
+
+    cardSelector->setItemText(cardNumber, QString("%1").arg(cardNumber));
+
+    cardSelector->setMaximumWidth(45);
+    //cardSelector->setMaximumHeight(16);
+    buttonLayout->addWidget(cardSelector, 0, Qt::AlignCenter);
+    // Edit Title button
+    QPushButton* editTitleButton = new QPushButton("*");
+    editTitleButton->setToolTip("Edit Title");
+    editTitleButton->setObjectName("editButton");
+    //editTitleButton->setMaximumHeight(16);
+    buttonLayout->addWidget(editTitleButton);
+
+    // Close button
+    QPushButton* closeButton = new QPushButton("Close");
+    //closeButton->setMaximumHeight(16);
+    closeButton->setObjectName("closeButton");
+    buttonLayout->addWidget(closeButton);
+
+
+    QLabel* cardNameLabel = new QLabel();
+    cardNameLabel->setText(QString("%1%2").arg(cardName).arg(orientation));
+    cardNameLabel->setAlignment(Qt::AlignCenter);  // Center horizontally
+    mainLayout->addWidget(cardNameLabel);
+
+    // Add widgets with vertical center alignment
+
+    mainLayout->addLayout(buttonLayout);
+
+    // Connect signals
+    connect(cardSelector, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [this, popup, imageLabel, cardSelector, cardNameLabel](int index) {
+            if (index < 0) return;
+            int newCardNumber = cardSelector->itemData(index).toInt();
+
+            // Update the displayed text to just the number
+            QString numberStr = QString("%1").arg(newCardNumber);
+            cardSelector->setItemText(index, numberStr);
+
+            // Update image
+            QPixmap newImage = cardLoader.getCardImage(newCardNumber);
+            newImage = newImage.scaled(200, 300, Qt::KeepAspectRatio);
+            imageLabel->setPixmap(newImage);
+
+            // Update window title (keep orientation as is)
+            QString newCardName = getCardName(newCardNumber);
+            cardNameLabel->setText(QString("%1").arg(newCardName));
+
+
+
+        });
+
+    connect(editTitleButton, &QPushButton::clicked, [popup]() {
+        bool ok;
+        QString newTitle = QInputDialog::getText(nullptr, "Edit Title",
+            "Enter custom title:", QLineEdit::Normal, popup->windowTitle(), &ok);
+        if (ok && !newTitle.isEmpty()) {
+            popup->setWindowTitle(newTitle);
+        }
+    });
+
+    connect(closeButton, &QPushButton::clicked, popup, &QDialog::accept);
+
+    popup->show();
 }

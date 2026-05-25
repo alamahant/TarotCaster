@@ -535,6 +535,38 @@ void HelpDialog::setupChangelogHelp()
 
 <hr>
 
+<h3 style='color:#8C6D46;'>Version 1.2.8 - May 25, 2026</h3>
+
+<h4>Unified Extra Card and Significator Popup</h4>
+<ul>
+    <li><strong>Dual Purpose:</strong> Single dialog serving both random extra cards and significator assignment</li>
+    <li><strong>Editable Title:</strong> User can customize window title with edit button (example: Clarifies The Moon)</li>
+    <li><strong>Dropdown Selector:</strong> Pick any card 00-77 - shows number when collapsed, full name when expanded</li>
+    <li><strong>Hover Tooltips:</strong> Full card name appears when hovering over dropdown items</li>
+    <li><strong>Instant Update:</strong> Card image changes immediately when selection changes</li>
+    <li><strong>Stay Open:</strong> Popup remains open across spreads - minimize and maximize via title bar</li>
+</ul>
+
+<h4>Social Media Sharing</h4>
+<ul>
+    <li><strong>Multiple Platforms:</strong> Share to Twitter, Facebook, Reddit, WhatsApp, Telegram, Instagram, and Email</li>
+    <li><strong>Utility Actions:</strong> Copy to Clipboard, Save to File (PNG), and Open Screenshots Folder</li>
+    <li><strong>Custom Message:</strong> Editable text editor for personalized captions</li>
+    <li><strong>Auto Attribution:</strong> GitHub link automatically appended to shared text</li>
+    <li><strong>Timestamped Files:</strong> Screenshots saved with date and time in filename</li>
+    <li><strong>Icon Grid:</strong> Platform buttons with hover effects in clean grid layout</li>
+</ul>
+
+<h4>Styling Improvements</h4>
+<ul>
+    <li><strong>Dark Theme:</strong> Popup dialog unified with app-wide gold on black color scheme</li>
+    <li><strong>Consistent Heights:</strong> Combo boxes forced to 16px height across all dialogs</li>
+</ul>
+
+
+
+<hr>
+
 <h3 style='color:#8C6D46;'>Version 1.2.7 - May 17, 2026</h3>
 
 <h4>Show Spread in Different Deck</h4>

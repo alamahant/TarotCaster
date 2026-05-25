@@ -17,12 +17,11 @@
 #include "tarotscene.h"
 #include "dockcontrols.h"
 #include"mistralapi.h"
-#include"helpdialog.h"
 #include "customspreaddesigner.h"
 #include <QSize>
 #include<QDialog>
 #include"journaldialog.h"
-#include"importphysicaldialog.h"
+#include"socialshare.h"
 
 class MainWindow : public QMainWindow
 {
@@ -95,6 +94,7 @@ private slots:
     void loadReading(const QString& filename);
     void onShowInOtherDeck();
     void onImportPhysicalSpread();
+    void onShareClicked();
 private:
     QString markdownToHtml(const QString &markdown);
     QTextEdit *questionInput = nullptr;
@@ -107,5 +107,10 @@ private:
     JournalDialog* journalDialog = nullptr;
     QPushButton* openJournalButton;
     QPushButton* switchDeckButton;
+
+    //sharing
+    void setupShareButton();
+    SocialShare* m_socialShare;
+    QPushButton* oneMoreButton;
 };
 #endif // MAINWINDOW_H

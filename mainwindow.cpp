@@ -8,12 +8,17 @@
 #include "donationdialog.h"
 #include "modelselectordialog.h"
 #include"journalmanager.h"
+#include"socialsharedialog.h"
+#include<QCoreApplication>
+#include<QMimeData>
+#include"helpdialog.h"
+#include"importphysicaldialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , questionInput(new QTextEdit(this))
     , journalDialog(new JournalDialog(this))
-
+    , m_socialShare(new SocialShare(this))
 {
     this->setMinimumSize(1200, 800);
     this->showMaximized();
@@ -238,6 +243,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(journalDialog, &JournalDialog::loadReadingRequested,
             this, &MainWindow::loadReading);
 
+    setupShareButton();
 }
 
 MainWindow::~MainWindow()
@@ -247,6 +253,7 @@ MainWindow::~MainWindow()
     if (glWidget && glWidget->parent() == nullptr) {
         delete glWidget;
     }
+    if(tarotScene) delete tarotScene;
 }
 
 
@@ -302,6 +309,23 @@ void MainWindow::createDocks() {
     rightLayout->addWidget(switchDeckButton);
 
 
+    oneMoreButton = new QPushButton("Extra Card", this);
+    oneMoreButton->setToolTip(
+        "Extra Card OR Significator Assigner\n\n"
+        "Keep open while using - minimize/maximize via title bar.\n"
+        "• Draw extra card → just open (If you need final or explanatory cards)\n"
+        "• Set significator → use dropdown before dealing\n\n"
+        "Use * button to set window title (e.g., 'Clarifies The Moon' or 'Significator')"
+    );
+    connect(oneMoreButton, &QPushButton::clicked, this, [this](){
+        bool allowReversed = dockControls->allowReversed->isChecked();
+        QVector<CardLoader::CardData> randomCard = tarotScene->getCardLoader().getRandomCards(1, allowReversed);
+
+        if (!randomCard.isEmpty()) {
+            tarotScene->showExtraCardPopup(randomCard[0].number, randomCard[0].reversed);
+        }
+    });
+    rightLayout->addWidget(oneMoreButton);
 
     // Add meaning display
     meaningDisplay = new MeaningDisplay(this);
@@ -395,7 +419,6 @@ void MainWindow::onDealClicked() {
 
 void MainWindow::onGetReadingClicked() {
     if(tarotScene->getReadingRequested() && readingDisplayed) return;
-
 
     dockControls->readingDisplay->clear();
     // Check if we have an API key
@@ -1261,3 +1284,114 @@ void MainWindow::onImportPhysicalSpread()
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
 }
+
+//sharing
+
+void MainWindow::setupShareButton()
+{
+    // Create the share button
+    QPushButton *shareButton = new QPushButton(this);
+    shareButton->setIcon(QIcon(":/resources/icons-white/share-2.svg"));
+    shareButton->setToolTip("Share this spread");
+    shareButton->setFlat(true);
+    shareButton->setFixedSize(32, 32);
+
+    /*
+    shareButton->setStyleSheet(R"(
+        QPushButton {
+            border: none;
+            border-radius: 4px;
+        }
+        QPushButton:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        QPushButton:pressed {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+    )");
+    */
+
+    // Add to menubar corner
+    QMenuBar *menuBar = this->menuBar();
+    if (menuBar) {
+        menuBar->setCornerWidget(shareButton, Qt::TopRightCorner);
+    }
+
+    connect(shareButton, &QPushButton::clicked, this, &MainWindow::onShareClicked);
+}
+
+void MainWindow::onShareClicked()
+{
+    // Capture the spread
+    QRectF sceneRect = tarotScene->sceneRect();
+    QPixmap screenshot(sceneRect.size().toSize());
+    screenshot.fill(Qt::transparent);
+
+    QPainter painter(&screenshot);
+    tarotScene->render(&painter, screenshot.rect(), sceneRect);
+    painter.end();
+
+    // Add watermark
+    QPainter watermarkPainter(&screenshot);
+    watermarkPainter.setPen(Qt::NoPen);
+    watermarkPainter.setPen(QPen(QColor(255, 255, 255, 180), 2));
+    watermarkPainter.setFont(QFont("Arial", 20, QFont::Bold));
+    watermarkPainter.drawText(screenshot.rect(), Qt::AlignBottom | Qt::AlignRight,
+                              "  Created with TarotCaster  ");
+    watermarkPainter.end();
+    // Build the text once
+    QString shareText = QString("My %1 reading with the %2 deck!\n")
+                        .arg(g_currentSpreadName)
+                        .arg(g_currentDeckName);
+
+    // Copy watermarked image to clipboard
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setImage(screenshot.toImage());
+
+    // Create and show dialog
+    SocialShareDialog *dialog = new SocialShareDialog(shareText, screenshot, m_socialShare, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);
+    dialog->show();
+}
+
+/*
+void MainWindow::onShareClicked()
+{
+    // Capture the spread
+    QRectF sceneRect = tarotScene->sceneRect();
+    QPixmap screenshot(sceneRect.size().toSize());
+    screenshot.fill(Qt::transparent);
+
+    QPainter painter(&screenshot);
+    tarotScene->render(&painter, screenshot.rect(), sceneRect);
+    painter.end();
+
+    // Add watermark
+    QPainter watermarkPainter(&screenshot);
+    watermarkPainter.setPen(Qt::NoPen);
+    watermarkPainter.setPen(QPen(QColor(255, 255, 255, 180), 2));
+    watermarkPainter.setFont(QFont("Arial", 20, QFont::Bold));
+    watermarkPainter.drawText(screenshot.rect(), Qt::AlignBottom | Qt::AlignRight,
+                              "  Created with TarotCaster  ");
+    watermarkPainter.end();
+
+    // Build the text
+    QString shareText = QString("My %1 reading with the %2 deck!\n")
+                        .arg(g_currentSpreadName)
+                        .arg(g_currentDeckName);
+
+    // Copy BOTH image and text to clipboard using QMimeData
+    QClipboard *clipboard = QApplication::clipboard();
+    QMimeData *mimeData = new QMimeData();
+    mimeData->setText(shareText);
+    mimeData->setImageData(screenshot);
+    clipboard->setMimeData(mimeData);
+
+    // Create and show dialog
+    SocialShareDialog *dialog = new SocialShareDialog(shareText, screenshot, m_socialShare, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setModal(false);
+    dialog->show();
+}
+*/

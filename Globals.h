@@ -4,10 +4,13 @@
 #include<QString>
 
 extern const QMap<QString, QString> tarotNames;
+
 QString getUserDecksDirPath();
 QString getUnorderedDecksDirPath();
 QString getLocalDataDirPath();
 QString getJournalDirPath();
+QString getSharesDirPath();
+
 extern bool activeModelLoaded;
 
 

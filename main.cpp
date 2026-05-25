@@ -14,11 +14,12 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("Alamahant");
     QCoreApplication::setApplicationName("TarotCaster");
-    QCoreApplication::setApplicationVersion("1.2.7");
+    QCoreApplication::setApplicationVersion("1.2.8");
     QDir().mkpath(getLocalDataDirPath());
     QDir().mkpath(getUserDecksDirPath());
     QDir().mkpath(getUnorderedDecksDirPath());
     QDir().mkpath(getJournalDirPath());
+    QDir().mkpath(getSharesDirPath());
 
     a.setWindowIcon(QIcon(":/resources/app-blue.png"));
 

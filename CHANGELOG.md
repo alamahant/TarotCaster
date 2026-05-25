@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.2.8] - 2026-05-25
+
+### Added
+- **Unified Extra Card & Significator Popup**: Single dialog serving two purposes
+  - Display random extra/clarification card with one click
+  - Assign significator before dealing spread using dropdown selector (00-77)
+  - ✏️ Edit Title button - user customizes window title (e.g., "Clarifies The Moon", "Significator - The Fool")
+  - Card image updates instantly when selecting from dropdown
+  - Popup stays open across spreads - minimize/maximize via title bar
+  - Combo box shows card number when collapsed, full "00: The Fool" when expanded
+  - Hover tooltips on dropdown items display full card name
+  - No need to close before dealing spread
+
+- **Social Media Sharing**: Share spread screenshots and readings across multiple platforms
+  - **Twitter/X** - Opens tweet composer with custom text + screenshot in clipboard
+  - **Facebook** - Opens post creator with attribution
+  - **Reddit** - Opens new post with title
+  - **WhatsApp** - Opens chat with pre-filled message
+  - **Telegram** - Opens share dialog
+  - **Instagram** - Opens app with screenshot in clipboard
+  - **Email** - Opens mail client with subject and body
+  - **Copy to Clipboard** - Copies both custom text and screenshot image
+  - **Save to File** - Save screenshot as PNG with timestamped filename
+  - **Open Folder** - Opens screenshots directory in file manager
+  - Automatic GitHub attribution in shared text
+  - Platform icons in grid layout with hover effects
+
+### Changed
+- Popup dialog styling unified with app-wide dark theme (gold on black)
+- Combo boxes forced to consistent 16px height across all dialogs
+
+---
+
 ## [1.2.7] - 2026-05-17
 
 ### Added

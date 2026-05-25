@@ -21,6 +21,7 @@ private:
 public:
     TarotScene(QObject *parent = nullptr);
     ~TarotScene();
+
     void displayCard(int number, bool reversed, const QPointF& pos, bool beRevealed);
     bool beRevealed;
     void setCardLoader(CardLoader* newCardLoader);
@@ -36,7 +37,7 @@ public:
 public slots:
     void onCardRevealed(int cardNumber);
     void clearScene();
-    void setAllowReversedCards(bool allow);  // Add this slot
+    void setAllowReversedCards(bool allow);
     void setSpreadType(const QString& type);
     void displayFullDeck();
 
@@ -217,6 +218,10 @@ private:
     QVector<QPointF> getCelticCrossPositions() const;
     QVector<QPointF> getHorseshoePositions() const;
     QVector<QPointF> getZodiacPositions() const;
+public:
+    void showExtraCardPopup(int cardNumber, bool reversed);
+private:
+    QList<QDialog*> activePopups;  // Track all popup dialogs
 };
 
 #endif

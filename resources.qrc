@@ -5,5 +5,16 @@
         <file>resources/app-gold.png</file>
         <file>resources/card_meanings.json</file>
         <file>resources/tarotcaster.css</file>
+        <file>resources/icons/facebook.svg</file>
+        <file>resources/icons/instagram.svg</file>
+        <file>resources/icons/x.svg</file>
+        <file>resources/icons-white/share-2.svg</file>
+        <file>resources/icons/copy.svg</file>
+        <file>resources/icons/folder.svg</file>
+        <file>resources/icons/save.svg</file>
+        <file>resources/icons/send.svg</file>
+        <file>resources/icons/reddit.svg</file>
+        <file>resources/icons/telegram.svg</file>
+        <file>resources/icons/whatsapp.svg</file>
     </qresource>
 </RCC>

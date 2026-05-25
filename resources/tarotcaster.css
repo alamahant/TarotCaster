@@ -235,6 +235,28 @@ QSlider::tick-mark:horizontal {
 
 
 
+/* Extra card popup specific styles - use class + object name */
+QDialog[objectName="extraCardPopup"] QComboBox[objectName="extraCardCombo"] {
+    background-color: #2a2a2a;
+    color: gold;
+    height: 16px;
+    min-height: 16px;
+    max-height: 16px;
+}
 
+QDialog[objectName="extraCardPopup"] QPushButton[objectName="editButton"],
+QDialog[objectName="extraCardPopup"] QPushButton[objectName="closeButton"] {
+    background-color: #2a2a2a;
+    color: gold;
+    border: 1px solid #3a3a3a;
+    padding: 0px;
+    height: 16px;
+    min-height: 16px;
+    max-height: 16px;
+}
 
-
+QDialog[objectName="extraCardPopup"] QPushButton[objectName="editButton"]:hover,
+QDialog[objectName="extraCardPopup"] QPushButton[objectName="closeButton"]:hover {
+    background-color: #3a3a3a;
+    border: 1px solid gold;
+}

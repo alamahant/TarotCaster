@@ -63,12 +63,26 @@
 
   <releases>
 
+<release version="1.2.8" date="2026-05-25">
+  <description>
+    <p>New Features:</p>
+    <ul>
+      <li>Unified Extra Card and Significator Popup: Single dialog serving both random extra cards and significator assignment before dealing spreads - features editable window title, dropdown selector (00-77) showing numbers collapsed and full names expanded, hover tooltips, instant card image updates, and stays open across spreads with minimize/maximize via title bar</li>
+      <li>Social Media Sharing: Share spread screenshots and readings to Twitter, Facebook, Reddit, WhatsApp, Telegram, Instagram, Email, plus Copy to Clipboard, Save to File, and Open Folder - includes automatic GitHub attribution, custom message editor, timestamped PNG filenames, and platform icons with hover effects</li>
+    </ul>
+    <p>Changed:</p>
+    <ul>
+      <li>Popup dialog styling unified with app-wide dark theme (gold on black) and combo boxes forced to consistent 16px height across all dialogs</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.2.7" date="2026-05-17">
   <description>
     <p>New Features:</p>
     <ul>
-      <li>Show Spread in Different Deck: View any existing spread with any installed deck via non-modal dialog prompt. Spread redraws instantly to compare how different decks represent the same reading</li>
-      <li>Import Physical Cards: Manually assign physical tarot cards (00-77) to spread positions with upright and reversed toggle. Prevents duplicate card assignments, validates all positions before saving as .tarot files, and automatically creates journal entries for imported readings</li>
+      <li>Show Spread in Different Deck: View any existing spread with any installed deck via non-modal dialog prompt; spread redraws instantly to compare how different decks represent the same reading</li>
+      <li>Import Physical Cards: Manually assign physical tarot cards (00-77) to spread positions with upright/reversed toggle; prevents duplicate card assignments, validates all positions before saving as .tarot files, and automatically creates journal entries for imported readings</li>
     </ul>
   </description>
 </release>
