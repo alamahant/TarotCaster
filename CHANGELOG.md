@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.9] - 2026-06-10
+
+### Added
+- Dynamic card scaling based on screen resolution (10% width, 15% height)
+- Adaptive spacing for all spreads (Celtic Cross, Horseshoe, Zodiac)
+- Auto-adjusting cards per row in full deck view (6-10 based on screen width)
+
+### Changed
+- Removed obsolete Qt high DPI attributes
+- Optimized render hints for sharper card images
+
+### Fixed
+- Card overlapping in Celtic Cross spread on high resolutions
+
 ## [1.2.8] - 2026-05-25
 
 ### Added

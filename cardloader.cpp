@@ -2,6 +2,8 @@
 #include <QRandomGenerator>
 #include "dockcontrols.h"
 #include<QImageReader>
+#include"Globals.h"
+
 CardLoader::CardLoader(const QString& path) : cardPath(path) {
 }
 
@@ -67,7 +69,7 @@ QPixmap CardLoader::getCardImage(int number) {
 
     // Fall back to scaling on-demand if not pre-cached
     if (cardImages.contains(number)) {
-        return cardImages[number].scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        return cardImages[number].scaled(getCardWidth(), getCardHeight(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
 
     // Return empty pixmap if card not found
@@ -96,11 +98,11 @@ QVector<CardLoader::CardData> CardLoader::getRandomCards(int count, bool allowRe
 void CardLoader::preScaleCards() {
     // Pre-scale all cards for better performance
     for (auto it = cardImages.begin(); it != cardImages.end(); ++it) {
-        scaledCardImages[it.key()] = it.value().scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        scaledCardImages[it.key()] = it.value().scaled(getCardWidth(), getCardHeight(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
 
     // Pre-scale back card
-    scaledCardBack = cardBack.scaled(200, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    scaledCardBack = cardBack.scaled(getCardWidth(), getCardHeight(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 }
 
 

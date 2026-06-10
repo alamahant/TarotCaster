@@ -118,3 +118,5 @@ bool g_isCustomSpread = false;
 QString g_currentDeckName = "OriginalRiderWaite";
 int g_currentSpreadType = 1;  // optional, for JSON
 QString g_currentDeckPath = "";
+//const qreal CARD_WIDTH = 200;
+//const qreal CARD_HEIGHT = 300;

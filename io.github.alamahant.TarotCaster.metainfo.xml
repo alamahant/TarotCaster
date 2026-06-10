@@ -63,6 +63,16 @@
 
   <releases>
 
+<release version="1.2.9" date="2026-06-10">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Dynamic card scaling based on screen resolution - cards now take 10 percent of screen width and 15 percent of height instead of hardcoded 150x225 pixels</li>
+      <li>Adaptive spacing for Celtic Cross, Horseshoe, and Zodiac spreads - positions automatically adjust to card size</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.2.8" date="2026-05-25">
   <description>
     <p>New Features:</p>

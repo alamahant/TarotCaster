@@ -50,6 +50,7 @@ private:
     QPushButton* m_cancelBtn;
     QPushButton *m_unassignBtn;
     QString detectDominantImageFormat() const;
+    bool findBackCardInDeck() const;
 
 };
 

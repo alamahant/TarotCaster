@@ -535,6 +535,18 @@ void HelpDialog::setupChangelogHelp()
 
 <hr>
 
+<h3 style='color:#8C6D46;'>Version 1.2.9 - June 10, 2026</h3>
+
+<h4>Dynamic Card Scaling</h4>
+<ul>
+    <li><strong>Resolution Based:</strong> Cards now scale dynamically - 10% of screen width and 15% of screen height instead of hardcoded 150x225 pixels</li>
+    <li><strong>Adaptive Spreads:</strong> Celtic Cross, Horseshoe, and Zodiac spreads automatically adjust spacing and positions based on card size</li>
+    <li><strong>Full Deck View:</strong> Cards per row auto-calculates based on screen width (6 to 10 cards)</li>
+    <li><strong>Sharp Rendering:</strong> Optimized render hints for crisp images on all displays</li>
+</ul>
+
+<hr>
+
 <h3 style='color:#8C6D46;'>Version 1.2.8 - May 25, 2026</h3>
 
 <h4>Unified Extra Card and Significator Popup</h4>

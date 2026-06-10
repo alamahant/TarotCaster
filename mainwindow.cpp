@@ -35,15 +35,16 @@ MainWindow::MainWindow(QWidget *parent)
     centralView->setCacheMode(QGraphicsView::CacheBackground);
     centralView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     centralView->setBackgroundBrush(Qt::black);
-    centralView->setRenderHint(QPainter::Antialiasing);
-    centralView->setRenderHint(QPainter::SmoothPixmapTransform);
+    centralView->setRenderHint(QPainter::Antialiasing, true);
+    centralView->setRenderHint(QPainter::SmoothPixmapTransform, true);
     centralView->setRenderHint(QPainter::TextAntialiasing, true);
-    centralView->setOptimizationFlags(QGraphicsView::DontSavePainterState | QGraphicsView::DontAdjustForAntialiasing);
-    centralView->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    //centralView->setOptimizationFlags(QGraphicsView::DontSavePainterState | QGraphicsView::DontAdjustForAntialiasing);
+    centralView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
+    //centralView->setRenderHint(QPainter::LosslessImageRendering, true);
 
 #ifndef QT_NO_OPENGL
     QSurfaceFormat format;// = glWidget->format();
-    format.setSamples(4);  // 4x MSAA
+    format.setSamples(4);  // 4x MSAA was 4
     format.setSwapInterval(1);  // Enable VSync
     format.setColorSpace(QSurfaceFormat::sRGBColorSpace); // Better color accuracy
     //use either this or     glWidget->setFormat(format);

@@ -176,6 +176,19 @@ void TarotOrderDialog::movePrev() {
 
 void TarotOrderDialog::confirmAll()
 {
+    if (!findBackCardInDeck()) {
+        QMessageBox::critical(this, "Missing Back Card",
+                              "Your deck directory does not contain a back card image!\n\n"
+                              "The back card must be named one of the following:\n"
+                              "• back.png\n"
+                              "• back.jpg\n"
+                              "• Back.png\n"
+                              "• Back.jpg\n\n"
+                              "Please add the back card to the deck folder and try again.\n"
+                              "The deck cannot be properly imported without a back card.");
+        return;
+    }
+
     // First check for 78 cards
     if (m_assignments.size() != 78) {
         QMessageBox::warning(this, "Incomplete",
@@ -299,3 +312,12 @@ QString TarotOrderDialog::detectDominantImageFormat() const {
     return (jpgCount > pngCount) ? "jpg" : "png";
 }
 
+bool TarotOrderDialog::findBackCardInDeck() const {
+    QDir dir(m_deckPath);
+    QStringList filters;
+    filters << "back.png" << "back.jpg" << "Back.png" << "Back.jpg"
+            << "back.jpeg" << "Back.jpeg";
+
+    QStringList backCards = dir.entryList(filters);
+    return !backCards.isEmpty();
+}

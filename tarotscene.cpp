@@ -6,6 +6,7 @@
 #include<QInputDialog>
 #include<QComboBox>
 #include<QLineEdit>
+#include"Globals.h"
 
 void TarotScene::setCardLoader(CardLoader* newCardLoader)
 {
@@ -78,27 +79,24 @@ void TarotScene::setAllowReversedCards(bool allow) {
     allowReversedCards = allow;
 }
 
+
 void TarotScene::displayThreeCardSpread() {
     clearScene();
     currentSpreadType = ThreeCard;
     readingRequested = false;
     currentCards = cardLoader.getRandomCards(3, allowReversedCards);
 
-    const qreal CARD_WIDTH = 150;
-    const qreal CARD_HEIGHT = 225;
-    //const qreal CARD_WIDTH = 300;    // 150 * 2
-    //const qreal CARD_HEIGHT = 450;   // 225 * 2
-    const qreal HORIZONTAL_SPACING = 65; //40
+    qreal cardWidth = getCardWidth();
+    qreal horizontalSpacing = getHorizontalSpacing();
 
     QPointF center = sceneRect().center();
 
     // Use the stored cards for display
     displayCard(currentCards[0].number, currentCards[0].reversed,
-                QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()));
+                QPointF(center.x() - cardWidth - horizontalSpacing, center.y()));
     displayCard(currentCards[1].number, currentCards[1].reversed, center);
     displayCard(currentCards[2].number, currentCards[2].reversed,
-                QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()));
-
+                QPointF(center.x() + cardWidth + horizontalSpacing, center.y()));
 }
 
 void TarotScene::setSpreadType(const QString& type) {
@@ -117,8 +115,7 @@ void TarotScene::displaySingleCard() {
     readingRequested = false;
     currentCards = cardLoader.getRandomCards(1, allowReversedCards);
 
-    const qreal CARD_WIDTH = 150; //150
-    const qreal CARD_HEIGHT = 225;  //225
+
 
     QPointF center = sceneRect().center();
 
@@ -131,25 +128,27 @@ void TarotScene::displaySingleCard() {
 void TarotScene::displayFullDeck() {
     clearScene();
 
-    const int CARDS_PER_ROW = 8;  // Reduced from 13
-    const qreal CARD_WIDTH = 120;  // Slightly larger cards
-    const qreal CARD_HEIGHT = 180;
-    const qreal VERTICAL_SPACING = 110;
-    const qreal HORIZONTAL_SPACING = 30;
+    qreal cardWidth = getCardWidth();
+    qreal cardHeight = getCardHeight();
 
-    //const qreal SPACING = 30;
+    // Calculate how many cards fit based on screen width
+    int CARDS_PER_ROW = qMax(6, qMin(10, (int)(sceneRect().width() / (cardWidth * 1.2))));
+
+    // Spacing based on card size (20% of card size for gaps)
+    qreal horizontalSpacing = cardWidth * 0.035;
+    qreal verticalSpacing = cardHeight * 0.05;
 
     for(int i = 0; i < 78; i++) {
         int row = i / CARDS_PER_ROW;
         int col = i % CARDS_PER_ROW;
 
-        //QPointF pos(col * (CARD_WIDTH + SPACING), row * (CARD_HEIGHT + SPACING));
-        QPointF pos(col * (CARD_WIDTH + HORIZONTAL_SPACING), row * (CARD_HEIGHT + VERTICAL_SPACING));
+        QPointF pos(col * (cardWidth + horizontalSpacing),
+                    row * (cardHeight + verticalSpacing));
 
         TarotCardItem* card = new TarotCardItem(cardLoader.getCardImage(i),
                                                 cardLoader.getCardBack(), i);
         card->setPos(pos);
-        card->flip();  // Show front face immediately
+        card->flip();
         addItem(card);
         connect(card, &TarotCardItem::cardRevealed, this, &TarotScene::onCardRevealed);
     }
@@ -472,20 +471,17 @@ void TarotScene::displaySavedSingleCard(const QVector<CardLoader::CardData>& sav
 void TarotScene::displaySavedThreeCardSpread(const QVector<CardLoader::CardData>& savedCards) {
     if (savedCards.size() < 3) return;
     beRevealed = true;
-    const qreal CARD_WIDTH = 150;
-    const qreal HORIZONTAL_SPACING = 40;
+
+    qreal cardWidth = getCardWidth();
+    qreal horizontalSpacing = getHorizontalSpacing();
     QPointF center = sceneRect().center();
 
-    // Past
     displayCard(savedCards[0].number, savedCards[0].reversed,
-                QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()), beRevealed);
-    // Present
+                QPointF(center.x() - cardWidth - horizontalSpacing, center.y()), beRevealed);
     displayCard(savedCards[1].number, savedCards[1].reversed, center, beRevealed);
-    // Future
     displayCard(savedCards[2].number, savedCards[2].reversed,
-                QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()), beRevealed);
+                QPointF(center.x() + cardWidth + horizontalSpacing, center.y()), beRevealed);
 }
-
 
 bool TarotScene::saveCustomSpread(const TarotScene::CustomSpread& spread)
 {
@@ -795,40 +791,31 @@ void TarotScene::redrawCurrentSpread()
     readingRequested = wasReadingRequested;
 }
 
-QVector<QPointF> TarotScene::getCelticCrossPositions() const
-{
+
+QVector<QPointF> TarotScene::getCelticCrossPositions() const {
     QVector<QPointF> positions;
-    const qreal CARD_WIDTH = 150;
-    const qreal CARD_HEIGHT = 225;
-    const qreal HORIZONTAL_SPACING = 55;
-    const qreal VERTICAL_SPACING = CARD_HEIGHT + 85;
+
+    qreal cardWidth = getCardWidth();
+    qreal cardHeight = getCardHeight();
+    qreal horizontalSpacing = getHorizontalSpacing() * 0.2;  // 0.8
+
+    // Center-to-center distance = card height + 50% gap (no overlap)
+    qreal verticalSpacing = cardHeight * 1.07; // 1.8
+
     QPointF center = sceneRect().center();
 
-    // 1. Center card (Present)
-    positions.append(center);
+    positions.append(center);  // Center
+    positions.append(QPointF(center.x() - (cardWidth * 2.3) - (horizontalSpacing * 1.8), center.y()));  // Crossing
+    positions.append(QPointF(center.x(), center.y() + verticalSpacing));  // Below
+    positions.append(QPointF(center.x() - cardWidth - horizontalSpacing, center.y()));  // Left
+    positions.append(QPointF(center.x(), center.y() - verticalSpacing));  // Above
+    positions.append(QPointF(center.x() + cardWidth + horizontalSpacing, center.y()));  // Right
 
-    // 2. Crossing card (Challenge)
-    positions.append(QPointF(center.x() - (CARD_WIDTH * 2.3) - (HORIZONTAL_SPACING * 1.8), center.y()));
+    qreal staffX = center.x() + (cardWidth * 2) + (horizontalSpacing * 2);
+    qreal bottomY = center.y() + verticalSpacing;
 
-    // 3. Below (Foundation)
-    positions.append(QPointF(center.x(), center.y() + VERTICAL_SPACING));
-
-    // 4. Left (Past)
-    positions.append(QPointF(center.x() - CARD_WIDTH - HORIZONTAL_SPACING, center.y()));
-
-    // 5. Above (Crown)
-    positions.append(QPointF(center.x(), center.y() - VERTICAL_SPACING));
-
-    // 6. Right (Future)
-    positions.append(QPointF(center.x() + CARD_WIDTH + HORIZONTAL_SPACING, center.y()));
-
-    // Staff positions (right column)
-    qreal staffX = center.x() + (CARD_WIDTH * 2) + (HORIZONTAL_SPACING * 2);
-    qreal bottomY = center.y() + VERTICAL_SPACING;
-
-    // 7-10. Staff cards (bottom to top)
     for (int i = 0; i < 4; i++) {
-        positions.append(QPointF(staffX, bottomY - (i * VERTICAL_SPACING)));
+        positions.append(QPointF(staffX, bottomY - (i * verticalSpacing)));
     }
 
     return positions;
@@ -863,49 +850,55 @@ void TarotScene::displaySavedCelticCross(const QVector<CardLoader::CardData>& sa
 QVector<QPointF> TarotScene::getHorseshoePositions() const
 {
     QVector<QPointF> positions;
-    const qreal CARD_WIDTH = 150;
-    const qreal CARD_HEIGHT = 225;
-    const qreal HORIZONTAL_SPACING = 200;
-    const qreal VERTICAL_SPACING = 310;
+
+    qreal cardWidth = getCardWidth();
+    qreal cardHeight = getCardHeight();
+    qreal horizontalSpacing = cardWidth * 1.2;
+    qreal verticalSpacing = cardHeight * 1.1;
+
     QPointF center = sceneRect().center();
 
     // Left column (1-2-3)
-    positions.append(QPointF(center.x() - HORIZONTAL_SPACING, center.y() + VERTICAL_SPACING));
-    positions.append(QPointF(center.x() - HORIZONTAL_SPACING, center.y()));
-    positions.append(QPointF(center.x() - HORIZONTAL_SPACING, center.y() - VERTICAL_SPACING));
+    positions.append(QPointF(center.x() - horizontalSpacing, center.y() + verticalSpacing));
+    positions.append(QPointF(center.x() - horizontalSpacing, center.y()));
+    positions.append(QPointF(center.x() - horizontalSpacing, center.y() - verticalSpacing));
 
     // Top center (4)
-    positions.append(QPointF(center.x(), center.y() - VERTICAL_SPACING * 2));
+    positions.append(QPointF(center.x(), center.y() - verticalSpacing * 2));
 
     // Right column (5-6-7)
-    positions.append(QPointF(center.x() + HORIZONTAL_SPACING, center.y() - VERTICAL_SPACING));
-    positions.append(QPointF(center.x() + HORIZONTAL_SPACING, center.y()));
-    positions.append(QPointF(center.x() + HORIZONTAL_SPACING, center.y() + VERTICAL_SPACING));
+    positions.append(QPointF(center.x() + horizontalSpacing, center.y() - verticalSpacing));
+    positions.append(QPointF(center.x() + horizontalSpacing, center.y()));
+    positions.append(QPointF(center.x() + horizontalSpacing, center.y() + verticalSpacing));
 
     return positions;
 }
 
+
 QVector<QPointF> TarotScene::getZodiacPositions() const
 {
     QVector<QPointF> positions;
-    const qreal CARD_WIDTH = 150;
-    const qreal CARD_HEIGHT = 225;
-    const qreal BASE_RADIUS = 365;
+
+    qreal cardWidth = getCardWidth();
+    qreal cardHeight = getCardHeight();
+
+    // Keep your original radius values but scale them
+    qreal baseRadius = 365 * (cardWidth / 170);  // Scale from original 200px card width
     QPointF center = sceneRect().center();
 
     for (int i = 0; i < 12; i++) {
         qreal angle = M_PI + (i * 2 * M_PI / 12);
-        qreal currentRadius = BASE_RADIUS;
+        qreal currentRadius = baseRadius;
 
         if (i == 0 || i == 6) {
-            currentRadius = BASE_RADIUS + 190;
+            currentRadius = baseRadius + (190 * (cardWidth / 200));
         }
         if (i == 5 || i == 7 || i == 11 || i == 1) {
-            currentRadius = BASE_RADIUS + 60;
+            currentRadius = baseRadius + (60 * (cardWidth / 200));
         }
 
-        qreal x = center.x() + currentRadius * cos(angle) - (CARD_WIDTH / 2);
-        qreal y = center.y() + currentRadius * sin(angle) - (CARD_HEIGHT / 2);
+        qreal x = center.x() + currentRadius * cos(angle) - (cardWidth / 2);
+        qreal y = center.y() + currentRadius * sin(angle) - (cardHeight / 2);
         positions.append(QPointF(x, y));
     }
 
@@ -962,6 +955,7 @@ void TarotScene::displaySavedZodiacSpread(const QVector<CardLoader::CardData>& s
     }
 }
 
+
 void TarotScene::showExtraCardPopup(int cardNumber, bool reversed) {
     QWidget* mainWindow = QApplication::activeWindow();
     QDialog* popup = new QDialog(mainWindow);
@@ -991,7 +985,7 @@ void TarotScene::showExtraCardPopup(int cardNumber, bool reversed) {
         transform.rotate(180);
         cardImage = cardImage.transformed(transform);
     }
-    cardImage = cardImage.scaled(200, 300, Qt::KeepAspectRatio);
+    cardImage = cardImage.scaled(getCardWidth(), getCardHeight(), Qt::KeepAspectRatio);
     imageLabel->setPixmap(cardImage);
     mainLayout->addWidget(imageLabel, 0, Qt::AlignCenter);
 
@@ -1055,7 +1049,7 @@ void TarotScene::showExtraCardPopup(int cardNumber, bool reversed) {
 
             // Update image
             QPixmap newImage = cardLoader.getCardImage(newCardNumber);
-            newImage = newImage.scaled(200, 300, Qt::KeepAspectRatio);
+            newImage = newImage.scaled(getCardWidth(), getCardHeight(), Qt::KeepAspectRatio);
             imageLabel->setPixmap(newImage);
 
             // Update window title (keep orientation as is)
@@ -1079,3 +1073,6 @@ void TarotScene::showExtraCardPopup(int cardNumber, bool reversed) {
 
     popup->show();
 }
+
+
+
