@@ -1,5 +1,7 @@
 #include"Globals.h"
 #include<QStandardPaths>
+#include<QApplication>
+#include<QFont>
 
 QString getUnorderedDecksDirPath() {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/unordered_decks";
@@ -118,5 +120,14 @@ bool g_isCustomSpread = false;
 QString g_currentDeckName = "OriginalRiderWaite";
 int g_currentSpreadType = 1;  // optional, for JSON
 QString g_currentDeckPath = "";
+
+#ifdef Q_OS_WIN
+    const qreal DEFAULTFONTSIZE = 11;
+#else
+    const qreal DEFAULTFONTSIZE = 12;
+#endif
+//const qreal DEFAULTFONTSIZE = 11;
+qreal FONTSIZE = DEFAULTFONTSIZE;
+
 //const qreal CARD_WIDTH = 200;
 //const qreal CARD_HEIGHT = 300;

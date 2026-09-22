@@ -26,7 +26,7 @@ JournalDialog::JournalDialog(QWidget* parent)
 void JournalDialog::setupUI()
 {
     setWindowTitle("Journal");
-    setMinimumSize(800, 800);
+    setMinimumSize(800, 600);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 

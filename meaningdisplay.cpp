@@ -5,6 +5,7 @@ MeaningDisplay::MeaningDisplay(QWidget *parent) : QTextEdit(parent)
 {
     setReadOnly(true);
     //setStyleSheet("QTextEdit { background-color: black; color: gold; }");
+    setPlaceholderText("Card meanings will appear here...");
 }
 
 

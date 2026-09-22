@@ -59,6 +59,7 @@ qt_add_executable(TarotCaster
         journaldialog.cpp journaldialog.h
         importphysicaldialog.cpp importphysicaldialog.h
         socialshare.cpp socialshare.h socialsharedialog.cpp socialsharedialog.h
+        rssnotificationdialog.cpp rssnotificationdialog.h
 
     )
 # Define target properties for Android with Qt 6 as:

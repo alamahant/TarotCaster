@@ -535,6 +535,40 @@ void HelpDialog::setupChangelogHelp()
 
 <hr>
 
+<h3 style='color:#8C6D46;'>Version 1.3.0 - September 22, 2026</h3>
+
+<h4>Set Scale</h4>
+<ul>
+    <li><strong>Adjustable UI Scale:</strong> New menu action to set UI scaling from 0.5 to 3.0 with a restart prompt</li>
+    <li><strong>Copy Command Button:</strong> Restart dialog includes a button to copy the command that resets settings if the UI becomes unusable</li>
+    <li><strong>Reset Settings:</strong> New menu action to clear all settings and restart</li>
+</ul>
+
+<h4>Set Font Size</h4>
+<ul>
+    <li><strong>Adjustable Font:</strong> New menu action to set application font from 6 to 32 points with live preview</li>
+    <li><strong>Default Button:</strong> Restore the platform default font size with one click</li>
+</ul>
+
+<h4>Reorganized UI</h4>
+<ul>
+    <li><strong>Menu Grouping:</strong> Settings grouped under Settings menu, tools under Tools menu</li>
+    <li><strong>Dock Titles:</strong> Dock widgets use custom title bar widgets for proper font propagation</li>
+</ul>
+
+<h4>Updated Dependencies</h4>
+<ul>
+    <li><strong>KDE Runtime SDK:</strong> Updated to 6.11</li>
+</ul>
+
+<h4>Fixes</h4>
+<ul>
+    <li><strong>Combo Box Dropdown:</strong> Hover and selection now visible with proper highlight color</li>
+    <li><strong>Checkboxes:</strong> Improved appearance</li>
+</ul>
+
+<hr>
+
 <h3 style='color:#8C6D46;'>Version 1.2.9 - June 10, 2026</h3>
 
 <h4>Dynamic Card Scaling</h4>

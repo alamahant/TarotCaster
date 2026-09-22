@@ -13,12 +13,15 @@
 #include<QMimeData>
 #include"helpdialog.h"
 #include"importphysicaldialog.h"
+#include<QProcess>
+#include<QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , questionInput(new QTextEdit(this))
     , journalDialog(new JournalDialog(this))
     , m_socialShare(new SocialShare(this))
+    , rssDialog(new RssNotificationDialog(this))
 {
     this->setMinimumSize(1200, 800);
     this->showMaximized();
@@ -41,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
     //centralView->setOptimizationFlags(QGraphicsView::DontSavePainterState | QGraphicsView::DontAdjustForAntialiasing);
     centralView->setOptimizationFlags(QGraphicsView::DontSavePainterState);
     //centralView->setRenderHint(QPainter::LosslessImageRendering, true);
+
 
 #ifndef QT_NO_OPENGL
     QSurfaceFormat format;// = glWidget->format();
@@ -78,11 +82,20 @@ MainWindow::MainWindow(QWidget *parent)
     connect(dockControls->clearButton, &QPushButton::clicked,
             this, &MainWindow::clearMeaningDisplay);
 
+    connect(clearButton, &QPushButton::clicked,
+            tarotScene, &TarotScene::clearScene);
+
+    connect(clearButton, &QPushButton::clicked,
+            this, &MainWindow::clearMeaningDisplay);
+
    connect(dockControls->allowReversed, &QCheckBox::toggled,
            tarotScene, &TarotScene::setAllowReversedCards);
 
     connect(dockControls, &DockControls::displayFullDeckRequested,
             tarotScene, &TarotScene::displayFullDeck);
+
+   connect(displayFullDeckButton, &QPushButton::clicked,
+           tarotScene, &TarotScene::displayFullDeck);
 
     mistralApi = new MistralAPI(this);
 
@@ -107,13 +120,24 @@ MainWindow::MainWindow(QWidget *parent)
 
     QAction *openFolderAction = fileMenu->addAction("&Open Data Directory");
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::openFolder);
-    fileMenu->addSeparator();
+    ;
 
     fileMenu->addSeparator();
+#ifndef Q_OS_WIN
     QAction *createSymlinkAction = fileMenu->addAction("Create Shortcut to TarotCaster Data");
     connect(createSymlinkAction, &QAction::triggered, this, &MainWindow::createSymlink);
-
     fileMenu->addSeparator();
+#endif
+
+    rssAction = fileMenu->addAction("&RSS Notifications");
+    rssAction->setShortcut(QKeySequence("Ctrl+R"));
+    rssAction->setIcon(QIcon(":/resources/icons-white/rss.svg"));
+    connect(rssAction, &QAction::triggered, this, [this]{
+        if(rssDialog) rssDialog->show();
+    });
+    fileMenu->addAction(rssAction);
+    fileMenu->addSeparator();
+
     fileMenu->addAction("&Exit", this, &QWidget::close, QKeySequence::Quit);
 
     //view menu
@@ -138,6 +162,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //
     QAction *aiModelsAction = settingsMenu->addAction("Configure AI &Models...", this, &MainWindow::configureAIModels);
+    settingsMenu->addSeparator();
 
     QAction *checkModelAction = settingsMenu->addAction("Check AI Model &Status", this, [this]() {
         if (!activeModelLoaded) {
@@ -198,8 +223,140 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
     checkModelAction->setIcon(QIcon::fromTheme("dialog-information"));
+    settingsMenu->addSeparator();
+
+    QAction* aiModelInfoAction = new QAction("AI Model Info Guide", this);
+    connect(aiModelInfoAction, &QAction::triggered, this, &MainWindow::showAIConfigGuide);
+    settingsMenu->addAction(aiModelInfoAction);
     //
 
+    settingsMenu->addSeparator();
+    //
+    QAction* scaleAction = settingsMenu->addAction("Set &Scale...");
+    scaleAction->setShortcut(QKeySequence("Ctrl+Shift+S"));
+    connect(scaleAction, &QAction::triggered, this, [this]() {
+        QSettings settings;
+        bool ok = false;
+        double current = settings.value("ui/scaleFactor", 1.0).toDouble();
+
+        double factor = QInputDialog::getDouble(
+            this, tr("UI Scale"),
+            tr("Scale factor (e.g. 0.9, 1.0, 1.1, 1.25):"),
+            current,          // initial value
+            0.5,              // min
+            3.0,              // max
+            2,                // decimals shown
+            &ok,
+            Qt::WindowFlags(),
+            0.05);             // ← step
+
+        if (!ok) return;
+
+        settings.setValue("ui/scaleFactor", factor);
+        settings.sync();
+
+        QMessageBox msg(this);
+        msg.setWindowTitle(tr("Restart Required"));
+        msg.setIcon(QMessageBox::Information);
+        msg.setText(tr("Please restart the application to apply the new scale."));
+        msg.setInformativeText(tr(
+            "If the new scale makes the app unusable, delete the settings file:\n\n%1\n\n"
+            "Note: this will reset all user-defined settings.")
+            .arg(QSettings().fileName()));
+
+
+        QPushButton *copyBtn   = msg.addButton(tr("Copy Command"), QMessageBox::ActionRole);
+        QPushButton *cancelBtn = msg.addButton(tr("Cancel"), QMessageBox::RejectRole);
+        QPushButton *okBtn     = msg.addButton(tr("OK"), QMessageBox::AcceptRole);
+
+        for (;;) {
+            msg.exec();
+            if (msg.clickedButton() != copyBtn)
+                break;
+
+        #ifdef Q_OS_WIN
+            const QString cmd = QString("Remove-Item \"%1\"").arg(QSettings().fileName());
+        #else
+            const QString cmd = QString("rm \"%1\"").arg(QSettings().fileName());
+        #endif
+            QGuiApplication::clipboard()->setText(cmd);
+
+            msg.setInformativeText(tr(
+                "Command copied to clipboard:\n\n%1\n\n"
+                "If the new scale makes the app unusable, delete the settings file above.")
+                .arg(cmd));
+        }
+
+        if (msg.clickedButton() == okBtn)
+            qApp->quit();
+        // Cancel: nothing happens
+
+    });
+
+    settingsMenu->addSeparator();
+    QAction* fontAction = settingsMenu->addAction("Set &Font Size...");
+    fontAction->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    connect(fontAction, &QAction::triggered, this, [this]() {
+        QSettings settings;
+
+        QMessageBox box(this);
+        box.setWindowTitle(tr("Font Size"));
+        box.setIcon(QMessageBox::NoIcon);
+        box.setText(tr("Point size (e.g. 9, 10, 12, 14):"));
+
+        QSpinBox *spin = new QSpinBox(&box);
+        spin->setRange(6, 32);
+        spin->setSingleStep(1);
+
+        double current = settings.value("ui/fontSize", 0.0).toDouble();
+        if (current <= 0.0)
+            current = qApp->font().pointSizeF();
+        spin->setValue(qRound(current));
+
+        if (auto *grid = qobject_cast<QGridLayout*>(box.layout())) grid->addWidget(spin, 1, 1);
+        QPushButton *okBtn     = box.addButton(QMessageBox::Ok);
+        QPushButton *cancelBtn = box.addButton(QMessageBox::Cancel);
+        QPushButton *defaultBtn = box.addButton(tr("Default"), QMessageBox::ResetRole);
+        box.setDefaultButton(okBtn);
+
+        box.exec();
+
+        qreal size;
+        if (box.clickedButton() == defaultBtn) {
+            size = DEFAULTFONTSIZE;
+        } else if (box.clickedButton() == okBtn) {
+            size = spin->value();
+        } else {
+            return;   // Cancel
+        }
+
+        FONTSIZE = size;
+        settings.setValue("ui/fontSize", size);
+        settings.sync();
+
+        QFont f = qApp->font();
+        f.setPointSizeF(size);
+        qApp->setFont(f);
+        qApp->setStyleSheet(qApp->styleSheet());
+    });
+
+
+    //
+    settingsMenu->addSeparator();
+    QAction* resetAction = settingsMenu->addAction("&Reset Settings");
+    connect(resetAction, &QAction::triggered, this, [this]() {
+        if (QMessageBox::question(this, tr("Reset Settings"),
+                tr("Delete all settings and restart?")) == QMessageBox::Yes) {
+            QSettings s;
+            s.clear();
+            s.sync();
+
+            if (QProcess::startDetached(QCoreApplication::applicationFilePath(),
+                                        QStringList())) {
+                QTimer::singleShot(0, qApp, &QCoreApplication::quit);
+            }
+        }
+    });
     //settingsMenu->addAction("&Preferences", this, &MainWindow::onOpenPreferences);
 
     // Tools Menu (create if it doesn't exist)
@@ -218,6 +375,13 @@ MainWindow::MainWindow(QWidget *parent)
     QAction* importSpreadAction = toolsMenu->addAction("Import Physicaal Spread");
     connect(importSpreadAction, &QAction::triggered, this, &MainWindow::onImportPhysicalSpread);
 
+    toolsMenu->addSeparator();
+    QAction* shuffleAction = new QAction("&Shuffle Deck", this);
+    shuffleAction->setShortcut(QKeySequence("Ctrl+Shift+H"));
+    connect(shuffleAction, &QAction::triggered, this, [this]{
+        dockControls->getShuffleButton()->click();
+    });
+    toolsMenu->addAction(shuffleAction);
     // Help Menu
     QMenu *helpMenu = menuBar()->addMenu("&Help");
     helpMenu->addAction("&About", this, &MainWindow::onShowAbout);
@@ -245,6 +409,22 @@ MainWindow::MainWindow(QWidget *parent)
             this, &MainWindow::loadReading);
 
     setupShareButton();
+
+    connect(rssDialog, &RssNotificationDialog::newContentAvailable,
+                this, [this](bool hasNew){
+
+            if (!rssAction) return;
+
+            if (hasNew) {
+                rssAction->setIcon(QIcon(":/resources/icons/rss-green.svg"));
+                // rssAction->setIcon(QIcon(":/icons/rss-red.svg"));
+            } else {
+                rssAction->setIcon(QIcon(":/resources/icons/rss.svg"));
+
+            }
+
+
+        });
 }
 
 MainWindow::~MainWindow()
@@ -260,56 +440,75 @@ MainWindow::~MainWindow()
 
 
 void MainWindow::createDocks() {
-    //leftDock = new QDockWidget("Deck Controls and Readings",this);
-    leftDock = new QDockWidget("Decks and Spreads", this);
-    //leftDock = new QDockWidget("Decks and Readings", this);
 
-    //leftDock->setStyleSheet("QDockWidget::title { text-align: center; }");
+    // ---------------------------------------------------------------
+    // Left dock — Decks and Spreads
+    // ---------------------------------------------------------------
+    leftDock = new QDockWidget(this);
+    //leftDock->setFeatures(QDockWidget::DockWidgetClosable);
 
-    //leftDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    leftDock->setFeatures(QDockWidget::DockWidgetClosable); // Makes it hideable
+    leftDock->setAllowedAreas(Qt::LeftDockWidgetArea);
 
+    // Custom title bar
+    QLabel *leftDockTitle = new QLabel("Decks and Spreads", leftDock);
+    //leftDockTitle->setFont(qApp->font());
+    leftDockTitle->setAlignment(Qt::AlignCenter);
+    leftDockTitle->setStyleSheet("QLabel { color: gold; background: transparent; padding: 4px; }");
+    leftDock->setTitleBarWidget(leftDockTitle);
+
+    // Content
     dockControls = new DockControls(this);
     leftDock->setWidget(dockControls);
-    leftDock->setAllowedAreas(Qt::LeftDockWidgetArea);
+
     addDockWidget(Qt::LeftDockWidgetArea, leftDock);
 
 
-    //
-    rightDock = new QDockWidget("Card Meanings", this);
-    //rightDock->setStyleSheet("QDockWidget::title { text-align: center; }");
-    leftDock->setFeatures(QDockWidget::DockWidgetClosable);
+    // ---------------------------------------------------------------
+    // Right dock — Card Meanings
+    // ---------------------------------------------------------------
+    rightDock = new QDockWidget(this);
+    //rightDock->setFeatures(QDockWidget::DockWidgetClosable);
 
-    // Create a container widget for the question input and meaning display
+    rightDock->setAllowedAreas(Qt::RightDockWidgetArea);
+
+    // Custom title bar
+    QLabel *rightDockTitle = new QLabel("Card Meanings", rightDock);
+    //rightDockTitle->setFont(qApp->font());
+    rightDockTitle->setAlignment(Qt::AlignCenter);
+    rightDockTitle->setStyleSheet("QLabel { color: gold; background: transparent; padding: 4px; }");
+    rightDock->setTitleBarWidget(rightDockTitle);
+
+    // Content container
     QWidget *rightDockWidget = new QWidget(this);
     QVBoxLayout *rightLayout = new QVBoxLayout(rightDockWidget);
 
-    // Create question button
+    displayFullDeckButton = new QPushButton("Display Full Deck", this);
+    rightLayout->addWidget(displayFullDeckButton);
+
+    // Set a Question button
     openQuestionDialogButton = new QPushButton("Set a Question", this);
     openQuestionDialogButton->setToolTip("Pose a question to be forwarded to AI");
-    connect(openQuestionDialogButton, &QPushButton::clicked, this, &MainWindow::onSetQuestion);
+    connect(openQuestionDialogButton, &QPushButton::clicked,
+            this, &MainWindow::onSetQuestion);
     rightLayout->addWidget(openQuestionDialogButton);
-    //
 
+    // Journal button
     openJournalButton = new QPushButton("Journal", this);
-    //openJournalButton->setCheckable(true);
-    //openJournalButton->setChecked(false);
     openJournalButton->setToolTip("Open the journal");
-    connect(openJournalButton, &QPushButton::clicked, this, [this](){
-            journalDialog->refreshForDate(QDate::currentDate());  // Refresh to current date
-            journalDialog->show();
+    connect(openJournalButton, &QPushButton::clicked, this, [this]() {
+        journalDialog->refreshForDate(QDate::currentDate());
+        journalDialog->show();
     });
     rightLayout->addWidget(openJournalButton);
 
-
-
+    // Switch Deck button
     switchDeckButton = new QPushButton("Switch Deck", this);
-
     switchDeckButton->setToolTip("See your spread in different deck");
-    connect(switchDeckButton, &QPushButton::clicked, this, &MainWindow::onShowInOtherDeck);
+    connect(switchDeckButton, &QPushButton::clicked,
+            this, &MainWindow::onShowInOtherDeck);
     rightLayout->addWidget(switchDeckButton);
 
-
+    // Extra Card button
     oneMoreButton = new QPushButton("Extra Card", this);
     oneMoreButton->setToolTip(
         "Extra Card OR Significator Assigner\n\n"
@@ -317,10 +516,11 @@ void MainWindow::createDocks() {
         "• Draw extra card → just open (If you need final or explanatory cards)\n"
         "• Set significator → use dropdown before dealing\n\n"
         "Use * button to set window title (e.g., 'Clarifies The Moon' or 'Significator')"
-    );
-    connect(oneMoreButton, &QPushButton::clicked, this, [this](){
+        );
+    connect(oneMoreButton, &QPushButton::clicked, this, [this]() {
         bool allowReversed = dockControls->allowReversed->isChecked();
-        QVector<CardLoader::CardData> randomCard = tarotScene->getCardLoader().getRandomCards(1, allowReversed);
+        QVector<CardLoader::CardData> randomCard =
+            tarotScene->getCardLoader().getRandomCards(1, allowReversed);
 
         if (!randomCard.isEmpty()) {
             tarotScene->showExtraCardPopup(randomCard[0].number, randomCard[0].reversed);
@@ -328,15 +528,26 @@ void MainWindow::createDocks() {
     });
     rightLayout->addWidget(oneMoreButton);
 
-    // Add meaning display
+    //
+
+    clearButton = new QPushButton("Clear Cards", this);
+
+    rightLayout->addWidget(clearButton);
+    //
+
+
+    // Meaning display
     meaningDisplay = new MeaningDisplay(this);
-    rightLayout->addWidget(meaningDisplay, 1); // Give meaning display most space
+    rightLayout->addWidget(meaningDisplay, 1);
 
     rightDock->setWidget(rightDockWidget);
-    rightDock->setAllowedAreas(Qt::RightDockWidgetArea);
+
     addDockWidget(Qt::RightDockWidgetArea, rightDock);
-    //
-    // Connect the new signals
+
+
+    // ---------------------------------------------------------------
+    // Signal connections
+    // ---------------------------------------------------------------
     connect(dockControls, &DockControls::deckLoaded,
             this, &MainWindow::onDeckLoaded);
     connect(dockControls, &DockControls::reversedCardsToggled,
@@ -344,6 +555,7 @@ void MainWindow::createDocks() {
     connect(dockControls, &DockControls::swapEightElevenToggled,
             this, &MainWindow::onSwapEightElevenToggled);
 }
+
 
 void MainWindow::clearMeaningDisplay()
 {
@@ -412,6 +624,7 @@ void MainWindow::onDealClicked() {
             tarotScene->displayCelticCross();
         }
     }
+
 }
 
 
@@ -497,7 +710,9 @@ void MainWindow::onSaveReading() {
     }
 
     // Get the proper data location for the application
-    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    //QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataLocation = getLocalDataDirPath();;
+
     if (dataLocation.isEmpty()) {
         dataLocation = QDir::homePath() + "/.local/share/TaroCaster";
     }
@@ -601,7 +816,9 @@ void MainWindow::onSaveReading() {
 
 void MainWindow::onLoadReading() {
     // Get the proper data location for the application
-    QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    //QString dataLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString dataLocation = getLocalDataDirPath();;
+
     if (dataLocation.isEmpty()) {
         dataLocation = QDir::homePath() + "/.local/share/TaroCaster";
     }
@@ -1356,43 +1573,133 @@ void MainWindow::onShareClicked()
     dialog->show();
 }
 
-/*
-void MainWindow::onShareClicked()
+
+
+void MainWindow::showAIConfigGuide()
 {
-    // Capture the spread
-    QRectF sceneRect = tarotScene->sceneRect();
-    QPixmap screenshot(sceneRect.size().toSize());
-    screenshot.fill(Qt::transparent);
+    QDialog dialog(this);
+    dialog.setWindowTitle("AI Interpretation Guide");
+    dialog.resize(600, 500);
 
-    QPainter painter(&screenshot);
-    tarotScene->render(&painter, screenshot.rect(), sceneRect);
-    painter.end();
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
-    // Add watermark
-    QPainter watermarkPainter(&screenshot);
-    watermarkPainter.setPen(Qt::NoPen);
-    watermarkPainter.setPen(QPen(QColor(255, 255, 255, 180), 2));
-    watermarkPainter.setFont(QFont("Arial", 20, QFont::Bold));
-    watermarkPainter.drawText(screenshot.rect(), Qt::AlignBottom | Qt::AlignRight,
-                              "  Created with TarotCaster  ");
-    watermarkPainter.end();
+    QTextEdit *textEdit = new QTextEdit(&dialog);
+    textEdit->setReadOnly(true);
+    textEdit->setHtml(
+        "<h2>AI-Powered I-Ching Interpretations</h2>"
 
-    // Build the text
-    QString shareText = QString("My %1 reading with the %2 deck!\n")
-                        .arg(g_currentSpreadName)
-                        .arg(g_currentDeckName);
+        "<p>The app can use AI models to provide rich, contextual interpretations of your divinations. "
+        "You can connect to various AI providers by configuring them in the Model Selector.</p>"
 
-    // Copy BOTH image and text to clipboard using QMimeData
-    QClipboard *clipboard = QApplication::clipboard();
-    QMimeData *mimeData = new QMimeData();
-    mimeData->setText(shareText);
-    mimeData->setImageData(screenshot);
-    clipboard->setMimeData(mimeData);
+        "<h3>Getting Started:</h3>"
+        "<ol>"
+        "<li><b>Open AI Model Selector:</b> Tools → AI Model Selector</li>"
+        "<li><b>Add a new model:</b> Click 'Add' and fill in the details</li>"
+        "<li><b>Set as active:</b> Select the model and click 'Set Active'</li>"
+        "<li><b>Get interpretations:</b> Complete a hexagram and click 'Get AI Interpretation'</li>"
+        "</ol>"
 
-    // Create and show dialog
-    SocialShareDialog *dialog = new SocialShareDialog(shareText, screenshot, m_socialShare, this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setModal(false);
-    dialog->show();
+        "<h3>Compatible Providers (OpenAI-compatible API format):</h3>"
+        "<table width='100%' border='1' cellpadding='5'>"
+        "<tr><th>Provider</th><th>Endpoint</th><th>Example Model</th><th>API Key</th></tr>"
+
+        "<tr><td><b>Groq</b></td>"
+        "<td><code>https://api.groq.com/openai/v1/chat/completions</code></td>"
+        "<td><code>openai/gpt-oss-120b</code></td>"
+        "<td>gsk_... (free tier)</td></tr>"
+
+        "<tr><td><b>Mistral</b></td>"
+        "<td><code>https://api.mistral.ai/v1/chat/completions</code></td>"
+        "<td><code>mistral-medium</code></td>"
+        "<td>Free trial</td></tr>"
+
+
+        "<tr><td><b>Gemini</b></td>"
+        "<td><code>https://generativelanguage.googleapis.com/v1beta/openai/chat/completions</code></td>"
+        "<td><code>gemini-3.5-flash</code></td>"
+        "<td>Free trial</td></tr>"
+
+
+        "<tr><td><b>OpenAI</b></td>"
+        "<td><code>https://api.openai.com/v1/chat/completions</code></td>"
+        "<td><code>gpt-4</code> or <code>gpt-3.5-turbo</code></td>"
+        "<td>Paid access</td></tr>"
+
+        "<tr><td><b>Ollama (local)</b></td>"
+        "<td><code>http://localhost:11434/v1/chat/completions</code></td>"
+        "<td><code>llama3</code> or <code>mistral</code></td>"
+        "<td><i>None</i></td></tr>"
+
+        "<tr><td><b>Together AI</b></td>"
+        "<td><code>https://api.together.xyz/v1/chat/completions</code></td>"
+        "<td><code>mistralai/Mixtral-8x7B-Instruct</code></td>"
+        "<td>Required</td></tr>"
+
+        "<tr><td><b>DeepSeek</b></td>"
+        "<td><code>https://api.deepseek.com/v1/chat/completions</code></td>"
+        "<td><code>deepseek-chat</code></td>"
+        "<td>Required</td></tr>"
+        "</table>"
+
+        "<h3>Configuration Tips:</h3>"
+        "<ul>"
+        "<li><b>Friendly Name:</b> Any name to identify this config (e.g., 'My Groq Llama')</li>"
+        "<li><b>Provider:</b> Just for reference (e.g., 'Groq', 'OpenAI')</li>"
+        "<li><b>Endpoint URL:</b> The full API URL from the table above</li>"
+        "<li><b>API Key:</b> Get from provider's website (except Ollama)</li>"
+        "<li><b>Model Name:</b> The specific model identifier from the provider</li>"
+        "<li><b>Temperature:</b> Keep at 0.7 for balanced interpretations</li>"
+        "<li><b>Max Tokens:</b> 4096 is usually sufficient</li>"
+        "</ul>"
+
+        "<h3>Finding Model Names and Endpoints:</h3>"
+        "<p>If you're unsure about which model to use or need the exact endpoint URL:</p>"
+        "<ul>"
+        "<li><b>Ask AI assistants</b> like ChatGPT, Claude: "
+        "\"What's the API endpoint and available models for [Provider]?\"</li>"
+        "<li><b>Check provider documentation</b> - most have clear API reference pages</li>"
+        "<li><b>Search online:</b> '[Provider] API documentation'</li>"
+        "</ul>"
+
+        "<h3>Recommended Settings by Provider:</h3>"
+        "<ul>"
+        "<li><b>Groq:</b> <code>openai/gpt-oss-120b</code> for best quality</li>"
+        "<li><b>Mistral:</b> <code>mistral-medium</code> works well</li>"
+        "<li><b>Gemini(Google):</b> <code>gemini-3.5-flash</code> works well</li>"
+
+        "<li><b>OpenAI:</b> <code>gpt-4</code> best results, <code>gpt-3.5-turbo</code> faster/cheaper</li>"
+        "<li><b>Ollama:</b> Install Ollama first, then pull <code>llama3</code> or <code>mistral</code></li>"
+        "</ul>"
+
+        "<h3 style='color: #ff6b6b;'>Important Notes:</h3>"
+        "<ul>"
+        "<li><b>API keys are stored locally</b> in your system's secure settings</li>"
+        "<li><b>Not compatible:</b> Claude (Anthropic) - different API formats</li>"
+        "<li><b>Restart app</b> after configuring your first model</li>"
+        "<li><b>Hexagram data and question</b> are sent to the configured AI service</li>"
+        "</ul>"
+    );
+
+    layout->addWidget(textEdit);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *openConfigButton = new QPushButton("Open Model Selector", &dialog);
+    QPushButton *closeButton = new QPushButton("Close", &dialog);
+
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(openConfigButton);
+    buttonLayout->addWidget(closeButton);
+
+    layout->addLayout(buttonLayout);
+
+    connect(openConfigButton, &QPushButton::clicked, &dialog, [this, &dialog]() {
+        dialog.accept();
+        ModelSelectorDialog dlg(this);
+        dlg.exec();
+        //aiManager->loadActiveModel();
+    });
+
+    connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    dialog.exec();
 }
-*/

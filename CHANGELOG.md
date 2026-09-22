@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.3.0] - 2026-09-22
+
+### Added
+- Set Scale menu action to adjust UI scaling (0.5 – 3.0) with restart prompt
+- Set Font Size menu action to adjust application font (6 – 32pt) with live preview
+- Copy Command button in the restart dialog to reset settings if the UI becomes unusable
+- Reset Settings menu action
+
+### Changed
+- Reorganized UI
+- Updated KDE runtime SDK to 6.11
+- Dock widgets use custom title bar widgets for proper font propagation
+
+### Fixed
+- Combo box dropdown hover/selection now visible with proper highlight color
+- Improved appearence of checkboxes
+
 ## [1.2.9] - 2026-06-10
 
 ### Added

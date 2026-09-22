@@ -22,6 +22,7 @@
 #include<QDialog>
 #include"journaldialog.h"
 #include"socialshare.h"
+#include"rssnotificationdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -112,5 +113,11 @@ private:
     void setupShareButton();
     SocialShare* m_socialShare;
     QPushButton* oneMoreButton;
+    RssNotificationDialog* rssDialog = nullptr;
+    QAction *rssAction;
+    void showAIConfigGuide();
+    QPushButton* displayFullDeckButton;
+    QPushButton* clearButton;
+
 };
 #endif // MAINWINDOW_H

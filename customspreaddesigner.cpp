@@ -64,6 +64,7 @@ void CustomSpreadDesigner::setupUI()
         "- Fill in both name and significance before adding the next card\n"
         " or saving.\n"
         "- You can rearrange cards in the scene by dragging.\n"
+        "- You can select cards in the scene by clicking on 'Defined Positions' items.\n"
         "- Press 'Save Spread' when finished."
     );
     instructionsLabel->setWordWrap(true);
@@ -547,4 +548,3 @@ void CustomSpreadDesigner::commitCurrentEdits()
     m_positions[m_selectedPositionIndex].significance =
         m_positionSignificanceEdit->toPlainText();
 }
-

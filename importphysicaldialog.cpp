@@ -393,6 +393,8 @@ void ImportPhysicalDialog::onSaveClicked()
     
     // Open save dialog
     QString saveDir = getLocalDataDirPath();
+    //QString saveDir =  QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
     QDir dir;
     if (!dir.exists(saveDir)) {
         dir.mkpath(saveDir);

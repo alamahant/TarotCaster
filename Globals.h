@@ -16,7 +16,8 @@ QString getJournalDirPath();
 QString getSharesDirPath();
 
 extern bool activeModelLoaded;
-
+extern const qreal DEFAULTFONTSIZE;
+extern qreal FONTSIZE;
 
 extern QString g_currentSpreadName;
 extern bool g_isCustomSpread;
@@ -26,6 +27,7 @@ extern QString g_currentDeckPath;
 //extern const qreal CARD_WIDTH;
 //extern const qreal CARD_HEIGHT;
 
+/*
 inline qreal getCardWidth() {
     QScreen *screen = QGuiApplication::primaryScreen();
     qreal screenWidth = screen->geometry().width();
@@ -48,6 +50,24 @@ inline qreal getHorizontalSpacing() {
 
 inline qreal getVerticalSpacing() {
     return getCardHeight() * 0.15;  // 15% of card height
+}
+*/
+
+
+inline qreal getCardWidth() {
+    return 200.0;   // fixed scene units
+}
+
+inline qreal getCardHeight() {
+    return 300.0;   // fixed scene units
+}
+
+inline qreal getHorizontalSpacing() {
+    return getCardWidth() * 0.27;
+}
+
+inline qreal getVerticalSpacing() {
+    return getCardHeight() * 0.15;
 }
 
 #endif // GLOBALS_H

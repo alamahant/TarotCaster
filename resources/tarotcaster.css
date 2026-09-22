@@ -6,7 +6,7 @@ QWidget {
 
 /* Menu bar */
 QMenuBar {
-    background-color: #2a2a2a;
+   /* background-color: #2a2a2a; */
 }
 
 /* Standard buttons */
@@ -63,8 +63,9 @@ QPushButton#readingButton:hover {
 
 /* Text edits */
 QTextEdit {
-    background-color: black;
+    background-color: #1a1a1a;
     color: gold;
+    border: none;
 }
 
 /* Reading display (specific styling) */
@@ -88,21 +89,43 @@ QGroupBox::title {
 }
 
 /* Combo boxes */
+
 QComboBox {
     background-color: #2a2a2a;
     color: gold;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    min-height: 20px;
 }
 
-/* Dropdown menu in combo boxes */
+/*
 QComboBox QAbstractItemView {
     background-color: #2a2a2a;
     color: gold;
-    selection-background-color: darkgoldenrod;
-    selection-color: black;
+    border: 1px solid #3a3a3a;
+    outline: none;
+    selection-background-color: #0078d7;
+    selection-color: white;
 }
 
+QComboBox QAbstractItemView::item {
+    background: #2a2a2a;
+    color: gold;
+    min-height: 20px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background: #0078d7;
+    color: white;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background: #0078d7;
+    color: white;
+}
+*/
 /* Checkboxes */
-/*
+
 QCheckBox {
     color: gold;
 }
@@ -114,14 +137,14 @@ QCheckBox::indicator {
 
 QCheckBox::indicator:unchecked {
     border: 1px solid gold;
-    background-color: #2a2a2a;
+    background-color: 2a2a2a;
 }
 
 QCheckBox::indicator:checked {
     border: 1px solid gold;
-    background-color: darkgoldenrod;
+    background-color: gold;
 }
-*/
+
 /* Dialog styling */
 QDialog {
     background-color: #1a1a1a;

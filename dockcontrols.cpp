@@ -18,8 +18,8 @@ DockControls::DockControls(QWidget *parent)
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     // Create deck selector group
-    QGroupBox* deckGroup = new QGroupBox("Deck Selection", this);
-    QVBoxLayout* deckLayout = new QVBoxLayout(deckGroup);
+    QLabel* deckLabel = new QLabel("Deck Selection", this);
+
     deckSelector = new QComboBox(this);
 
     // Load decks from cards directory
@@ -36,12 +36,14 @@ DockControls::DockControls(QWidget *parent)
     if (deckSelector->count() >= 0) {
         onDeckSelected(deckSelector->currentText());
     }
-    deckLayout->addWidget(deckSelector);
-    layout->addWidget(deckGroup);
+    layout->addWidget(deckLabel);
+    layout->addWidget(deckSelector);
+    layout->addSpacing(4);
 
     // Create spread selector group
-    QGroupBox* spreadGroup = new QGroupBox("Spread Type", this);
-    QVBoxLayout* spreadLayout = new QVBoxLayout(spreadGroup);
+    //QGroupBox* spreadGroup = new QGroupBox("Spread Type", this);
+    //QVBoxLayout* spreadLayout = new QVBoxLayout(spreadGroup);
+    QLabel* spreadLabel = new QLabel("Spread Selection", this);
     spreadSelector = new QComboBox(this);
     spreadSelector->addItem("Single Card");
     spreadSelector->addItem("Three Card");
@@ -59,12 +61,13 @@ DockControls::DockControls(QWidget *parent)
 
 
     //
-    spreadLayout->addWidget(spreadSelector);
-    layout->addWidget(spreadGroup);
+    layout->addWidget(spreadLabel);
+    layout->addWidget(spreadSelector);
+    layout->addSpacing(4);
 
     // Create options group
-    QGroupBox* optionsGroup = new QGroupBox("Options", this);
-    QVBoxLayout* optionsLayout = new QVBoxLayout(optionsGroup);
+    //QGroupBox* optionsGroup = new QGroupBox("Options", this);
+    //QVBoxLayout* optionsLayout = new QVBoxLayout(optionsGroup);
     allowReversed = new QCheckBox("Allow Reversed Cards", this);
     allowReversed->setToolTip("By checking this checkbox you will allow reversed cards displayed");
     swapEightEleven = new QCheckBox("Swap Eighth with Eleventh", this);
@@ -80,13 +83,12 @@ DockControls::DockControls(QWidget *parent)
     zoomSlider->setToolTip("Adjust view zoom level");
 
     //
-    optionsLayout->addWidget(allowReversed);
-    optionsLayout->addWidget(swapEightEleven);
 
-    optionsLayout->addWidget(zoomLabel);
-    optionsLayout->addWidget(zoomSlider);
-
-    layout->addWidget(optionsGroup);
+    layout->addWidget(allowReversed);
+    layout->addWidget(swapEightEleven);
+    layout->addWidget(zoomLabel);
+    layout->addWidget(zoomSlider);
+    layout->addSpacing(4);
 
     // Create action buttons
     shuffleButton = new QPushButton("Shuffle Deck", this);
@@ -97,11 +99,11 @@ DockControls::DockControls(QWidget *parent)
     dealButton = new QPushButton("Deal Cards", this);
 
     clearButton = new QPushButton("Clear Cards", this);
-
+    clearButton->setVisible(false);
 
     //display full deck
     displayFullDeckButton = new QPushButton("Display Full Deck", this);
-
+    displayFullDeckButton->setVisible(false);
     layout->addWidget(displayFullDeckButton);
     layout->addWidget(clearButton);
     layout->addWidget(shuffleButton);

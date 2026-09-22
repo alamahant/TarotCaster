@@ -69,6 +69,7 @@ ModelSelectorDialog::ModelSelectorDialog(QWidget *parent)
     infoLabel->setToolTip(tr(
         "<b>✅ Fully compatible (OpenAI format):</b><br>"
         "• Mistral<br>"
+        "• Gemini (Google)<br>"
         "• OpenAI (ChatGPT, GPT-4)<br>"
         "• Groq (fast inference, free tier)<br>"
         "• Ollama (local models, no API key)<br>"
@@ -79,7 +80,7 @@ ModelSelectorDialog::ModelSelectorDialog(QWidget *parent)
         "• AnyLocal (OpenAI compatibility mode)<br><br>"
         "<b>❌ NOT compatible (different formats):</b><br>"
         "• Claude (Anthropic)<br>"
-        "• Gemini (Google)<br>"
+
         "• Cohere<br><br>"
         "For local models: Install Ollama, use endpoint http://localhost:11434/v1/chat/completions"
     ));

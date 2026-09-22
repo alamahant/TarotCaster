@@ -63,6 +63,29 @@
 
   <releases>
 
+<release version="1.3.0" date="2026-09-22">
+  <description>
+    <p>Added:</p>
+    <ul>
+      <li>Set Scale menu action to adjust UI scaling from 0.5 to 3.0 with a restart prompt</li>
+      <li>Set Font Size menu action to adjust application font from 6 to 32 points with live preview</li>
+      <li>Copy Command button in the restart dialog to reset settings if the UI becomes unusable</li>
+      <li>Reset Settings menu action</li>
+    </ul>
+    <p>Changed:</p>
+    <ul>
+      <li>Reorganized UI</li>
+      <li>Updated KDE runtime SDK to 6.11</li>
+      <li>Dock widgets now use custom title bar widgets for proper font propagation</li>
+    </ul>
+    <p>Fixed:</p>
+    <ul>
+      <li>Combo box dropdown hover and selection now visible with proper highlight color</li>
+      <li>Improved appearance of checkboxes</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.2.9" date="2026-06-10">
   <description>
     <p>Added:</p>

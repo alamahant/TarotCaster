@@ -284,7 +284,7 @@ Flatpak apps run in a sandbox with limited access to the system. To add custom d
 ## License
 
 GPL-3.0 - See the LICENSE file for details
-
+**Copyright © 2025 Alamahant**
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

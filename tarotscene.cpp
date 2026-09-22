@@ -133,6 +133,7 @@ void TarotScene::displayFullDeck() {
 
     // Calculate how many cards fit based on screen width
     int CARDS_PER_ROW = qMax(6, qMin(10, (int)(sceneRect().width() / (cardWidth * 1.2))));
+    //int CARDS_PER_ROW = 6;
 
     // Spacing based on card size (20% of card size for gaps)
     qreal horizontalSpacing = cardWidth * 0.035;
@@ -798,6 +799,7 @@ QVector<QPointF> TarotScene::getCelticCrossPositions() const {
     qreal cardWidth = getCardWidth();
     qreal cardHeight = getCardHeight();
     qreal horizontalSpacing = getHorizontalSpacing() * 0.2;  // 0.8
+   //qreal horizontalSpacing = cardWidth * 0.02;  // 0.2
 
     // Center-to-center distance = card height + 50% gap (no overlap)
     qreal verticalSpacing = cardHeight * 1.07; // 1.8
@@ -1062,7 +1064,7 @@ void TarotScene::showExtraCardPopup(int cardNumber, bool reversed) {
 
     connect(editTitleButton, &QPushButton::clicked, [popup]() {
         bool ok;
-        QString newTitle = QInputDialog::getText(nullptr, "Edit Title",
+        QString newTitle = QInputDialog::getText(popup, "Edit Title",
             "Enter custom title:", QLineEdit::Normal, popup->windowTitle(), &ok);
         if (ok && !newTitle.isEmpty()) {
             popup->setWindowTitle(newTitle);
